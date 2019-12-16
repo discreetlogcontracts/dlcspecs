@@ -1,5 +1,7 @@
 # DLC Transactions
 
+It is recommended that all keys be generated/derived as specified [here](https://github.com/bitcoin-s/dlcspecs/blob/master/KeyDerivation.md#dlc-key-derivation).
+
 ## Funding Transaction
 ### <a name="FundingKnownValues">Known Values</a>
   * Local Funding Inputs: `List[TransactionInput]`
