@@ -33,12 +33,12 @@ Where
   * Remote Change ScriptPubKey
 
 Where
-  - `P2WSH(DLC Funding Output)`'s value is `Total Local Collateral + Total Remote Collateral`
+  - `P2WSH(DLC Funding Output)`'s value is `Total Local Collateral + Total Remote Collateral + Computed CET Fee`
   - `DLC Funding Output`'s script is
    
         OP_2 <Local Funding Public Key> <Remote Funding Public Key> OP_2 OP_CHECKMULTISIG
    
-  - Each `Change ScriptPubKey`'s value is at most that of its respective `Sum(Funding Inputs) - Total Collateral - Computed Fees` with `Computed Fees` being equal for both parties
+  - Each `Change ScriptPubKey`'s value is at most that of its respective `Sum(Funding Inputs) - Total Collateral - Computed Fees - (Computed CET Fee/2)` with `Computed Fees` being proportional to each party's total input weight and `Computed CET Fee` being the estimated fee for a [Contract Execution Transaction](#contract-execution-transaction)
   
 ## Contract Execution Transaction
 ### <a name="CETKnownValues">Known Values</a>
@@ -68,9 +68,8 @@ Where
   * ToRemoteOutput
   
 Where
-  - `P2WSH(ToLocalOutput).value = Local Payout - Local Fee`
-  - `ToRemoteOutput.value = Remote Payout - Remote Fee`
-  - `Local Fee = Remote Fee`
+  - `P2WSH(ToLocalOutput).value = Local Payout`
+  - `ToRemoteOutput.value = Remote Payout`
   - `ToLocalOutput`'s script is:
   
         OP_IF
@@ -97,6 +96,7 @@ Where
   * Fee Rate: `FeeUnit`
   
 Where
+  - Unlike any other transaction in a DLC, there is only one Refund Transaction that both parties share
   - Both `Refund Public Key`s are 33-byte compressed public keys
   - `Total Local Collateral + Total Remote Collateral = (DLC Funding Output).value`
   - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
@@ -109,9 +109,9 @@ Where
   * ToRemoteOutput
 
 Where
-  - `ToLocalOutput`'s value is `Total Local Collateral - Local Fee`
-  - `ToRemoteOutput`'s value is `Total Remote Collateral - Remote Fee`
-  - `Local Fee / Total Local Collateral = Remote Fee / Total Remote Collateral`
+  - `ToLocalOutput`'s value is `Total Local Collateral + RefundFeeDelta/2`
+  - `ToRemoteOutput`'s value is `Total Remote Collateral + RefundFeeDelta/2`
+  - `RefundFeeDelta = Computed CET Fee - Computed Refund Tx Fee` (note that the Refund Transaction is smaller than any CET)
   - `ToLocalOutput`'s script is:
   
         OP_0 <Hash160(Local Refund Public Key)>
