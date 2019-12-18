@@ -74,12 +74,14 @@ Where
   - `ToLocalOutput`'s script is:
   
         OP_IF
-          OP_2 <Oracle Signature Point> <Local CET Public Key> OP_2 OP_CHECKMULTISIG
+          <Oracle Signature Point + Local CET Public Key>
         OP_ELSE
           <Timeout> OP_CHECKLOCKTIMEVERIFY OP_DROP
-          OP_DUP OP_HASH160 <Hash160(Remote CET Public Key)> OP_EQUALVERIFY OP_CHECKSIG
+          <Remote CET Public Key>
         OP_ENDIF
+        OP_CHECKSIG
         
+      - Note that The addition in the if case is elliptic curve point addition
   - `ToRemoteOutput`'s script is:
   
         OP_0 <Hash160(Remote CET Public Key)>
