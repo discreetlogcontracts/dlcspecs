@@ -56,8 +56,8 @@ Where
   - `Oracle Signature Point` is the 33-byte public key associated with this CET's outcome
   - Both `CET Public Key`s are 33-byte compressed public keys
   - `Local Paytout + Remote Payout = (DLC Funding Output).value`
-  - `nLockTime` is in the past (rather than just using 0)
-    - for privacy purposes and also to prevent [fee snipping](https://github.com/zkSNACKs/WalletWasabi/issues/2500)
+  - `nLockTime` is set to the contract maturity time
+  - `Timeout` is a CSV locktime after which [penalty transactions](#ClosingPenalty) are valid
   - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
 ### <a name="CETGlobal">Global</a>
   * nLockTime
@@ -75,7 +75,7 @@ Where
         OP_IF
           <Oracle Signature Point + Local CET Public Key>
         OP_ELSE
-          <Timeout> OP_CHECKLOCKTIMEVERIFY OP_DROP
+          <Timeout> OP_CHECKSEQUENCEVERIFY OP_DROP
           <Remote CET Public Key>
         OP_ENDIF
         OP_CHECKSIG
@@ -101,6 +101,7 @@ Where
   - Unlike CETs in a DLC, there is only one Refund Transaction that both parties share, similar to how there is only one [Funding Transaction](#funding-transaction)
   - Both `Refund Public Key`s are 33-byte compressed public keys
   - `Total Local Collateral + Total Remote Collateral = (DLC Funding Output).value`
+  - `Timeout` is a CLTV locktime set well after the contract maturity time
   - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
 ### <a name="RefundGlobal">Global</a>
   * nLockTime is `Timeout`
@@ -148,9 +149,9 @@ Where
 Where
   - `P2WPKH(Local Unilateral Public Key)`'s value is `Local Payout`
 
-## Closing Transaction (Justice)
+## <a name="ClosingPenalty">Closing Transaction (Penalty)</a>
 ### <a name="ClosingKnownValues">Known Values</a>
-  * Local Justice Public Key: `ECPublicKey`
+  * Local Penalty Public Key: `ECPublicKey`
   * nLockTime: `UInt32`
   * Remote's ToLocalOutput: `ScriptPubKey`
   * Fee Rate: `FeeUnit`
@@ -167,4 +168,4 @@ Where
   * P2WPKH(Local Justice Public Key)
 
 Where
-  - `P2WPKH(Local Justice Public Key)`'s value is `P2WSH(Remote's ToLocalOutput).value - fee`
+  - `P2WPKH(Local Penalty Public Key)`'s value is `P2WSH(Remote's ToLocalOutput).value - fee`
