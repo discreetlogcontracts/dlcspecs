@@ -26,7 +26,7 @@ There are three different keys each party has for each event: The key in one's o
 
 Define `k_cet = k_par / 1 / event_index / key_index`.
 
-### Closing Key (Optional)
-Closing keys are used as outputs in [Unilateral](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Transactions.md#closing-transaction-unilateral) and [Penalty](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Transactions.md#ClosingPenalty) transactions. Since these transactions are only constructed by one party and require no signatures from their counter-party, there is no strict requirement that these keys be deterministically derived. However, there are many instances in which it is nice to do so anyway, such as for testing purposes (TODO: Link to test vectors).
+### Closing Key
+Closing keys are used as outputs in [Mutual](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Transactions.md#mutual-closing-transaction), [Unilateral](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Transactions.md#closing-transaction-unilateral) and [Penalty](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Transactions.md#ClosingPenalty) closing transactions. Since Unilateral and Penalty transactions are only constructed by one party and require no signatures from their counter-party, there is no strict requirement that these keys be deterministically derived. However, there are many instances in which it is nice to do so anyway, such as for testing purposes (TODO: Link to test vectors). Let `key_index` be `0`, `1`, and `2` for Mutual, Unilateral, and Penalty closing transactions respectively.
 
-Define `k_closing` to be `k_par / 2`.
+Define `k_closing` to be `k_par / 2 / key_index`.
