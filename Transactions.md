@@ -127,6 +127,48 @@ Where
         
     Which is `P2WPKH(Remote Refund Public Key)`
 
+## Mutual Closing Transaction
+### <a name="MutualClosingKnownValues">Known Values</a>
+  * Local Mutual Closing Public Key: `ECPublicKey`
+  * Local Payout: `CurrencyUnit`
+  * Remote Mutual Closing Public Key: `ECPublicKey`
+  * Remote Payout: `CurrencyUnit`
+  * nLockTime: `UInt32`
+  * DLC Funding Output: `ScriptPubKey`
+  * Fee Rate: `FeeUnit`
+  
+Where
+  - After the contract maturity time, Mutual Closing Transaction is created in cooperation for fee reduction and improvement in privacy 
+  - Both `Mutual Closing Public Key`s are 33-byte compressed public keys
+  - `Local Payout = (Contract Execution Transaction Local Payout).value`
+  - `Remote Payout = (Contract Execution Transaction Remote Payout).value`
+  - `nLockTime` is in the past (rather than just using 0)
+    - for privacy purposes and also to prevent [fee snipping](https://github.com/zkSNACKs/WalletWasabi/issues/2500)
+  - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
+### <a name="MutualClosingGlobal">Global</a>
+  * nLockTime
+### <a name="MutualClosingInputs">Inputs</a>
+  * Input Spending(P2WSH(DLC Funding Output))
+### <a name="MutualClosingOutputs">Outputs</a>
+  * ToLocalOutput
+  * ToRemoteOutput
+  
+Where
+  - `ToLocalOutput's value is Local Payout + MutualClosingFeeDelta/2`
+  - `ToRemoteOutput's value is Remote Payout + MutualClosingFeeDelta/2`
+  - `MutualClosingFeeDelta = Computed CET Fee + Computed ToLocal Closing Fee - Computed MutualClosing Tx Fee (note that the Mutual Closing Transaction is smaller than any CET)`
+  - `ToLocalOutput`'s script is:
+  
+        OP_0 <Hash160(Local Mutual Closing Public Key)>
+        
+    Which is `P2WPKH(Local Mutual Closing Public Key)`
+  
+  - `ToRemoteOutput`'s script is:
+  
+        OP_0 <Hash160(Remote Mutual Closing Public Key)>
+        
+    Which is `P2WPKH(Remote Mutual Closing Public Key)`
+
 ## <a name="ClosingUnilateral">Closing Transaction (Unilateral)</a>
 ### <a name="ClosingKnownValues">Known Values</a>
   * Local Unilateral Public Key: `ECPublicKey`
