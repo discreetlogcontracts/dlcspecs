@@ -31,13 +31,13 @@ This message includes the following information:
 1. Contract information (an array of triples defined below)
 1. Oracle information (optional)
 1. A's fund amount (satoshi)
-1. A's [extended public key](https://github.com/discreetlogcontracts/dlcspecs/blob/master/KeyDerivation.md)
-1. A's inputs
-1. A's change address
-1. Estimatesmartfee (satoshi/vbyte)
-1. CET CSV delay
-1. CET locktime (corresponding to the contract maturity date)
-1. Refund locktime
+2. A's [extended public key](KeyDerivation.md)
+3. A's inputs
+4. A's change address
+5. Estimatesmartfee (satoshi/vbyte)
+6. CET CSV delay
+7. CET locktime (corresponding to the contract maturity date)
+8. Refund locktime
 
 #### Contract information
 Contract information consists of a total value (sum of both outputs) and a map to be used to create CETs.
@@ -57,7 +57,7 @@ If both parties already have this information, transmission is unnecessary.
 How much A inputs into the contract.
 
 #### A's extended public key
-The extended public key to be used to [derive](https://github.com/discreetlogcontracts/dlcspecs/blob/master/KeyDerivation.md) public keys for the Fund transaction, refund transaction and CETs.
+The extended public key to be used to [derive](KeyDerivation.md) public keys for the Fund transaction, refund transaction and CETs.
 
 #### A's inputs
 The set of UTXOs to be used as input to the fund transaction.
@@ -69,7 +69,7 @@ The address to use to send the change if the sum of A's inputs is greater than t
 The fee rate to be used when computing fees for the different transactions.
 
 #### CET CSV Delay
-The number to use as input to the CSV in the [CETs](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Transactions.md#outputs-1).
+The number to use as input to the CSV in the [CETs](Transactions.md#outputs-1).
 
 #### CET lock time
 The number to use as `nLockTime` for the CET transactions.
@@ -84,17 +84,17 @@ It should be set at a later date than the maturity date of the contract.
 ### Accept
 After receiving the `offer` message from A, and after [validating](#offer-validation) the provided information, B creates and sends back an `accept` message containing:
 1. B's fund amount (satoshi)
-1. B's [extended public key](https://github.com/discreetlogcontracts/dlcspecs/blob/master/KeyDerivation.md)
-1. B's inputs
-1. B's change output
-1. CET signatures
-1. Refund signature
+2. B's [extended public key](KeyDerivation.md)
+3. B's inputs
+4. B's change output
+5. CET signatures
+6. Refund signature
 
 #### B's fund amount (satoshi)
 How much B inputs into the contract.
 
 #### B's extended public key
-The extended public key to be used to [derive](https://github.com/discreetlogcontracts/dlcspecs/blob/master/KeyDerivation.md) public keys for the Fund transaction, refund transaction and CETs.
+The extended public key to be used to [derive](KeyDerivation.md) public keys for the Fund transaction, refund transaction and CETs.
 
 #### B's inputs
 The set of UTXOs to be used as input to the fund transaction.
