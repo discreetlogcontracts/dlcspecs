@@ -1,6 +1,8 @@
 # DLC Transactions
 
-It is recommended that all keys be generated/derived as specified [here](KeyDerivation.md#dlc-key-derivation).
+## A Note on Key Derivation
+
+There is no strict constraint on how the three keys (Funding, ToLocal and ToRemote) and one address (Final Address) used in a DLC are generated. We do note that absent external considerations, it does seem reasonable to use [BIP 44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) with four sequential address indices. We think this will usually be the best option for implementing key derivation because it is compatible with [normal wallet account discovery](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#account-discovery).
 
 ## Funding Transaction
 ### <a name="FundingKnownValues">Known Values</a>
@@ -39,19 +41,20 @@ Where
         OP_2 <Local Funding Public Key> <Remote Funding Public Key> OP_2 OP_CHECKMULTISIG
    
   - Each `Change ScriptPubKey`'s value is at most that of its respective `Sum(Funding Inputs) - Total Collateral - Computed Fees - (Computed CET Fee + Computed ToLocal Closing Fee)/2` with `Computed Fees` being proportional to each party's total input weight and `Computed CET Fee` being the estimated fee for a [Contract Execution Transaction](#contract-execution-transaction) and `Computed ToLocal Closing Fee` being the estimated fee for a [Unilateral Closing Transaction](#ClosingUnilateral)
-  
+
 ## Contract Execution Transaction
 ### <a name="CETKnownValues">Known Values</a>
   * Oracle Signature Point: `ECPublicKey`
-  * Local CET Public Key: `ECPublicKey`
+  * Local CET ToLocal Public Key: `ECPublicKey`
   * Local Payout: `CurrencyUnit`
-  * Remote CET Public Key: `ECPublicKey`
+  * Remote CET ToLocal Public Key: `ECPublicKey`
+  * Remote CET ToRemote Address: `BitcoinAddress`
   * Remote Paytout: `CurrencyUnit`
   * nLockTime: `UInt32`
   * Timeout: `UInt32`
   * DLC Funding Output: `ScriptPubKey`
   * Fee Rate: `FeeUnit`
-  
+
 Where
   - `Oracle Signature Point` is the 33-byte public key associated with this CET's outcome
   - Both `CET Public Key`s are 33-byte compressed public keys
@@ -66,40 +69,35 @@ Where
 ### <a name="CETOutputs">Outputs</a>
   * P2WSH(ToLocalOutput)
   * ToRemoteOutput
-  
+
 Where
   - `P2WSH(ToLocalOutput).value = Local Payout + Computed ToLocal Closing Fee`
   - `ToRemoteOutput.value = Remote Payout`
   - `ToLocalOutput`'s script is:
   
         OP_IF
-          <Oracle Signature Point + Local CET Public Key>
+          <Oracle Signature Point + Local CET ToLocal Public Key>
         OP_ELSE
           <Timeout> OP_CHECKSEQUENCEVERIFY OP_DROP
-          <Remote CET Public Key>
+          <Remote CET ToLocal Public Key>
         OP_ENDIF
         OP_CHECKSIG
-        
+      
       - Note that The addition in the if case is elliptic curve point addition
-  - `ToRemoteOutput`'s script is:
-  
-        OP_0 <Hash160(Remote CET Public Key)>
-        
-    Which is `P2WPKH(Remote CET Public Key)`
-  
+  - `ToRemoteOutput`'s script corresponds to `Remote CET ToRemote Address`
+
 ## Refund Transaction
 ### <a name="RefundKnownValues">Known Values</a>
-  * Local Refund Public Key: `ECPublicKey`
+  * Local Final Address: `BitcoinAddress`
   * Total Local Collateral: `CurrencyUnit`
-  * Remote Refund Public Key: `ECPublicKey`
+  * Remote Final Address: `BitcoinAddress`
   * Total Remote Collateral: `CurrencyUnit`
   * Timeout: `UInt32`
   * DLC Funding Output: `ScriptPubKey`
   * Fee Rate: `FeeUnit`
-  
+
 Where
   - Unlike CETs in a DLC, there is only one Refund Transaction that both parties share, similar to how there is only one [Funding Transaction](#funding-transaction)
-  - Both `Refund Public Key`s are 33-byte compressed public keys
   - `Total Local Collateral + Total Remote Collateral = (DLC Funding Output).value`
   - `Timeout` is a CLTV locktime set well after the contract maturity time
   - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
@@ -115,31 +113,22 @@ Where
   - `ToLocalOutput`'s value is `Total Local Collateral + RefundFeeDelta/2`
   - `ToRemoteOutput`'s value is `Total Remote Collateral + RefundFeeDelta/2`
   - `RefundFeeDelta = Computed CET Fee + Computed ToLocal Closing Fee - Computed Refund Tx Fee` (note that the Refund Transaction is smaller than any CET)
-  - `ToLocalOutput`'s script is:
+  - `ToLocalOutput`'s script is that of `Local Final Address`
   
-        OP_0 <Hash160(Local Refund Public Key)>
-        
-    Which is `P2WPKH(Local Refund Public Key)`
-  
-  - `ToRemoteOutput`'s script is:
-  
-        OP_0 <Hash160(Remote Refund Public Key)>
-        
-    Which is `P2WPKH(Remote Refund Public Key)`
+  - `ToRemoteOutput`'s script is that of `Remote Final Address`
 
 ## Mutual Closing Transaction
 ### <a name="MutualClosingKnownValues">Known Values</a>
-  * Local Mutual Closing Public Key: `ECPublicKey`
+  * Local Final Address: `BitcoinAddress`
   * Local Payout: `CurrencyUnit`
-  * Remote Mutual Closing Public Key: `ECPublicKey`
+  * Remote Final Address: `BitcoinAddress`
   * Remote Payout: `CurrencyUnit`
   * nLockTime: `UInt32`
   * DLC Funding Output: `ScriptPubKey`
   * Fee Rate: `FeeUnit`
-  
+
 Where
   - After the contract maturity time, Mutual Closing Transaction is created in cooperation for fee reduction and improvement in privacy 
-  - Both `Mutual Closing Public Key`s are 33-byte compressed public keys
   - `Local Payout = (Contract Execution Transaction Local Payout).value`
   - `Remote Payout = (Contract Execution Transaction Remote Payout).value`
   - `nLockTime` is in the past (rather than just using 0)
@@ -152,26 +141,18 @@ Where
 ### <a name="MutualClosingOutputs">Outputs</a>
   * ToLocalOutput
   * ToRemoteOutput
-  
+
 Where
-  - `ToLocalOutput's value is Local Payout + MutualClosingFeeDelta/2`
-  - `ToRemoteOutput's value is Remote Payout + MutualClosingFeeDelta/2`
-  - `MutualClosingFeeDelta = Computed CET Fee + Computed ToLocal Closing Fee - Computed MutualClosing Tx Fee (note that the Mutual Closing Transaction is smaller than any CET)`
-  - `ToLocalOutput`'s script is:
-  
-        OP_0 <Hash160(Local Mutual Closing Public Key)>
-        
-    Which is `P2WPKH(Local Mutual Closing Public Key)`
-  
-  - `ToRemoteOutput`'s script is:
-  
-        OP_0 <Hash160(Remote Mutual Closing Public Key)>
-        
-    Which is `P2WPKH(Remote Mutual Closing Public Key)`
+  - `ToLocalOutput`'s value is `Local Payout + MutualClosingFeeDelta/2`
+  - `ToRemoteOutput`'s value is `Remote Payout + MutualClosingFeeDelta/2`
+  - `MutualClosingFeeDelta = Computed CET Fee + Computed ToLocal Closing Fee - Computed MutualClosing Tx Fee` (note that the Mutual Closing Transaction is smaller than any CET)
+  - `ToLocalOutput`'s script is that of `Local Final Address`
+
+  - `ToRemoteOutput`'s script is that of `Remote Final Address`
 
 ## <a name="ClosingUnilateral">Closing Transaction (Unilateral)</a>
 ### <a name="ClosingKnownValues">Known Values</a>
-  * Local Unilateral Public Key: `ECPublicKey`
+  * Local Final Address: `BitcoinAddress`
   * nLockTime: `UInt32`
   * Local Payout: `CurrencyUnit`
   * ToLocalOutput: `ScriptPubKey`
@@ -186,18 +167,15 @@ Where
 ### <a name="ClosingInputs">Inputs</a>
   * Input Spending(P2WSH(ToLocalOutput))
 ### <a name="ClosingOutputs">Outputs</a>
-  * P2WPKH(Local Unilateral Public Key)
-
-Where
-  - `P2WPKH(Local Unilateral Public Key)`'s value is `Local Payout`
+  * One output corresponding to `Local Final Address` with value `Local Payout`
 
 ## <a name="ClosingPenalty">Closing Transaction (Penalty)</a>
 ### <a name="ClosingKnownValues">Known Values</a>
-  * Local Penalty Public Key: `ECPublicKey`
+  * Local Final Address: `BitcoinAddress`
   * nLockTime: `UInt32`
   * Remote's ToLocalOutput: `ScriptPubKey`
   * Fee Rate: `FeeUnit`
-  
+
 Where
   - `Remote's ToLocalOutput` is of the form [specified above](#CETOutputs)
   - `nLockTime` is in the past (rather than just using 0)
@@ -207,7 +185,4 @@ Where
 ### <a name="ClosingInputs">Inputs</a>
   * Input Spending(P2WSH(Remote's ToLocalOutput))
 ### <a name="ClosingOutputs">Outputs</a>
-  * P2WPKH(Local Justice Public Key)
-
-Where
-  - `P2WPKH(Local Penalty Public Key)`'s value is `P2WSH(Remote's ToLocalOutput).value - fee`
+  * One output corresponding to `LocalFinalAddress` with value `P2WSH(Remote's ToLocalOutput).value - fee`
