@@ -45,6 +45,7 @@ Where
 ## Contract Execution Transaction
 ### <a name="CETKnownValues">Known Values</a>
   * Oracle Signature Point: `ECPublicKey`
+  * Local Funding Public Key: `ECPublicKey`
   * Local CET ToLocal Public Key: `ECPublicKey`
   * Local Payout: `CurrencyUnit`
   * Remote CET ToLocal Public Key: `ECPublicKey`
@@ -57,6 +58,7 @@ Where
 
 Where
   - `Oracle Signature Point` is the 33-byte public key associated with this CET's outcome
+  - `Local Funding Public Key` is the local key from the [funding transaction](#funding-transaction)
   - Both `CET Public Key`s are 33-byte compressed public keys
   - `Local Paytout + Remote Payout = (DLC Funding Output).value`
   - `nLockTime` is set to the contract maturity time
@@ -76,7 +78,7 @@ Where
   - `ToLocalOutput`'s script is:
   
         OP_IF
-          <Oracle Signature Point + Local CET ToLocal Public Key>
+          <Oracle Signature Point + Local Funding Public Key + SHA256(Local CET ToLocal Public Key)*G>
         OP_ELSE
           <Timeout> OP_CHECKSEQUENCEVERIFY OP_DROP
           <Remote CET ToLocal Public Key>

@@ -61,7 +61,6 @@ The following public keys:
 
 1. Funding Public Key
 2. CET ToLocal Public Key
-3. CET ToRemote Public Key
 
 #### A's addresses
 
@@ -110,7 +109,6 @@ The following public keys:
 
 1. Funding Public Key
 2. CET ToLocal Public Key
-3. CET ToRemote Public Key
 
 #### B's addresses
 
