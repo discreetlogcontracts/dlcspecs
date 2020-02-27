@@ -25,7 +25,7 @@ Pull requests and comments welcome.
 
 - Create introductory page to DLCs and a glossary of technical terms ([#16](https://github.com/discreetlogcontracts/dlcspecs/issues/16))
 
-- Specify how an event Id should be calculated [#20](https://github.com/discreetlogcontracts/dlcspecs/issues/20))
+- Specify how an event Id should be calculated ([#20](https://github.com/discreetlogcontracts/dlcspecs/issues/20))
 
 - Oracle signature specification ([#21](https://github.com/discreetlogcontracts/dlcspecs/issues/21))
 
