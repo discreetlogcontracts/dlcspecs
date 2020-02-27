@@ -60,7 +60,9 @@ How much A inputs into the contract.
 The following public keys:
 
 1. Funding Public Key
+   - A's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
 2. CET ToLocal Public Key
+   - A's public key used in computing the [ToLocal](Transactions.md#CETOutputs) keys in CETs
 
 #### A's addresses
 
@@ -68,10 +70,8 @@ The following addresses:
 
 1. Funding Change Address
    - The address to use to send the change if the sum of A's inputs is greater than the fund amount plus the fees.
-2. ToRemote Address
-   - The address to which remote funds will be sent in the unilateral case.
-3. Final Address
-   - The address to which funds will be sent in refund and mutual transactions.
+2. Final Address
+   - The address to which funds will be sent in [unilateral contract execution](Transactions.md#CETOutputs), [refund](Transactions.md#refund-transaction) and [mutual closing](Transactions.md#mutual-closing-transaction) transactions.
 
 #### A's inputs
 The set of UTXOs to be used as input to the fund transaction.
@@ -108,7 +108,9 @@ How much B inputs into the contract.
 The following public keys:
 
 1. Funding Public Key
+   - B's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
 2. CET ToLocal Public Key
+   - B's public key used in computing the [ToLocal](Transactions.md#CETOutputs) keys in CETs
 
 #### B's addresses
 
@@ -116,10 +118,8 @@ The following addresses:
 
 1. Funding Change Address
    - The address to use to send the change if the sum of A's inputs is greater than the fund amount plus the fees.
-2. ToRemote Address
-   - The address to which remote funds will be sent in the unilateral case.
-3. Final Address
-   - The address to which funds will be sent in refund and mutual transactions.
+2. Final Address
+   - The address to which funds will be sent in [unilateral contract execution](Transactions.md#CETOutputs), [refund](Transactions.md#refund-transaction) and [mutual closing](Transactions.md#mutual-closing-transaction) transactions.
 
 #### B's inputs
 The set of UTXOs to be used as input to the fund transaction.
@@ -207,3 +207,4 @@ Takatoshi Nakagawa
 Ichiro Kuwahara
 Thibaut Le Guilly
 Nadav Kohen
+

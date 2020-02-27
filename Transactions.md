@@ -2,7 +2,7 @@
 
 ## A Note on Key Derivation
 
-There is no strict constraint on how the three keys (Funding, ToLocal and ToRemote) and one address (Final Address) used in a DLC are generated. We do note that absent external considerations, it does seem reasonable to use [BIP 44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) with four sequential address indices. We think this will usually be the best option for implementing key derivation because it is compatible with [normal wallet account discovery](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#account-discovery).
+There is no strict constraint on how the two keys (Funding and ToLocal) and one address (Final Address) used in a DLC are generated. We do note that absent external considerations, it does seem reasonable to use [BIP 44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) with three sequential address indices. We think this will usually be the best option for implementing key derivation because it is compatible with [normal wallet account discovery](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#account-discovery).
 
 ## Funding Transaction
 ### <a name="FundingKnownValues">Known Values</a>
@@ -49,8 +49,8 @@ Where
   * Local CET ToLocal Public Key: `ECPublicKey`
   * Local Payout: `CurrencyUnit`
   * Remote CET ToLocal Public Key: `ECPublicKey`
-  * Remote CET ToRemote Address: `BitcoinAddress`
-  * Remote Paytout: `CurrencyUnit`
+  * Remote Final Address: `BitcoinAddress`
+  * Remote Payout: `CurrencyUnit`
   * nLockTime: `UInt32`
   * Timeout: `UInt32`
   * DLC Funding Output: `ScriptPubKey`
@@ -86,7 +86,7 @@ Where
         OP_CHECKSIG
       
       - Note that The addition in the if case is elliptic curve point addition
-  - `ToRemoteOutput`'s script corresponds to `Remote CET ToRemote Address`
+  - `ToRemoteOutput`'s script corresponds to `Remote CET Final Address`
 
 ## Refund Transaction
 ### <a name="RefundKnownValues">Known Values</a>
@@ -173,12 +173,13 @@ Where
 
 ## <a name="ClosingPenalty">Closing Transaction (Penalty)</a>
 ### <a name="ClosingKnownValues">Known Values</a>
-  * Local Final Address: `BitcoinAddress`
+  * Local Address: `BitcoinAddress`
   * nLockTime: `UInt32`
   * Remote's ToLocalOutput: `ScriptPubKey`
   * Fee Rate: `FeeUnit`
 
 Where
+  - `Local Address` is any unused local address
   - `Remote's ToLocalOutput` is of the form [specified above](#CETOutputs)
   - `nLockTime` is in the past (rather than just using 0)
     - for privacy purposes and also to prevent [fee snipping](https://github.com/zkSNACKs/WalletWasabi/issues/2500)
@@ -187,4 +188,4 @@ Where
 ### <a name="ClosingInputs">Inputs</a>
   * Input Spending(P2WSH(Remote's ToLocalOutput))
 ### <a name="ClosingOutputs">Outputs</a>
-  * One output corresponding to `LocalFinalAddress` with value `P2WSH(Remote's ToLocalOutput).value - fee`
+  * One output corresponding to `LocalAddress` with value `P2WSH(Remote's ToLocalOutput).value - fee`
