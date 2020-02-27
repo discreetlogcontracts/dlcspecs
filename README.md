@@ -33,7 +33,7 @@ Pull requests and comments welcome.
 
 ### Future Work
 
-- Construction and neogatiation of DLCs in Lightning [#3](https://github.com/discreetlogcontracts/dlcspecs/issues/3))
+- Construction and neogatiation of DLCs in Lightning ([#3](https://github.com/discreetlogcontracts/dlcspecs/issues/3))
 
 ---
 
