@@ -11,7 +11,7 @@ Pull requests and comments welcome.
 
 - Rework partipants shared public keys and addresses ([#10](https://github.com/discreetlogcontracts/dlcspecs/pull/10))
 
-- Funding, CET, and Closing Transaction `sequence` numbers and `nLocktime`
+- Funding, CET, and Closing Transaction `sequence` numbers and `nLocktime` ([#23](https://github.com/discreetlogcontracts/dlcspecs/pull/23))
 
 - Funding, CET, and Closing Transaction input and output ordering ([#18](https://github.com/discreetlogcontracts/dlcspecs/issues/18))
 
@@ -25,7 +25,7 @@ Pull requests and comments welcome.
 
 - Create introductory page to DLCs and a glossary of technical terms ([#16](https://github.com/discreetlogcontracts/dlcspecs/issues/16))
 
-- Specify how an event Id should be calculated [#20](https://github.com/discreetlogcontracts/dlcspecs/issues/20))
+- Specify how an event Id should be calculated ([#20](https://github.com/discreetlogcontracts/dlcspecs/issues/20))
 
 - Oracle signature specification ([#21](https://github.com/discreetlogcontracts/dlcspecs/issues/21))
 
@@ -33,7 +33,7 @@ Pull requests and comments welcome.
 
 ### Future Work
 
-- Construction and neogatiation of DLCs in Lightning [#3](https://github.com/discreetlogcontracts/dlcspecs/issues/3))
+- Construction and neogatiation of DLCs in Lightning ([#3](https://github.com/discreetlogcontracts/dlcspecs/issues/3))
 
 ---
 
