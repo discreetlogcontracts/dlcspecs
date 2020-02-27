@@ -28,16 +28,16 @@ The following figure gives a brief overview of the protocol:
 
 The initiating party starts the protocol by sending an `offer` message to the other party.
 This message includes the following information:
-1. Contract information (an array of triples defined below)
+1. Contract information (a map defined below)
 1. Oracle information (optional)
 1. A's fund amount (satoshi)
-2. A's [extended public key](KeyDerivation.md)
-3. A's inputs
-4. A's change address
-5. Estimatesmartfee (satoshi/vbyte)
-6. CET CSV delay
-7. CET locktime (corresponding to the contract maturity date)
-8. Refund locktime
+1. A's public keys
+1. A's addresses
+1. A's funding inputs
+1. Estimatesmartfee (satoshi/vbyte)
+1. CET CSV delay
+1. CET locktime (corresponding to the contract maturity date)
+1. Refund locktime
 
 #### Contract information
 Contract information consists of a total value (sum of both outputs) and a map to be used to create CETs.
@@ -56,14 +56,25 @@ If both parties already have this information, transmission is unnecessary.
 #### A's fund amount (satoshi)
 How much A inputs into the contract.
 
-#### A's extended public key
-The extended public key to be used to [derive](KeyDerivation.md) public keys for the Fund transaction, refund transaction and CETs.
+#### A's public keys
+The following public keys:
+
+1. Funding Public Key
+   - A's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
+2. CET ToLocal Public Key
+   - A's public key used in computing the [ToLocal](Transactions.md#CETOutputs) keys in CETs
+
+#### A's addresses
+
+The following addresses:
+
+1. Funding Change Address
+   - The address to use to send the change if the sum of A's inputs is greater than the fund amount plus the fees.
+2. Final Address
+   - The address to which funds will be sent in [unilateral contract execution](Transactions.md#CETOutputs), [refund](Transactions.md#refund-transaction) and [mutual closing](Transactions.md#mutual-closing-transaction) transactions.
 
 #### A's inputs
 The set of UTXOs to be used as input to the fund transaction.
-
-#### A's change address
-The address to use to send the change if the sum of A's inputs is greater than the fund amount plus the fees.
 
 #### Estimatesmartfee (satoshi/vbyte)
 The fee rate to be used when computing fees for the different transactions.
@@ -84,23 +95,34 @@ It should be set at a later date than the maturity date of the contract.
 ### Accept
 After receiving the `offer` message from A, and after [validating](#offer-validation) the provided information, B creates and sends back an `accept` message containing:
 1. B's fund amount (satoshi)
-2. B's [extended public key](KeyDerivation.md)
-3. B's inputs
-4. B's change output
-5. CET signatures
-6. Refund signature
+1. B's public keys
+1. B's addresses
+1. B's inputs
+1. CET signatures
+1. Refund signature
 
 #### B's fund amount (satoshi)
 How much B inputs into the contract.
 
-#### B's extended public key
-The extended public key to be used to [derive](KeyDerivation.md) public keys for the Fund transaction, refund transaction and CETs.
+#### B's public keys
+The following public keys:
+
+1. Funding Public Key
+   - B's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
+2. CET ToLocal Public Key
+   - B's public key used in computing the [ToLocal](Transactions.md#CETOutputs) keys in CETs
+
+#### B's addresses
+
+The following addresses:
+
+1. Funding Change Address
+   - The address to use to send the change if the sum of A's inputs is greater than the fund amount plus the fees.
+2. Final Address
+   - The address to which funds will be sent in [unilateral contract execution](Transactions.md#CETOutputs), [refund](Transactions.md#refund-transaction) and [mutual closing](Transactions.md#mutual-closing-transaction) transactions.
 
 #### B's inputs
 The set of UTXOs to be used as input to the fund transaction.
-
-#### B's change address
-The address to use to send the change if the sum of A's inputs is greater than the fund amount plus the fees.
 
 #### CET signatures
 A set of signatures from B, one for each CET input.
@@ -185,3 +207,4 @@ Takatoshi Nakagawa
 Ichiro Kuwahara
 Thibaut Le Guilly
 Nadav Kohen
+
