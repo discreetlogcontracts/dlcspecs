@@ -61,8 +61,8 @@ The following public keys:
 
 1. Funding Public Key
    - A's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
-2. CET ToLocal Public Key
-   - A's public key used in computing the [ToLocal](Transactions.md#CETOutputs) keys in CETs
+2. Sweep Public Key
+   - A's public key used in the creation of the CETs [output script](Transactions.md#CETOutputs).
 
 #### A's addresses
 
@@ -109,8 +109,8 @@ The following public keys:
 
 1. Funding Public Key
    - B's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
-2. CET ToLocal Public Key
-   - B's public key used in computing the [ToLocal](Transactions.md#CETOutputs) keys in CETs
+2. Sweep Public Key
+   - A's public key used in the creation of the CETs [output script](Transactions.md#CETOutputs).
 
 #### B's addresses
 
