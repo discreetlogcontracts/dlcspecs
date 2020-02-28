@@ -7,20 +7,18 @@ There is no strict constraint on how the two keys (Funding and ToLocal) and one 
 ## Funding Transaction
 ### <a name="FundingKnownValues">Known Values</a>
   * Local Funding Inputs: `List[TransactionInput]`
-  * Local Change ScriptPubKey: `ScriptPubKey`
+  * Local Change Address: `BitcoinAddress`
   * Local Funding Public Key: `ECPublicKey`
   * Remote Funding Inputs: `List[TransactionInput]`
-  * Remote Change ScriptPubKey: `ScriptPubKey`
+  * Remote Change Address: `BitcoinAddress`
   * Remote Funding Public Key: `ECPublicKey`
   * Total Local Collateral: `CurrencyUnit`
   * Total Remote Collateral: `CurrencyUnit`
   * Fee Rate: `FeeUnit`
 
 Where
-  - Local something something Remote
-  - The sum of each `Funding Inputs`' value is at least that of its `Total Collateral`
+  - The sum of the values of each `Funding Inputs` value is at least that of its corresponding `Total Collateral`
   - `Funding Public Key`s are both 33-byte compressed public keys
-  - Both `Change ScriptPubKey`s must be either `P2WSH/P2WPKH`, or `P2SH-P2WSH/P2SH-P2WPKH`
 ### <a name="FundingGlobal">Global</a>
   * nLockTime is `0`
 ### <a name="FundingInputs">Inputs</a>
@@ -30,8 +28,8 @@ Where
       * All should have nSequence of `0xffffffff`
 ### <a name="FundingOutputs">Outputs</a>
   * P2WSH(DLC Funding Output)
-  * Local Change ScriptPubKey
-  * Remote Change ScriptPubKey
+  * Local Change Address
+  * Remote Change Address
 
 Where
   - `P2WSH(DLC Funding Output)`'s value is `Total Local Collateral + Total Remote Collateral + Computed CET Fee + Computed ToLocal Closing Fee`
@@ -39,7 +37,7 @@ Where
    
         OP_2 <Local Funding Public Key> <Remote Funding Public Key> OP_2 OP_CHECKMULTISIG
    
-  - Each `Change ScriptPubKey`'s value is at most that of its respective `Sum(Funding Inputs) - Total Collateral - Computed Fees - (Computed CET Fee + Computed ToLocal Closing Fee)/2` with `Computed Fees` being proportional to each party's total input weight and `Computed CET Fee` being the estimated fee for a [Contract Execution Transaction](#contract-execution-transaction) and `Computed ToLocal Closing Fee` being the estimated fee for a [Unilateral Closing Transaction](#ClosingUnilateral)
+  - Each `Change Address`'s value is at most that of its respective `Sum(Funding Inputs) - Total Collateral - Computed Fees - (Computed CET Fee + Computed ToLocal Closing Fee)/2` with `Computed Fees` being proportional to each party's total input weight and `Computed CET Fee` being the estimated fee for a [Contract Execution Transaction](#contract-execution-transaction) and `Computed ToLocal Closing Fee` being the estimated fee for a [Unilateral Closing Transaction](#ClosingUnilateral)
 
 ## Contract Execution Transaction
 ### <a name="CETKnownValues">Known Values</a>
