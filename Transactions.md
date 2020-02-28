@@ -12,7 +12,6 @@ There is no strict constraint on how the two keys (Funding and ToLocal) and one 
   * Remote Funding Inputs: `List[TransactionInput]`
   * Remote Change ScriptPubKey: `ScriptPubKey`
   * Remote Funding Public Key: `ECPublicKey`
-  * nLockTime: `UInt32`
   * Total Local Collateral: `CurrencyUnit`
   * Total Remote Collateral: `CurrencyUnit`
   * Fee Rate: `FeeUnit`
@@ -21,14 +20,14 @@ Where
   - Local something something Remote
   - The sum of each `Funding Inputs`' value is at least that of its `Total Collateral`
   - `Funding Public Key`s are both 33-byte compressed public keys
-  - `nLockTime` is in the past (rather than just using 0)
-    - for privacy purposes and also to prevent [fee snipping](https://github.com/zkSNACKs/WalletWasabi/issues/2500)
   - Both `Change ScriptPubKey`s must be either `P2WSH/P2WPKH`, or `P2SH-P2WSH/P2SH-P2WPKH`
 ### <a name="FundingGlobal">Global</a>
-  * nLockTime
+  * nLockTime is `0`
 ### <a name="FundingInputs">Inputs</a>
   * Local Funding Inputs
+      * All should have nSequence of `0xffffffff`
   * Remote Funding Inputs
+      * All should have nSequence of `0xffffffff`
 ### <a name="FundingOutputs">Outputs</a>
   * P2WSH(DLC Funding Output)
   * Local Change ScriptPubKey
@@ -68,6 +67,7 @@ Where
   * nLockTime
 ### <a name="CETInputs">Inputs</a>
   * Input Spending(P2WSH(DLC Funding Output))
+      * nSequence is `0xfffffffe`
 ### <a name="CETOutputs">Outputs</a>
   * P2WSH(ToLocalOutput)
   * ToRemoteOutput
@@ -107,6 +107,7 @@ Where
   * nLockTime is `Timeout`
 ### <a name="RefundInputs">Inputs</a>
   * Input Spending(P2WSH(DLC Funding Output))
+      * nSequence is `0xfffffffe`
 ### <a name="RefundOutputs">Outputs</a>
   * ToLocalOutput
   * ToRemoteOutput
@@ -116,7 +117,6 @@ Where
   - `ToRemoteOutput`'s value is `Total Remote Collateral + RefundFeeDelta/2`
   - `RefundFeeDelta = Computed CET Fee + Computed ToLocal Closing Fee - Computed Refund Tx Fee` (note that the Refund Transaction is smaller than any CET)
   - `ToLocalOutput`'s script is that of `Local Final Address`
-  
   - `ToRemoteOutput`'s script is that of `Remote Final Address`
 
 ## Mutual Closing Transaction
@@ -125,7 +125,6 @@ Where
   * Local Payout: `CurrencyUnit`
   * Remote Final Address: `BitcoinAddress`
   * Remote Payout: `CurrencyUnit`
-  * nLockTime: `UInt32`
   * DLC Funding Output: `ScriptPubKey`
   * Fee Rate: `FeeUnit`
 
@@ -133,13 +132,12 @@ Where
   - After the contract maturity time, Mutual Closing Transaction is created in cooperation for fee reduction and improvement in privacy 
   - `Local Payout = (Contract Execution Transaction Local Payout).value`
   - `Remote Payout = (Contract Execution Transaction Remote Payout).value`
-  - `nLockTime` is in the past (rather than just using 0)
-    - for privacy purposes and also to prevent [fee snipping](https://github.com/zkSNACKs/WalletWasabi/issues/2500)
   - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
 ### <a name="MutualClosingGlobal">Global</a>
-  * nLockTime
+  * nLockTime is `0`
 ### <a name="MutualClosingInputs">Inputs</a>
   * Input Spending(P2WSH(DLC Funding Output))
+      * nSequence is `0xffffffff`
 ### <a name="MutualClosingOutputs">Outputs</a>
   * ToLocalOutput
   * ToRemoteOutput
@@ -162,30 +160,25 @@ Where
 
 Where
   - `ToLocalOutput` is of the form [specified above](#CETOutputs)
-  - `nLockTime` is in the past (rather than just using 0)
-    - for privacy purposes and also to prevent [fee snipping](https://github.com/zkSNACKs/WalletWasabi/issues/2500)
 ### <a name="ClosingGlobal">Global</a>
-  * nLockTime
+  * nLockTime is `0`
 ### <a name="ClosingInputs">Inputs</a>
   * Input Spending(P2WSH(ToLocalOutput))
+      * nSequence is `0xffffffff`
 ### <a name="ClosingOutputs">Outputs</a>
   * One output corresponding to `Local Final Address` with value `Local Payout`
 
 ## <a name="ClosingPenalty">Closing Transaction (Penalty)</a>
 ### <a name="ClosingKnownValues">Known Values</a>
   * Local Address: `BitcoinAddress`
-  * nLockTime: `UInt32`
   * Remote's ToLocalOutput: `ScriptPubKey`
   * Fee Rate: `FeeUnit`
 
 Where
   - `Local Address` is any unused local address
   - `Remote's ToLocalOutput` is of the form [specified above](#CETOutputs)
-  - `nLockTime` is in the past (rather than just using 0)
-    - for privacy purposes and also to prevent [fee snipping](https://github.com/zkSNACKs/WalletWasabi/issues/2500)
-### <a name="ClosingGlobal">Global</a>
-  * nLockTime
 ### <a name="ClosingInputs">Inputs</a>
   * Input Spending(P2WSH(Remote's ToLocalOutput))
 ### <a name="ClosingOutputs">Outputs</a>
   * One output corresponding to `LocalAddress` with value `P2WSH(Remote's ToLocalOutput).value - fee`
+
