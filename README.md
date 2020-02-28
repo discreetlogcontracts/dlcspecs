@@ -9,10 +9,6 @@ Pull requests and comments welcome.
 
 ### Works in Progress
 
-- Rework partipants shared public keys and addresses ([#10](https://github.com/discreetlogcontracts/dlcspecs/pull/10))
-
-- Funding, CET, and Closing Transaction `sequence` numbers and `nLocktime` ([#23](https://github.com/discreetlogcontracts/dlcspecs/pull/23))
-
 - Funding, CET, and Closing Transaction input and output ordering ([#18](https://github.com/discreetlogcontracts/dlcspecs/issues/18))
 
 - Transaction dust limits ([#11](https://github.com/discreetlogcontracts/dlcspecs/issues/11))
