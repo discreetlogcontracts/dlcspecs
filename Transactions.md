@@ -43,9 +43,9 @@ Where
 ### <a name="CETKnownValues">Known Values</a>
   * Oracle Signature Point: `ECPublicKey`
   * Local Funding Public Key: `ECPublicKey`
-  * Local CET ToLocal Public Key: `ECPublicKey`
+  * Local Sweep Public Key: `ECPublicKey`
   * Local Payout: `CurrencyUnit`
-  * Remote CET ToLocal Public Key: `ECPublicKey`
+  * Remote Sweep Public Key: `ECPublicKey`
   * Remote Final Address: `BitcoinAddress`
   * Remote Payout: `CurrencyUnit`
   * nLockTime: `UInt32`
@@ -56,7 +56,7 @@ Where
 Where
   - `Oracle Signature Point` is the 33-byte public key associated with this CET's outcome
   - `Local Funding Public Key` is the local key from the [funding transaction](#funding-transaction)
-  - Both `CET Public Key`s are 33-byte compressed public keys
+  - Both `Sweep Public Key`s are 33-byte compressed public keys
   - `Local Paytout + Remote Payout = (DLC Funding Output).value`
   - `nLockTime` is set to the contract maturity time
   - `Timeout` is a CSV locktime after which [penalty transactions](#ClosingPenalty) are valid
