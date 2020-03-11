@@ -5,6 +5,8 @@ drafted.
 
 Pull requests and comments welcome.
 
+For learning more about DLC have a look at the [resources](Resources.md) page.
+
 ## Specification Roadmap
 
 ### Works in Progress
