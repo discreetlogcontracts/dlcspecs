@@ -57,7 +57,7 @@ Where
   - `Oracle Signature Point` is the 33-byte public key associated with this CET's outcome
   - `Local Funding Public Key` is the local key from the [funding transaction](#funding-transaction)
   - Both `Sweep Public Key`s are 33-byte compressed public keys
-  - `Local Paytout + Remote Payout = (DLC Funding Output).value`
+  - `Local Payout + Remote Payout = (DLC Funding Output).value`
   - `nLockTime` is set to the contract maturity time
   - `Timeout` is a CSV locktime after which [penalty transactions](#ClosingPenalty) are valid
   - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
@@ -76,10 +76,10 @@ Where
   - `ToLocalOutput`'s script is:
   
         OP_IF
-          <Oracle Signature Point + Local Funding Public Key + SHA256(Local CET ToLocal Public Key)*G>
+          <Oracle Signature Point + Local Funding Public Key + SHA256(Local Sweep Public Key)*G>
         OP_ELSE
           <Timeout> OP_CHECKSEQUENCEVERIFY OP_DROP
-          <Remote CET ToLocal Public Key>
+          <Remote Sweep Public Key>
         OP_ENDIF
         OP_CHECKSIG
       
