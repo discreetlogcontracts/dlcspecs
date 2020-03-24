@@ -83,7 +83,7 @@ Where
         OP_ENDIF
         OP_CHECKSIG
       
-      - Note that The addition in the if case is elliptic curve point addition
+      - Note that the addition in the `IF` case is elliptic curve point addition
   - `ToRemoteOutput`'s script corresponds to `Remote CET Final Address`
 
 ## Refund Transaction

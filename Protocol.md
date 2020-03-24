@@ -110,7 +110,7 @@ The following public keys:
 1. Funding Public Key
    - B's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
 2. Sweep Public Key
-   - A's public key used in the creation of the CETs [output script](Transactions.md#CETOutputs).
+   - B's public key used in the creation of the CETs [output script](Transactions.md#CETOutputs).
 
 #### B's addresses
 
@@ -194,13 +194,13 @@ We distinguish between user validation, performed by the user (through a user in
 
 At any point in the protocol up until the sending of the `sign` message, both parties can safely decide to cancel the contract.
 An empty `cancel` message can be used to inform the other party of the desire to cancel the contract.
-If one of the party doesn't send a message after a given timeout, the other party should assume the contract to be canceled.
+If one of the parties doesn't send a message after a given timeout, the other party should assume the contract to be canceled.
 Timeouts should be proportional to the number of possible outputs of the contract, as the signing and verification of the CET signatures is expected to be the bottleneck.
 
-After party A sends the `sign` transaction, they cannot unilaterally cancel the contract anymore.
-If they want to cancel the contract, for example because of not observing the fund transaction in the Bitcoin network, they can try to do so by broadcasting a transaction spending at least one of the UTXO specified in the fund transaction.
+After party A sends the `sign` message, they cannot unilaterally cancel the contract anymore.
+If they want to cancel the contract, for example because of not observing the fund transaction in the Bitcoin network, they can try to do so by broadcasting a transaction spending at least one of the UTXOs specified in the fund transaction.
 If this transaction gets included in the blockchain prior to the fund transaction, the contract will be canceled as this will have rendered the fund transaction invalid.
-In the even that the fund transaction gets included first, both party will be bound to the contract.
+In the event that the fund transaction gets included first, both parties will be bound to the contract.
 
 # Authors
 Takatoshi Nakagawa
