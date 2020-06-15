@@ -3,9 +3,9 @@
 ## Adaptor Signatures
 
 * We don't need the NIZK proof of knowledge of the scalar behind the adaptor point from the [generalized channel paper](https://eprint.iacr.org/2020/476.pdf), especially for DLCs
-  * The purpose of this proof is to maintain zero knowledge by ensuring that this scalar is already known and hence not learned.
-  * For DLCs, we assume knowledge of the adaptor secret (which is an oracle signature) will be made public and hence known/knowable to both parties
-* @nkohen will speak with @nickler about getting a maintainable branch of [secp256k1](https://github.com/bitcoin-core/secp256k1) with ECDSA Adaptor Signatures and Schnorr
+  * The purpose of this proof is to make sure the adaptor point is well formed and not maliciously crafted.
+  * Since all our adaptor points come from an anticipated signature from the oracle's static key, we assume they are always well formed.
+* @nkohen will speak with @jonasnick about getting a maintainable branch of [secp256k1](https://github.com/bitcoin-core/secp256k1) with ECDSA Adaptor Signatures and Schnorr
   * Should just be a matter of cherry-picking signature point computation and ECDSA Adaptor Signatures on top of the most recent Schnorr branch
 * Refund might still be necessary for palliating to software issues
   * The same use case as for non-adaptor DLCs
@@ -26,6 +26,7 @@
 
 * We still need to work on standardizing oracle messages
 * Not discussed this week but previously we discussed introducing some format for oracle message templates which can be published to clients (e.g. documented publicly) which enable users to construct the exact messages to be signed by oracles
+* Shared notes on current Oracle API implementations at Suredbits and Crypto Garage
 
 ## DLCs with Multiple R Values
 
