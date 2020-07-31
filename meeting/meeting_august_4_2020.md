@@ -8,14 +8,23 @@
 * [Temporary non-zkp branch with everything DLC's need on it (with stable APIs that will appear on the final zkp branch ... I think)](https://github.com/nkohen/secp256k1/tree/temp-everything)
   * [Same branch but with JNI integration as well](https://github.com/nkohen/secp256k1/tree/temp-everything-with-jni)
 
+## BIP 340 support for var length messages
+
+* https://github.com/sipa/bips/issues/207
+
 ## Crypto Garage Testnet DLC Trading App!
 
 * 
 
 ## Oracles
 
-* 
+* API Specifications
 
 ## Specification Writing
 
 * 
+
+## Rust DLC/Rust LN
+
+* API for custom on-chain scripts instead of default HTLCs in Rust LN
+* Dev Plan and Objectives
