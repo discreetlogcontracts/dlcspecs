@@ -33,6 +33,16 @@ For learning more about DLC have a look at the [resources](Resources.md) page.
 
 - Construction and neogatiation of DLCs in Lightning ([#3](https://github.com/discreetlogcontracts/dlcspecs/issues/3))
 
+## Implementations
+
+### [bitcoin-s](https://github.com/bitcoin-s/bitcoin-s)
+
+The team at Suredbits is working on a implementation of discreet log contracts in bitcoin-s. 
+
+1. [Documentation](https://bitcoin-s.org/docs/next/wallet/dlc)
+2. [Github branch](https://github.com/bitcoin-s/bitcoin-s/tree/dlc)
+
+
 ---
 
 ![Creative Commons License](https://i.creativecommons.org/l/by/4.0/88x31.png "License CC-BY")
