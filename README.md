@@ -40,8 +40,8 @@ For learning more about DLC have a look at the [resources](Resources.md) page.
 The team at Suredbits is working on a implementation of discreet log contracts in bitcoin-s. 
 
 1. [Documentation](https://bitcoin-s.org/docs/next/wallet/dlc)
-2. [Github branch](https://github.com/bitcoin-s/bitcoin-s/tree/dlc)
-
+2. [Github branch](https://github.com/bitcoin-s/bitcoin-s/tree/adaptor-dlc)
+3. [Interactive DLC Demo](https://scastie.scala-lang.org/nkohen/OVWMOXwPRryREhVNw7pjLw/11)
 
 ---
 
