@@ -5,6 +5,8 @@ drafted.
 
 Pull requests and comments welcome.
 
+Please see our [introduction](Introduction.md) for what a DLC is and a glossary of terms used in DLCs.
+
 For learning more about DLC have a look at the [resources](Resources.md) page.
 
 ## Specification Roadmap
