@@ -33,7 +33,7 @@ All funding inputs must be Segwit or nested P2SH(Segwit) in order to protect aga
 
 ## Change Outputs
 
-The funding transaction's change outputs should pay to the address specified in the relevant offer/accept message. A change output's value should equal the total funding amount of that party subtracted by their total collateral as well as their fees for both this transaction as well as their fees for the largest possible Contract Execution Transaction. If this value is below the dust limit, then no change output is added for that party.
+The funding transaction's change outputs should pay to the address specified in the relevant offer/accept message. A change output's value should equal the total funding amount of that party subtracted by their total collateral as well as their fees for both this transaction as well as their fees for the largest possible Contract Execution Transaction. If this value is below the dust limit of `1000 satoshis`, then no change output is added for that party.
 
 # Fees
 
@@ -103,7 +103,7 @@ Multiplying non-witness data by 4 results in a weight of:
 funding_transaction_weight = 4 * funding_transaction
 
 // 2 + 108 * num_inputs weight
-witness_wight = witness_header + witness * num_inputs
+witness_weight = witness_header + witness * num_inputs
 
 overall_weight = 462 + 272 * num_inputs weight
 ```
