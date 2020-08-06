@@ -23,13 +23,13 @@ For learning more about DLC have a look at the [resources](Resources.md) page.
 
 ### TODO
 
-- Create introductory page to DLCs and a glossary of technical terms ([#16](https://github.com/discreetlogcontracts/dlcspecs/issues/16))
-
 - Specify how an event Id should be calculated ([#20](https://github.com/discreetlogcontracts/dlcspecs/issues/20))
 
 - Oracle signature specification ([#21](https://github.com/discreetlogcontracts/dlcspecs/issues/21))
 
 - P2P communication specification ([#13](https://github.com/discreetlogcontracts/dlcspecs/issues/13))
+
+- For more information on TODO see our [project v0.1 project dashboard](https://github.com/discreetlogcontracts/dlcspecs/projects/1)
 
 ### Future Work
 
