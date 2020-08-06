@@ -29,7 +29,7 @@ For learning more about DLC have a look at the [resources](Resources.md) page.
 
 - P2P communication specification ([#13](https://github.com/discreetlogcontracts/dlcspecs/issues/13))
 
-- For more information on TODO see our [project v0.1 project dashboard](https://github.com/discreetlogcontracts/dlcspecs/projects/1)
+- For more information on TODO see our [v0.1 project dashboard](https://github.com/discreetlogcontracts/dlcspecs/projects/1)
 
 ### Future Work
 
