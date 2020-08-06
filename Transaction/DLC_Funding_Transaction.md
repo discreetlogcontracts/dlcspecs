@@ -48,10 +48,10 @@ p2wsh: 34 bytes
 	- OP_DATA: 1 byte (witness_script_SHA256 length)
 	- witness_script_SHA256: 32 bytes
 
-change_output: 31 bytes
+change_output: 9 + change_spk_script length bytes
 	- value: 8 bytes
 	- var_int: 1 byte (pk_script length)
-	- pk_script (p2wpkh): 22 bytes
+	- pk_script: change_spk_script length
 
 funding_output: 43 bytes
 	- value: 8 bytes
@@ -82,28 +82,29 @@ witness: 108 bytes
 	- pub_key_length: 1 byte
 	- pub_key: 33 bytes
 
-funding_transaction: 115 + 41 * num_inputs
+funding_transaction: 71 + offer_change_spk_script length + accept_change_spk_script length + 41 * num_inputs bytes
 	- version: 4 bytes
 	- witness_header <---- part of the witness data
 	- count_tx_in: 1 byte
 	- tx_in: 41 bytes * num_inputs
 		funding_input
 	- count_tx_out: 1 byte
-	- tx_out: 43 + 31 + 31
-		funding_ouptut,
-		change_output,
-		change_output
+	- tx_out: 61 + offer_change_spk_script length + accept_change_spk_script length
+		funding_ouptut (43 bytes),
+		change_output (9 + offer_change_spk_script length bytes),
+		change_output (9 + accept_change_spk_script length bytes)
 	- lock_time: 4 bytes
 ```
 
 Multiplying non-witness data by 4 results in a weight of:
 
 ```
-// 460 + 164 * num_inputs weight
+// total_change_length = offer_change_spk_script length + accept_change_spk_script length
+// 284 + 4 * total_change_length + 164 * num_inputs weight
 funding_transaction_weight = 4 * funding_transaction
 
 // 2 + 108 * num_inputs weight
 witness_weight = witness_header + witness * num_inputs
 
-overall_weight = 462 + 272 * num_inputs weight
+overall_weight = 286 + 4 * total_change_length + 272 * num_inputs weight
 ```
