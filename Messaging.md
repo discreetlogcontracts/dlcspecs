@@ -56,6 +56,7 @@ Various fundamental types are referred to in the message specifications:
 * `u32`: a 4 byte unsigned integer
 * `u64`: an 8 byte unsigned integer
 * `int32`: a 4 byte signed integer
+* `bool`: a boolean value represented as a `byte` which can have only two value, `0x01` to represent `true` and `0x00` to represent false (any other value should be considered invalid).
 
 Inside TLV records which contain a single value, leading zeros in
 integers can be omitted:
@@ -78,7 +79,8 @@ The following convenience types are also defined:
 * `script_sig`: A bitcoin script signature encoded as ASM prefixed a `u16` value indicating its length.
 * `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
 * `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#appendix-a-bigsize-test-vectors).
-* `string`: a UTF-8 encoded string using [NFC for normalization](https://github.com/discreetlogcontracts/dlcspecs/issues/89)
+* `string`: a UTF-8 encoded string using [NFC for normalization](https://github.com/discreetlogcontracts/dlcspecs/issues/89), prefixed by a `bigsize` value indicating its length in bytes.
+
 
 ## DLC Specific Types
 
@@ -174,78 +176,6 @@ This type contains signatures of the funding transaction and any necessary infor
 
 `witness` is the data for a witness element in a witness stack. An empty `witness_stack` is an error,
 as every input must be Segwit. Witness elements should *not* include their length as part of the witness data.
-
-### The `event_descriptor` Type
-
-This type contains information about the *exact* and fully specified outcomes  in an event for which an oracle plans on releasing a signature over.
-
-#### Version 0 `external_event_descriptor`
-
-1. type: 55300 (`external_event_descriptor_v0`)
-2. data:
-   * [`string`:`external_name`]
-
-`external_name` can refer to anything here and it is up to the oracle and user to agree on how to interpret it.
-
-#### Version 0 `enum_event_descriptor`
-
-1. type: 55302 (`enum_event_descriptor_v0`)
-2. data:
-   * [`u16`:`num_outcomes`]
-   * [`u16`:`outcome_1_len`]
-   * [`string`:`outcome_1`]
-   * ...
-   * [`u16`:`outcome_n_len`]
-   * [`string`:`outcome_n`]
-
-This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
-
-Each `outcome_i` corresponds to the pre-image of a possible outcome that the oracle could sign.
-
-#### Version 0 `range_event_descriptor`
-
-1. type: 55304 (`range_event_descriptor_v0`)
-2. data:
-   * [`int32`:`start`]
-   * [`int32`:`stop`]
-   * [`u16`:`step`]
-
-`start` refers to the first possible outcome number
-
-`end` refers to the last possible outcome number
-
-`step` refers to the increment between each outcome
-
-### The `oracle_event` Type
-
-This type contains information about an event for which an oracle plans on releasing a signature over.
-
-#### Version 0 `oracle_event`
-
-1. type: 55330 (`oracle_event_v0`)
-2. data:
-   * [`x_point`:`oracle_public_key`]
-   * [`x_point`:`oracle_nonce`]
-   * [`u32`:`event_maturity_epoch`]
-   * [`event_descriptor`:`event_descriptor`]
-   * [`string`:`event_uri`]
-
-`event_maturity_epoch` refers to the earliest time this event (UTC) is expected to be signed, in epoch seconds.
-
-`event_uri` is a name and/or categorization of this event given by the oracle.
-
-### The `oracle_announcement` Type
-
-This type contains information about an announcement of an oracle to attest to an event in the future.
-
-#### Version 0 `oracle_announcement`
-
-1. type: 55332 (`oracle_announcement`)
-2. data:
-   * [`signature`:`annoucement_signature`]
-   * [`oracle_event`:`oracle_event`]
-
-The `annoucement_signature` is a signature of the hash of the serialized `oracle_event` that is valid with respect to `oracle_public_key`. This can be shared with peers that have already verified this oracle's public key.
 
 ## Authors
 
