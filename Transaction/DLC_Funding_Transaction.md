@@ -10,8 +10,16 @@ This details the exact format of the on-chain funding transaction, which both si
   * [FundingOutput](#funding-output)
   * [Change Outputs](#change-outputs)
 * [Fees](#fees)
+* [Test Vectors](#test-vectors)
+* [References](#references)
+* [Authors](#authors)
 
 # Transaction
+
+* version: 2
+* locktime: 0
+
+The funding inputs and change output script public keys are negotiated in the offer and accept messages
 
 ## Transaction Input and Output Ordering
 
@@ -27,13 +35,15 @@ All funding inputs must be Segwit or nested P2SH(Segwit) in order to protect aga
 
 * The funding output script is a P2WSH to:
 
-`2 <offer_funding_pubkey> <accept_funding_pubkey> 2 OP_CHECKMULTISIG`
+```
+2 <offer_funding_pubkey> <accept_funding_pubkey> 2 OP_CHECKMULTISIG
+```
 
 * Where both `pub_key`s are in compressed format.
 
 ## Change Outputs
 
-The funding transaction's change outputs should pay to the address specified in the relevant offer/accept message. A change output's value should equal the total funding amount of that party subtracted by their total collateral as well as their fees for both this transaction as well as their fees for the largest possible Contract Execution Transaction. If this value is below the dust limit of `1000 satoshis`, then no change output is added for that party.
+The funding transaction's change outputs should pay to the address specified in the relevant offer/accept message. A change output's value should equal the total funding amount of that party subtracted by their total collateral as well as their fees for both this transaction as well as their fees for the largest possible Contract Execution Transaction. If this value is below the dust limit of `1000 satoshis`, then that party must include additional funding in order to ensure they have a valid anchor output.
 
 # Fees
 
@@ -108,3 +118,20 @@ witness_weight = witness_header + witness * num_inputs
 
 overall_weight = 286 + 4 * total_change_length + 272 * num_inputs weight
 ```
+
+# Test Vectors
+
+TODO
+
+# References
+
+* [Bitcoin-S implementation](https://github.com/bitcoin-s/bitcoin-s/blob/adaptor-dlc/dlc/src/main/scala/org/bitcoins/dlc/builder/DLCFundingTxBuilder.scala)
+
+# Authors
+
+Nadav Kohen <nadavk25@gmail.com>
+
+![Creative Commons License](https://i.creativecommons.org/l/by/4.0/88x31.png "License CC-BY")
+<br>
+This work is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
+
