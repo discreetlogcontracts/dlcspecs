@@ -1,16 +1,37 @@
-# DLC Protocol
+# Peer Protocol for Contract Negotiation
 
-This document describes a protocol for two parties to set up a Discreet Log Contract (DLC).
+# Table of Contents
 
-## Preliminaries
+  * [Contract](#contract)
+      * [Definition of `contract_id`](#definition-of-contract_id)
+      * [Contract Negotiation](#contract-negotiation)
+          * [The `offer_dlc` Message](#the-offer_dlc-message)
+          * [The `accept_dlc` Message](#the-accept_dlc-message)
+          * [The `sign_dlc` Message](#the-sign_dlc-message)
+* [Authors](#authors)
 
-The following protocol assumes that both parties have already agreed on the contract terms (the possible outputs of the contract).
-Negotiation of the contract, or decisions on the underlying asset are thus not part of the exchanged information.
+# Contract
 
-## Description
+## Definition of `contract_id`
 
-The two parties exchange a set of three messages, and terminates when the non-initiating party broadcasts the Fund Transaction to the Bitcoin network.
-The following figure gives a brief overview of the protocol:
+Most messages use a `contract_id` to identify the contract. It's
+derived from the funding transaction by combining the `funding_txid`
+and the `funding_output_index`, using big-endian exclusive-OR
+(i.e. `funding_output_index` alters the last 2 bytes).
+
+Prior to a contract being accepted, a `temporary_contract_id` is used,
+which is the SHA256 hash of the offer message.
+
+## Contract Negotiation
+
+Contract Negotiation consists of the initiator (aka offerer) sending an `offer_dlc` message,
+followed by the responding node (aka accepter) sending `accept_dlc`. With the
+contract parameters locked in, both parties are able to create the funding
+transaction and subsequently all contract execution transactions (CETs) and the refund transaction, as described in the [transaction specification](Transactions.md). As such, the accepter includes its signatures of the CETs and refund transaction in the `accept_dlc` message.
+The initiator now able to generate signatures for all CETs and the refund transaction, as well as the funding transaction, and send it over using the `sign_dlc` message.
+
+Once the accepter receives the `sign_dlc` message, it
+must broadcast the funding transaction to the Bitcoin network.
 
     +-------+                    +-------+
     |       |                    |       |
@@ -23,188 +44,182 @@ The following figure gives a brief overview of the protocol:
     |       |                    |  (4) broadcast fund-tx
     |       |                    |       |
     +-------+                    +-------+
+    
+        - where node A is 'offerer' and node B is 'accepter'
 
-### Offer
+If this fails at any stage, or if one node decides the contract terms
+offered by the other node are not suitable, the contract negotiation
+fails.
 
-The initiating party starts the protocol by sending an `offer` message to the other party.
-This message includes the following information:
-1. Contract information (a map defined below)
-1. Oracle information (optional)
-1. A's fund amount (satoshi)
-1. A's public keys
-1. A's addresses
-1. A's funding inputs
-1. Estimatesmartfee (satoshi/vbyte)
-1. CET CSV delay
-1. CET locktime (corresponding to the contract maturity date)
-1. Refund locktime
+Note that multiple contracts can be open in parallel, as all DLC
+messages are identified by either a `temporary_contract_id` (before the
+funding transaction is created) or a `contract_id` (derived from the
+funding transaction).
 
-#### Contract information
-Contract information consists of a total value (sum of both outputs) and a map to be used to create CETs.
-The map consists of:
-`message` - `a_output` (satoshi)
-where `message` is the data on which the oracle will be providing a (set of) signatures, and `a_output` represents the amount that A will receive for this outcome (B's outcome can be computed by substracting `a_output` to the total value).
-The interpretation of the message semantics is left to the application.
+### The `offer_dlc` Message
 
-#### Oracle information
-The oracle public key and R point(s) to use to build the CETs as well as meta information to identify the oracle to be used in the contract.
-Example:
-`public_key` - `R_point`<sub>1</sub> - `R_point`<sub>2</sub> - `meta data`
-The meta data can either be human readable for a user to be able to interpret it, or machine readable so that an application can interpret it and present it to the user.
-If both parties already have this information, transmission is unnecessary.
+This message contains information about a node and indicates its
+desire to open a new contract. This is the first step toward creating
+the funding transaction and CETs.
 
-#### A's fund amount (satoshi)
-How much A inputs into the contract.
+1. type: ??? (`offer_dlc`)
+2. data:
+   * [`byte`:`contract_flags`]
+   * [`chain_hash`:`chain_hash`]
+   * [`contract_info`:`contract_info`]
+   * [`oracle_info`:`oracle_info`]
+   * [`point`:`funding_pubkey`]
+   * [`spk`:`payout_spk`]
+   * [`u64`:`total_collateral_satoshis`]
+   * [`u16`:`num_funding_inputs`]
+   * [`num_funding_inputs*funding_input`:`funding_inputs`]
+   * [`spk`:`change_spk`]
+   * [`u64`:`feerate_per_vb`]
+   * [`u32`:`contract_maturity_cltv`]
+   * [`u32`:`contract_timeout_cltv`]
 
-#### A's public keys
-The following public keys:
+No bits of `contract_flags` are currently defined, this field should be ignored.
 
-1. Funding Public Key
-   - A's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
-2. Sweep Public Key
-   - A's public key used in the creation of the CETs [output script](Transactions.md#CETOutputs).
+The `chain_hash` value denotes the exact blockchain that the DLC will
+reside within. This is usually the genesis hash of the respective blockchain.
+The existence of the `chain_hash` allows nodes to open contracts
+across many distinct blockchains as well as have contracts within multiple
+blockchains opened to the same peer (if it supports the target chains).
 
-#### A's addresses
+`contract_info` specifies the sender's payouts for all events. `oracle_info`
+specifies the oracle(s) to be used as well as their commitments to events.
 
-The following addresses:
+`funding_pubkey` is the public key in the 2-of-2 multisig script of
+the funding transaction output. `payout_spk` specifies the script
+pubkey that CETs and the refund transaction should use in the sender's output.
 
-1. Funding Change Address
-   - The address to use to send the change if the sum of A's inputs is greater than the fund amount plus the fees.
-2. Final Address
-   - The address to which funds will be sent in [unilateral contract execution](Transactions.md#CETOutputs), [refund](Transactions.md#refund-transaction) and [mutual closing](Transactions.md#mutual-closing-transaction) transactions.
+`total_collateral_satoshis` is the amount the sender is putting into the
+contract. `num_funding_inputs` is the number of funding inputs contributed by
+the sender and `funding_inputs` contains outputs, outpoints, and expected weights
+of the sender's funding inputs. `change_spk` specifies the script pubkey that funding
+change should be sent to.
 
-#### A's inputs
-The set of UTXOs to be used as input to the fund transaction.
+`feerate_per_vb` indicates the fee rate in satoshi per virtual byte that both
+sides will use to compute fees in the funding transaction, as described in the
+[transaction specification](Transactions.md).
 
-#### Estimatesmartfee (satoshi/vbyte)
-The fee rate to be used when computing fees for the different transactions.
+`contract_maturity_cltv` is the CLTV timelock to be put on CETs. `contract_timeout_cltv` is the CLTV timelock to be put on the refund transaction.
 
-#### CET CSV Delay
-The number to use as input to the CSV in the [CETs](Transactions.md#outputs-1).
+#### Requirements
 
-#### CET lock time
-The number to use as `nLockTime` for the CET transactions.
-This should correspond to the maturity date of the contracts, invalidating early CET broadcasting.
+The sending node MUST:
 
-#### Refund locktime
-The locktime to be used for the refund transaction.
-It should be set at a later date than the maturity date of the contract.
+  - set undefined bits in `contract_flags` to 0.
+  - ensure the `chain_hash` value identifies the chain it wishes to open the contract within.
+  - set `funding_pubkey` to a valid secp256k1 pubkey in compressed format.
+  - set `total_collateral_satoshis` greater than or equal to 1000.
+  - set `contract_maturity_cltv` and `contract_timeout_cltv` to either both be UNIX timestamps, or both be block heights as distinguished in [BIP 65](https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki).
+  - set `contract_maturity_cltv` to be less than `contract_timeout_cltv`.
 
----
+The sending node SHOULD:
 
-### Accept
-After receiving the `offer` message from A, and after [validating](#offer-validation) the provided information, B creates and sends back an `accept` message containing:
-1. B's fund amount (satoshi)
-1. B's public keys
-1. B's addresses
-1. B's inputs
-1. CET signatures
-1. Refund signature
+  - set `feerate_per_vb` to at least the rate it estimates would cause the transaction to be immediately included in a block.
+  - set `contract_maturity_cltv` to the earliest expected oracle signature time.
+  - set `contract_timeout_cltv` sufficiently long after `contract_maturity_cltv` to allow for late oracle signatures and other delays to closing the contract.
 
-#### B's fund amount (satoshi)
-How much B inputs into the contract.
+The receiving node MUST:
 
-#### B's public keys
-The following public keys:
+  - ignore undefined bits in `channel_flags`.
 
-1. Funding Public Key
-   - B's public key used in the multi-signature [funding output](Transactions.md#FundingOutputs)
-2. Sweep Public Key
-   - B's public key used in the creation of the CETs [output script](Transactions.md#CETOutputs).
+The receiving node MAY reject the contract if:
 
-#### B's addresses
+  - it does not agree to the terms in `contract_info`.
+  - the `contract_info` is missing relevant events.
+  - it does not want to use the oracle(s) specified in `oracle_info`.
+  - `total_collateral_satoshis` is too small.
 
-The following addresses:
+The receiving node MUST reject the contract if:
 
-1. Funding Change Address
-   - The address to use to send the change if the sum of A's inputs is greater than the fund amount plus the fees.
-2. Final Address
-   - The address to which funds will be sent in [unilateral contract execution](Transactions.md#CETOutputs), [refund](Transactions.md#refund-transaction) and [mutual closing](Transactions.md#mutual-closing-transaction) transactions.
+  - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
+  - the `contract_info` refers to events unknown to the receiver.
+  - the `oracle_info` refers to an oracle unknown to the receiver.
+  - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
+  - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
+  - the funder's amount for the funding transaction is not sufficient for full [fee payment](Transactions.md#fee-payment).
 
-#### B's inputs
-The set of UTXOs to be used as input to the fund transaction.
+### The `accept_dlc` Message
 
-#### CET signatures
-A set of signatures from B, one for each CET input.
+This message contains information about a node and indicates its
+acceptance of the new DLC, as well as its CET and refund transaction
+signatures. This is the second step toward creating the funding transaction
+and closing transactions.
 
-#### Refund signature
-A signature from B for the refund transaction input.
+1. type: ??? (`accept_dlc`)
+2. data:
+   * [`32*byte`:`temporary_contract_id`]
+   * [`u64`:`total_collateral_satoshis`]
+   * [`point`:`funding_pubkey`]
+   * [`spk`:`payout_spk`]
+   * [`u16`:`num_funding_inputs`]
+   * [`num_funding_inputs*funding_input`:`funding_inputs`]
+   * [`spk`:`change_spk`]
+   * [`cet_signatures`:`cet_signatures`]
+   * [`signature`:`refund_signature`]
 
----
+#### Requirements
 
-### Sign
+The `temporary_contract_id` MUST be the SHA256 hash of the `offer_dlc` message.
 
-After receiving and [validating](#sign-validation) the content of the `offer` message, A replies with a `sign` message containing:
-1. Fund transaction signatures
-1. CET signatures
-1. Refund signature
+The sender MUST:
 
-#### Fund transaction signatures
-A set of signatures from A, one (in case of P2WPKH) or several (in case of multisig P2WSH) for each of A's input to the fund transaction.
+  - set `total_collateral_satoshis` sufficiently large so that the sum of both parties' total collaterals is at least as large as the largest payout in the `offer_dlc`'s `contract_info`.
+  - set `cet_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
+  - include an adaptor signature in `cet_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
 
-#### CET signatures
-A set of signatures from A, one for each CET input.
+The receiver:
 
-#### Refund signature
-A signature from A for the refund transaction input.
+  - if `total_collateral_satoshis` is not large enough:
+    - MAY reject the contract.
+  - if `cet_signatures` or `refund_signature` fail validation:
+    - MUST reject the contract.
 
-### Broadcast
-Upon receiving the `sign` message from A, B [validates](#sign-validation) its content, signs the fund transaction and broadcasts it to the Bitcoin network.
+Other fields have the same requirements as their counterparts in `offer_dlc`.
 
-## Validation
+### The `sign_dlc` Message
 
-This section describes how each party needs to validate the messages received.
-We distinguish between user validation, performed by the user (through a user interface), and machine validation, that can be done without user interaction.
+This message gives all of the initiator's the signatures, which allows the receiver
+to broadcast the funding transaction with both parties being fully committed to
+all closing transactions.
 
-### Offer Validation
+This message introduces the `contract_id` to identify the contract. It's derived from the funding transaction by combining the `funding_txid` and the `funding_output_index`, using big-endian exclusive-OR (i.e. `funding_output_index` alters the last 2 bytes).
 
-#### User validation
-* Contract Information: confirm that the contract information matches what was agreed upon.
-* Oracle information: confirm that the oracle specified in the message matches what was agreed upon.
-* A fund amount: confirm that the input amount matches what was agreed upon.
-* Estimatesmartfee: confirm that it corresponds to what was agreed upon.
-* CET CSV delay: confirm that it corresponds to what was agreed upon.
-* Refund locktime: confirm that it corresponds to what was agreed upon.
+1. type: ??? (`sign_dlc`)
+2. data:
+   * [`contract_id`:`contract_id`]
+   * [`cet_signatures`:`cet_signatures`]
+   * [`signature`:`refund_signature`]
+   * [`funding_signatures`:`funding_signatures`]
 
-#### Machine validation
+#### Requirements
 
-* A fund amount: given this and B fund amount, need to validate that the amount incorporates the required fees for the CET or refund transaction as well as the closing transaction, and that the total input amount is greater than the payout amounts plus the fees to be paid.
-* A public key: validate that the public key is well formed.
-* Alice inputs: validate that the referenced outputs are in fact unspent and are either P2WSH or P2WPKH.
+The sender MUST:
 
-### Accept validation
+  - set `channel_id` by exclusive-OR of the `funding_txid` and the `funding_output_index` from the `offer_dlc` and `accept_dlc` messages.
+  - set `cet_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
+  - include an adaptor signature in `cet_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
+  - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
+  - set `funding_signatures` to valid input signatures.
+  - include a signature in `funding_signatures` for every funding input specified in the`offer_dlc` message.
 
-#### User validation
-* B fund amount: confirm that the fund amount matches what was agreed upon.
+The recipient:
 
-#### Machine validation
-* Bob public key: validate that the public key is well formed.
-* Bob inputs: validate that the referenced outputs are in fact unspent and are either P2WSH or P2WPKH.
-* CET signatures: validate that the signatures are valid for each of the CETs.
-* Refund signature: validate that the signature is valid.
-
-### Sign validation
-
-#### Machine validation
-* Fund transaction signatures: validate that the signatures are valid for each of the provided inputs.
-* CET signatures: validate that the signatures are valid for each of the CETs input.
-* Refund signature: validate that the signature is valid for the refund transaction input.
-
-## Contract cancellation
-
-At any point in the protocol up until the sending of the `sign` message, both parties can safely decide to cancel the contract.
-An empty `cancel` message can be used to inform the other party of the desire to cancel the contract.
-If one of the parties doesn't send a message after a given timeout, the other party should assume the contract to be canceled.
-Timeouts should be proportional to the number of possible outputs of the contract, as the signing and verification of the CET signatures is expected to be the bottleneck.
-
-After party A sends the `sign` message, they cannot unilaterally cancel the contract anymore.
-If they want to cancel the contract, for example because of not observing the fund transaction in the Bitcoin network, they can try to do so by broadcasting a transaction spending at least one of the UTXOs specified in the fund transaction.
-If this transaction gets included in the blockchain prior to the fund transaction, the contract will be canceled as this will have rendered the fund transaction invalid.
-In the event that the fund transaction gets included first, both parties will be bound to the contract.
+  - if any `signature` is incorrect:
+    - MUST reject the contract.
+  - MUST NOT broadcast the funding transaction before receipt of a valid `sign_dlc`.
+  - on receipt of a valid `sign_dlc`:
+    - SHOULD broadcast the funding transaction.
 
 # Authors
-Takatoshi Nakagawa
-Ichiro Kuwahara
-Thibaut Le Guilly
-Nadav Kohen
 
+Nadav Kohen <nadavk25@gmail.com>
+
+[ FIXME: Add Authors ]
+
+![Creative Commons License](https://i.creativecommons.org/l/by/4.0/88x31.png "License CC-BY")
+<br>
+This work is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
