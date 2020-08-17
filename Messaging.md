@@ -12,7 +12,7 @@ All data fields are unsigned big-endian unless otherwise specified.
 * [Connection Handling and Multiplexing](#connection-handling-and-multiplexing)
   * [Message Format](#message-format)
   * [Fundamental Types](#fundamental-types)
-  * [Authors](#authors)
+* [Authors](#authors)
 
 ## Connection Handling and Multiplexing
 
@@ -45,8 +45,8 @@ The following convenience types are also defined:
 * `sha256`: a 32-byte SHA2-256 hash
 * `signature`: a 64-byte bitcoin Elliptic Curve signature
 * `point`: a 33-byte Elliptic Curve point (compressed encoding as per [SEC 1 standard](http://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3))
-* `spk`: A bitcoin script public key encoded as ASM prefixed with a CompactSize
-* `short_contract_id`: an 8 byte value identifying a contract (see [BOLT #7](07-routing-gossip.md#definition-of-short-channel-id))
+* `spk`: A bitcoin script public key encoded as ASM prefixed with a Bitcoin CompactSize unsigned integer
+* `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](07-routing-gossip.md#definition-of-short-channel-id))
 * `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](01-messaging.md#appendix-a-bigsize-test-vectors).
 * `contract_info`: ???
 * `oracle_info`: ???

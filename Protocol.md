@@ -14,13 +14,14 @@
 
 ## Definition of `contract_id`
 
-Most messages use a `contract_id` to identify the contract. It's
-derived from the funding transaction by combining the `funding_txid`
-and the `funding_output_index`, using big-endian exclusive-OR
-(i.e. `funding_output_index` alters the last 2 bytes).
-
 Prior to a contract being accepted, a `temporary_contract_id` is used,
 which is the SHA256 hash of the offer message.
+
+Most messages use a `contract_id` to identify the contract. It's
+derived from the funding transaction and the offer by combining the `funding_txid`
+and the `funding_output_index` and the `temporary_contract_id`, using big-endian
+exclusive-OR (i.e. `funding_output_index` alters the last 2 bytes of
+`funding_txid XOR temporary_contract_id`).
 
 ## Contract Negotiation
 
@@ -28,7 +29,7 @@ Contract Negotiation consists of the initiator (aka offerer) sending an `offer_d
 followed by the responding node (aka accepter) sending `accept_dlc`. With the
 contract parameters locked in, both parties are able to create the funding
 transaction and subsequently all contract execution transactions (CETs) and the refund transaction, as described in the [transaction specification](Transactions.md). As such, the accepter includes its signatures of the CETs and refund transaction in the `accept_dlc` message.
-The initiator now able to generate signatures for all CETs and the refund transaction, as well as the funding transaction, and send it over using the `sign_dlc` message.
+The initiator is now able to generate signatures for all CETs and the refund transaction, as well as the funding transaction, and send them over using the `sign_dlc` message.
 
 Once the accepter receives the `sign_dlc` message, it
 must broadcast the funding transaction to the Bitcoin network.
@@ -59,7 +60,7 @@ funding transaction).
 ### The `offer_dlc` Message
 
 This message contains information about a node and indicates its
-desire to open a new contract. This is the first step toward creating
+desire to enter into a new contract. This is the first step toward creating
 the funding transaction and CETs.
 
 1. type: ??? (`offer_dlc`)
@@ -74,9 +75,9 @@ the funding transaction and CETs.
    * [`u16`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
    * [`spk`:`change_spk`]
-   * [`u64`:`feerate_per_vb`]
-   * [`u32`:`contract_maturity_cltv`]
-   * [`u32`:`contract_timeout_cltv`]
+   * [`u64`:`feerate_per_kw`]
+   * [`u32`:`contract_maturity_bound`]
+   * [`u32`:`contract_timeout`]
 
 No bits of `contract_flags` are currently defined, this field should be ignored.
 
@@ -99,11 +100,11 @@ the sender and `funding_inputs` contains outputs, outpoints, and expected weight
 of the sender's funding inputs. `change_spk` specifies the script pubkey that funding
 change should be sent to.
 
-`feerate_per_vb` indicates the fee rate in satoshi per virtual byte that both
+`feerate_per_kw` indicates the fee rate in satoshi per 1000-weight that both
 sides will use to compute fees in the funding transaction, as described in the
 [transaction specification](Transactions.md).
 
-`contract_maturity_cltv` is the CLTV timelock to be put on CETs. `contract_timeout_cltv` is the CLTV timelock to be put on the refund transaction.
+`contract_maturity_bound` is the nLockTime to be put on CETs. `contract_timeout` is the nLockTime to be put on the refund transaction.
 
 #### Requirements
 
@@ -112,15 +113,15 @@ The sending node MUST:
   - set undefined bits in `contract_flags` to 0.
   - ensure the `chain_hash` value identifies the chain it wishes to open the contract within.
   - set `funding_pubkey` to a valid secp256k1 pubkey in compressed format.
-  - set `total_collateral_satoshis` greater than or equal to 1000.
-  - set `contract_maturity_cltv` and `contract_timeout_cltv` to either both be UNIX timestamps, or both be block heights as distinguished in [BIP 65](https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki).
-  - set `contract_maturity_cltv` to be less than `contract_timeout_cltv`.
+  - set `total_collateral_satoshis` to a value greater than or equal to 1000.
+  - set `contract_maturity_bound` and `contract_timeout` to either both be UNIX timestamps, or both be block heights as distinguished in [BIP 65](https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki).
+  - set `contract_maturity_bound` to be less than `contract_timeout`.
 
 The sending node SHOULD:
 
-  - set `feerate_per_vb` to at least the rate it estimates would cause the transaction to be immediately included in a block.
-  - set `contract_maturity_cltv` to the earliest expected oracle signature time.
-  - set `contract_timeout_cltv` sufficiently long after `contract_maturity_cltv` to allow for late oracle signatures and other delays to closing the contract.
+  - set `feerate_per_kw` to at least the rate it estimates would cause the transaction to be immediately included in a block.
+  - set `contract_maturity_bound` to the earliest expected oracle signature time.
+  - set `contract_timeout` sufficiently long after `contract_maturity_bound` to allow for late oracle signatures and other delays to closing the contract.
 
 The receiving node MUST:
 
@@ -138,9 +139,9 @@ The receiving node MUST reject the contract if:
   - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
   - the `contract_info` refers to events unknown to the receiver.
   - the `oracle_info` refers to an oracle unknown to the receiver.
-  - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
+  - it considers `feerate_per_kw` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
-  - the funder's amount for the funding transaction is not sufficient for full [fee payment](Transactions.md#fee-payment).
+  - the funder's amount for the funding transaction is not sufficient for their full [fee payment](Transactions.md#fee-payment).
 
 ### The `accept_dlc` Message
 
@@ -170,6 +171,7 @@ The sender MUST:
   - set `total_collateral_satoshis` sufficiently large so that the sum of both parties' total collaterals is at least as large as the largest payout in the `offer_dlc`'s `contract_info`.
   - set `cet_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
+  - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
 
 The receiver:
 
@@ -182,11 +184,11 @@ Other fields have the same requirements as their counterparts in `offer_dlc`.
 
 ### The `sign_dlc` Message
 
-This message gives all of the initiator's the signatures, which allows the receiver
+This message gives all of the initiator's signatures, which allows the receiver
 to broadcast the funding transaction with both parties being fully committed to
 all closing transactions.
 
-This message introduces the `contract_id` to identify the contract. It's derived from the funding transaction by combining the `funding_txid` and the `funding_output_index`, using big-endian exclusive-OR (i.e. `funding_output_index` alters the last 2 bytes).
+This message introduces the [`contract_id`](#definition-of-contract_id) to identify the contract.
 
 1. type: ??? (`sign_dlc`)
 2. data:
@@ -199,7 +201,7 @@ This message introduces the `contract_id` to identify the contract. It's derived
 
 The sender MUST:
 
-  - set `channel_id` by exclusive-OR of the `funding_txid` and the `funding_output_index` from the `offer_dlc` and `accept_dlc` messages.
+  - set `contract_id` by exclusive-OR of the `funding_txid` and the `funding_output_index` from the `offer_dlc` and `accept_dlc` messages.
   - set `cet_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
