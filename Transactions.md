@@ -46,25 +46,25 @@ All funding inputs must be Segwit or nested P2SH(Segwit) in order to protect aga
 2 <offer_funding_pubkey> <accept_funding_pubkey> 2 OP_CHECKMULTISIG
 ```
 
-* Where both `pub_key`s are in compressed format.
+* Where both `pubkey`s are in compressed format.
 
 ## Change Outputs
 
-The funding transaction's change outputs should pay to the address specified in the relevant offer/accept message. A change output's value should equal the total funding amount of that party subtracted by their total collateral as well as their fees for both this transaction as well as their fees for the largest possible Contract Execution Transaction. If this value is below the dust limit of `1000 satoshis`, then that party must include additional funding in order to ensure they have a valid anchor output.
+The funding transaction's change outputs should pay to the address specified in the relevant offer/accept message. A change output's value should equal the total funding amount of that party subtracted by their total collateral, their fees for this transaction, and their fees for the largest possible closing transaction. If this value is below the dust limit of `1000 satoshis`, then that party must include additional funding in order to ensure they have a valid anchor output.
 
 # Contract Execution Transaction
 
 Also known as a CET.
 
 * version: 2
-* locktime: `contract_maturity`
+* locktime: `contract_maturity_bound`
 * txin count: 1
   * `txin[0]` outpoint: `txid` of funding transaction and `output_index` 0
   * `txin[0]` sequence: 0xFFFFFFFE
   * `txin[0]` script bytes: 0
   * `txin[0]` witness: `0 <signature_for_offer_pubkey> <signature_for_accept_pubkey>`
 
-The output script public keys and `contract_maturity` are negotiated in the offer and accept messages.
+The output script public keys and `contract_maturity_bound` are negotiated in the offer and accept messages.
 
 There will be one CET for every possible outcome, the output values correspond to such an outcome and are negotiated in the offer message.
 
@@ -86,7 +86,7 @@ This output sends funds won by the accepter corresponding to this CET's outcome 
 
 # Refund Transaction
 
-The refund transaction is exactly the same as a [Contract Execution Transaction](#contract-execution-transaction) except that its locktime is `contract_timeout` (as negotiated in the offer message) instead of `contract_maturity` and the output values for the offerer and the accepter are their total collateral values in the offer and accept message respectively.
+The refund transaction is exactly the same as a [Contract Execution Transaction](#contract-execution-transaction) except that its locktime is `contract_timeout` (as negotiated in the offer message) instead of `contract_maturity_bound` and the output values for the offerer and the accepter are their respective total collateral values from their offer/accept messages.
 
 # Fees
 
@@ -105,7 +105,6 @@ Thus, a simplified formula for *expected weight* is used, which assumes:
 
 * Signatures are 72 bytes long.
 * There are a small number of outputs (thus 1 byte to count them).
-* There are always both an offerer output and an accepter output.
 
 This yields the following *expected weights* (details of the computation below):
 
@@ -116,7 +115,7 @@ CET/Refund Transaction weight: 500 + 4 * total_output_length
 
 ### Fee Payment
 
-All fees are paid for in the [Funding Transaction](#funding-transaction) so that the funding output's value is inflated so that the outputs of CETs and the refund transaction are the exact amounts specified in the offer message's contract information (or total collateral specified in the offer and accept messages for the refund transaction) with no fees subtracted.
+The funding output's value is composed of the sum of both parties' `total_collateral` (from offer/accept messages) plus the `max_fee` of closing transactions. In this way all fees are paid for in the [Funding Transaction](#funding-transaction) so that the funding output's value is inflated and the outputs of CETs and the refund transaction are the exact amounts specified in the offer message's contract information (or total collateral specified in the offer and accept messages for the refund transaction) with no fees subtracted from closing transactions.
 
 All fees are currently paid evenly between the two parties, though this will change in a future version.
 
@@ -136,16 +135,6 @@ p2wsh: 34 bytes
 	- OP_0: 1 byte
 	- OP_DATA: 1 byte (witness_script_SHA256 length)
 	- witness_script_SHA256: 32 bytes
-
-change_output: 9 + change_spk_script length bytes
-	- value: 8 bytes
-	- var_int: 1 byte (pk_script length)
-	- pk_script: change_spk_script length
-
-funding_output: 43 bytes
-	- value: 8 bytes
-	- var_int: 1 byte (pk_script length)
-	- pk_script (p2wsh): 34 bytes
 
 funding_input: 41 bytes
 	- previous_out_point: 36 bytes
@@ -170,6 +159,16 @@ witness: 108 bytes
 	- sig: 72 bytes
 	- pub_key_length: 1 byte
 	- pub_key: 33 bytes
+
+change_output: 9 + change_spk_script length bytes
+	- value: 8 bytes
+	- var_int: 1 byte (pk_script length)
+	- pk_script: change_spk_script length
+
+funding_output: 43 bytes
+	- value: 8 bytes
+	- var_int: 1 byte (pk_script length)
+	- pk_script (p2wsh): 34 bytes
 
 funding_transaction: 71 + offer_change_spk_script length + accept_change_spk_script length + 41 * num_inputs bytes
 	- version: 4 bytes
@@ -212,16 +211,6 @@ multi_sig: 71 bytes
 	- OP_2: 1 byte
 	- OP_CHECKMULTISIG: 1 byte
 
-offer_output: 9 + offer_output_script length bytes
-	- value: 8 bytes
-	- var_int: 1 byte (pk_script length)
-	- pk_script: offer_output_script length
-
-accept_output: 9 + accept_output_script length bytes
-	- value: 8 bytes
-	- var_int: 1 byte (pk_script length)
-	- pk_script: accept_output_script length
-
 funding_tx_input: 41 bytes
 	- previous_out_point: 36 bytes
 		- hash: 32 bytes
@@ -248,6 +237,16 @@ witness: 222 bytes
 	- sig_accept: 73 bytes
 	- witness_script_length: 1 byte
 	- witness_script (multi_sig): 71 bytes
+
+offer_output: 9 + offer_output_script length bytes
+	- value: 8 bytes
+	- var_int: 1 byte (pk_script length)
+	- pk_script: offer_output_script length
+
+accept_output: 9 + accept_output_script length bytes
+	- value: 8 bytes
+	- var_int: 1 byte (pk_script length)
+	- pk_script: accept_output_script length
 
 cet: 69 + offer_output_script length + accept_output_script length bytes
 	- version: 4 bytes
