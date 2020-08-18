@@ -2,15 +2,15 @@
 
 This is a proposal for a _Uniform Resource Identifier_ (URI) format for oracle _event identifiers_ (event id).
 We take URI to mean a character string that unqiuely defines a resource without implying its location or how to access it.
-From the URI style event id, a client can determine all the event outcomes attach some meaning to each event outcome.
+From the URI style event id, a client can determine all the event outcomes attach semantics to each.
 
 ## Motivation
 
-When executing a _Discreet Log Contract_ two parties agree on an event and a propotion of coins each party will recieve on each possible event outcome.
+When executing a _Discreet Log Contract_ two parties agree on an event and a propotion of coins each party will recieve for each event outcome.
 In addition they must also agree on an _oracle_ who will cryptographically attest to the outcome of an event.
-To do this correctly, the oracle and the two parties have precisely the same understanding of the event and the rules the oracle will decide each outcome.
+To do this correctly, the oracle and the two parties have precisely the same understanding of the event.
 
-If we have a single URI string that uniquely identifies an event we get the following benefits:
+A single URI string that uniquely identifies an event has the following benefits:
 
 1. Copy pasteable: A user can easily copy paste the event id into a chat app/DLC software/browerser url.
 2. Trvially serializable: It is easy to byte encode the event id for signing purposes.
@@ -19,7 +19,7 @@ If we have a single URI string that uniquely identifies an event we get the foll
 
 ## Specification
 
-An event identifier (_event id_) a relative URI reference (a URI without the scheme and authority) with a query string.
+An event identifier (_event id_) is a relative URI reference (a URI without the scheme and authority) with a query string.
 The path of the URI is interpreted as a description of an event in time and space.
 The query string is interrpeted as an _measurement_ and describes a certain fact that will be observed by an oracle on the object described by the path.
 
@@ -30,14 +30,14 @@ If there is no applicable organisation because the measurement is being taken on
 Each following segment, should narrow the event id until it focuses on a particular event in space and time. 
 Oracles are free to define the structure for this themselves with the following considerations:
 
-1. The path should follow the strucuture defined by the event type if it specifies one.
-2. Rules and conventions may be attached to namespaces formally or informally and oracles should try and follow them.
+1. The event type of the event may require the path has a certain structure.
+2. Rules and conventions may be attached to namespaces and in general oracles should try and follow them.
 
 ### Announcement
 
 Oracles must announce their intention to attest to the outcome of an event ahead of time.
 This is done by signing a message which includes the event id.
-Usually involve commiting to some auxialliary cryptographic data which allows the clients to _anticipate_ the final signature for any message.
+Additionally it usually involves commiting to some auxialliary cryptographic data (e.g. nonces) which allows the clients to _anticipate_ the final signature for any message.
 The announcement signature is made by suffixing the event id with `!` and appending the cryptographic data.
 
 _how to encode the data is left for a future revision_
@@ -57,7 +57,7 @@ The oracle is conveying that it may blindly attest to whatever the source tells 
 An oracle who does not provide a source identifier is asserting that it will take the measurement of the event itself or otherwise verify it somehow before attesting to it. 
 It is completely acceptable from the point of view of this specification for an oracle to omit a source identifier even if in reality it is only using one online source to decide the outcome; it is simply a question of whether the oracle finds it advantageous to inform its users of this fact.
 
-Clients should determine the event that the event id is describing as if the source identifier were absent.
+Clients should interpret the event that the event id is describing as if the source identifier were absent.
 
 Examples:
 
@@ -73,7 +73,7 @@ The parameters are a list of comma separated values.
 Each event type defines its parameters and together they determine the outcomes for the event.
 
 The event type will usually define how to interpret the preceeding path segments.
-For example, for a `vs` event type may imply that the final path segment be in the form `<team1>_<team2>` or a `weather` event type may require the last two segments to be in the form `<city>/<date>`.
+For example, for a `vs` event type may require that the final path segment be in the form `<team1>_<team2>` or a `weather` event type may require the last two segments to be in the form `<location>/<date>`.
 
 We explicitly disallow the oracle to communicate what the outcomes are for a particular event explicitly.
 Outcomes are always determined implicitly from the event type.
@@ -87,10 +87,10 @@ Oracles who wish to control their own event type namespace partially or entirely
 ### Event Fragments
 
 An event that describes a cardinal quantity like a price will have a large number of discrete outcomes.
-Normally, the users will have to arrange a transactions to cover each outcome even if they only care about a small subset of outcomes.
+Normally, users will have to arrange a transactions to cover each outcome even if they only care about a small subset of outcomes.
 It is possible to optimize this by splitting up the quantitiy into some function of multiple sub-outcomes.
 
-For example a price between \$0 and \$99,999 could be expresseed as `10000×e + 1000×d + 100×c + b×10 + a` wherea a..e are in the range 0..10.
+For example, a price between \$0 and \$99,999 could be expresseed as `10000×e + 1000×d + 100×c + b×10 + a` wherea a..e are in the range 0..10.
 This means that two users who want to make a BTC/USDT trade with boundries of \$4,000 and \$20,000 and with increments of \$100 would only have to compute contracts for 7 + 5 + 3×5×9 = 147 possible relevant outcomes instead of the usual 100,000 outcomes. 
 
 The orcale will have to declare cryptogrpahically its intention to release siganture for each of the decimal decomposed values a..e.
@@ -101,7 +101,7 @@ When announcing an event with `n` event fragments the oracle creates only one an
 
 `<event_id>!<cryptographic_1>..<fragment_nonce_n>`
 
-When attesting to a notional outcome (which is composed of the outcomes of each fragment) each fragment scalar is determined by the message:
+When attesting to a notional outcome (which is composed of the outcomes of each fragment) each fragment message is determined by the message:
 
 `<event_id>.<i>=<fragment_outcome_i>`
 
@@ -127,7 +127,7 @@ Since these categories are somewhat subjective it is probably a good idea to add
 ### `digits(n_digits,least_significant_digit)`
 
 A positive number decomposed into its decimal digits.
-Each decimal digit is an [Event Fragment](#Event Fragments) i.e. the oracle will release a signature for each digit.
+Each decimal digit is an event fragment i.e. the oracle will release a signature for each digit.
 
 It has two parameters:
 
@@ -157,12 +157,11 @@ This binary event type asserts that the quantity measured will be above a certai
 ### `vs`
 
 This event type is for competive matches where the one team wins and one team loses or there is a draw.
-Competitions where drawing is impossible or highly unlikely can still use the `vs` event type and just use the `draw` outcome to indicate the match being cancelled due to some act of god.
+Competitions where drawing is impossible can still use the `vs` event type and just use the `draw` outcome to indicate the match being cancelled due to some act of god.
 
 The `vs` event type requires that the path segment preceeding it be in the form `<team1>_<team2>` where `<team1>_<team2>` are the competing teams.
 For example, `NBA/s2019/2020-08-11/PHI_PHX.vs` describes a team named `PHI` is playing against another team named `PHX`.
 Additionally the client can infer the date of the match.
-
 
 Clients that are familiar with the `NBA` namespace will be able to infer that the game is part of the 2019 season and that `PHI` refers to the Phoenix Suns and `PHX` refers to the Philadelphia 76ers.
 
