@@ -45,7 +45,7 @@ _how to encode the data is left for a future revision_
 ### Attestation
 
 When attesting to a particular outcome for the event the oracle appends `=` and the outcome text onto the event id and signs the result.
-For example, if the outcome of `NBA/s2019/2020-08-11/PHI_PHX.vs` is `PHX_win` then the oracle signs `NBA/s2019/2020-08-11/PHI_PHX.vs=PHX_win`.
+For example, if the outcome of `NBA/s2019/2020-08-11/PHI_PHX?vs` is `PHX_win` then the oracle signs `NBA/s2019/2020-08-11/PHI_PHX?vs=PHX_win`.
 
 ### Source Identifiers
 
@@ -61,7 +61,7 @@ Clients should interpret the event that the event id is describing as if the sou
 
 Examples:
 
-- `espn.com@NBA/s2019/2020-08-11/PHI_PHX.vs` indicates the oracle is using `espn.com` to determine the outcome of the `NBA` match (it is not watching the match itself).
+- `espn.com@NBA/s2019/2020-08-11/PHI_PHX?vs` indicates the oracle is using `espn.com` to determine the outcome of the `NBA` match (it is not watching the match itself).
 - `wttr.in@Earth/Paris/2020-08-19?weather` indicates that the oracle is using `wttr.in` to determine the weather in Paris on the date (it is not using its own weather satellite).
 
 ### Event Types
@@ -160,7 +160,7 @@ This event type is for competitive matches where the one team wins and one team 
 Competitions where drawing is impossible can still use the `vs` event type and just use the `draw` outcome to indicate the match being cancelled due to some act of god.
 
 The `vs` event type requires that the path segment preceding it be in the form `<team1>_<team2>` where `<team1>_<team2>` are the competing teams.
-For example, `NBA/s2019/2020-08-11/PHI_PHX.vs` describes a team named `PHI` is playing against another team named `PHX`.
+For example, `NBA/s2019/2020-08-11/PHI_PHX?vs` describes a team named `PHI` is playing against another team named `PHX`.
 Additionally the client can infer the date of the match.
 
 Clients that are familiar with the `NBA` namespace will be able to infer that the game is part of the 2019 season and that `PHI` refers to the Phoenix Suns and `PHX` refers to the Philadelphia 76ers.
@@ -183,7 +183,7 @@ Instead this piece of code can be written as `return "{winning_team}_win"` and a
 ### `left-win/right-win` 
 
 These are just like `vs` except they assert a particular team will win and are therefore binary.
-For the event `NBA/s2019/2020-08-11/PHI_PHX.left-win` the outcomes are `PHI_win` or `PHX_win-or-draw`.
+For the event `NBA/s2019/2020-08-11/PHI_PHX?left-win` the outcomes are `PHI_win` or `PHX_win-or-draw`.
 
 ## Extensibility
 
