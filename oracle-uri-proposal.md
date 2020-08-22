@@ -15,7 +15,6 @@ A single URI string that uniquely identifies an event has the following benefits
 1. Copy pasteable: A user can easily copy paste the event id into a chat app/DLC software/browser address bar.
 2. Trivially serializable: It is easy to byte encode the event id for signing purposes.
 3. Human readable: A user who is sufficiently familiar with event namespace does not need software to understand the event.
-4. Portable: If two oracles support the same event id then you can use either of the oracles without having to query the oracles to determine if they are attesting to the same event, and just as importantly, in the same way.
 
 ## Specification
 
