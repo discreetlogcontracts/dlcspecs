@@ -99,7 +99,7 @@ We treat all these values as related "fragments" of an event rather than separat
 An event type may determine that an event is made up of several event fragments.
 When announcing an event with `n` event fragments the oracle creates only one announcement signature which signs all the cryptographic data together:
 
-`<event_id>!<cryptographic_1>..<fragment_nonce_n>`
+`<event_id>!<fragment_nonce_1>..<fragment_nonce_n>`
 
 When attesting to a notional outcome (which is composed of the outcomes of each fragment) each fragment message is determined by the message:
 
