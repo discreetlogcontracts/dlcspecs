@@ -23,10 +23,11 @@ The path of the URI is interpreted as a description of an event in time and spac
 The query string is interpreted as an _measurement_ and describes a certain fact that will be observed by an oracle on the object described by the path.
 
 If applicable, the path should start with the human organization responsible for the event.
-If it is a price then the name of the exchange where the price is being measured e.g. `binance` or if it's a sporting competition then the name of the competition e.g. `NBA`.
+If it is a price then the name of the exchange where the price is being measured e.g. `Binance` or if it's a sporting competition then the name of the competition e.g. `NBA`.
 If there is no applicable organization because the measurement is being taken on some natural phenomenon like the weather or the passage of time then the first segment of the path should just be the name of this phenomenon e.g. `weather` or `time`.
+Path segments that represent proper nouns of acronyms should be capitalised as they would be written, otherwise they should be lower `kebab-case`.
 
-Each following segment, should narrow the event id until it focuses on a particular event in space and time. 
+Each following segment should narrow the event id until it focuses on a particular event in space and time. 
 Oracles are free to define the structure for this themselves with the following considerations:
 
 1. The event type of the event may require the path has a certain structure.
@@ -118,14 +119,14 @@ It has two parameters:
 
 If the actual value is above or equal to the maximum number expressible by the digits then the oracle must attest to the maximum number.
 
-For example, to attest to the bid price of Bitcoin on Binance between \$0 and \$99,999 the oracle would announce `binance/BTC_USDT/bid/2021-05-16T08:00:00?digits(5)`.
+For example, to attest to the bid price of Bitcoin on Binance between \$0 and \$99,999 the oracle would announce `Binance/BTC_USDT/bid/2021-05-16T08:00:00?digits(5)`.
 If the bid price on the date is \$20,421 the oracle would release five signatures on the following messages:
 
-  1. `binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).0=1`
-  2. `binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).1=2`
-  3. `binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).2=4`
-  4. `binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).3=0`
-  5. `binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).4=2`
+  1. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).0=1`
+  2. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).1=2`
+  3. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).2=4`
+  4. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).3=0`
+  5. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).4=2`
 
 If `digits(5)` turns out to be insufficient later on because the bitcoin price appreciates too much the oracle can always announce a new `digits(6)` event on the same path.
 However, this new event would not share any of the same signatures/nonces; it would be a completely separate event.
