@@ -37,7 +37,8 @@ Oracles are free to define the structure for this themselves with the following 
 Oracles must announce their intention to attest to the outcome of an event ahead of time.
 This is done by signing a message which includes the event id.
 Additionally it usually involves committing to some auxiliary cryptographic data (e.g. nonces) which allows the clients to _anticipate_ the final signature for any message.
-The announcement signature is made by suffixing the event id with `!` and appending the cryptographic data.
+The announcement signature is made by suffixing the event id with `#` and appending the cryptographic data.
+In addition, other metadata may be added here such as the time the oracle expects to be able to attest to the event.
 
 _how to encode the data is left for a future revision_
 
@@ -45,23 +46,6 @@ _how to encode the data is left for a future revision_
 
 When attesting to a particular outcome for the event the oracle appends `=` and the outcome text onto the event id and signs the result.
 For example, if the outcome of `NBA/s2019/2020-08-11/PHI_PHX?vs` is `PHX_win` then the oracle signs `NBA/s2019/2020-08-11/PHI_PHX?vs=PHX_win`.
-
-### Source Identifiers
-
-If the first segment of a path contains an `@` symbol then the text that precedes it is a _source identifier_.
-The source identifier describes a third party that the oracle is using to decide the outcome.
-This allows an oracle to explicitly state that it is vulnerable to manipulation from this party and therefore abdicate part of its usual responsibility.
-The oracle is conveying that it may blindly attest to whatever the source tells it without verifying it. 
-
-An oracle who does not provide a source identifier is asserting that it will take the measurement of the event itself or otherwise verify it somehow before attesting to it. 
-It is completely acceptable from the point of view of this specification for an oracle to omit a source identifier even if in reality it is only using one online source to decide the outcome; it is simply a question of whether the oracle finds it advantageous to inform its users of this fact.
-
-Clients should interpret the event that the event id is describing as if the source identifier were absent.
-
-Examples:
-
-- `espn.com@NBA/s2019/2020-08-11/PHI_PHX?vs` indicates the oracle is using `espn.com` to determine the outcome of the `NBA` match (it is not watching the match itself).
-- `wttr.in@Earth/Paris/2020-08-19?weather` indicates that the oracle is using `wttr.in` to determine the weather in Paris on the date (it is not using its own weather satellite).
 
 ### Event Types
 
@@ -98,7 +82,7 @@ We treat all these values as related "fragments" of an event rather than separat
 An event type may determine that an event is made up of several event fragments.
 When announcing an event with `n` event fragments the oracle creates only one announcement signature which signs all the cryptographic data together:
 
-`<event_id>!<fragment_nonce_1>..<fragment_nonce_n>`
+`<event_id>#<fragment_nonce_1>..<fragment_nonce_n>`
 
 When attesting to a notional outcome (which is composed of the outcomes of each fragment) each fragment message is determined by the message:
 
@@ -118,10 +102,9 @@ For example, it can be useful to mark the passage of time itself.
 ### `weather`
 
 The weather has a number of discrete outcomes e.g. cloudy, raining, snowing, clear etc.
-Since these categories are somewhat subjective it is probably a good idea to add a source identifier and defer to the definition of the source.
 
-- Example event id: `wttr.in@Earth/Australia/Sydney?weather`
-- Example outcome id: `wttr.in@Earth/Australia/Sydney?weather=☀️` (if there's sunny weather).
+- Example event id: `Earth/Australia/Sydney?weather`
+- Example outcome id: `Earth/Australia/Sydney?weather=☀️` (if there's sunny weather).
 
 ### `digits(n_digits,least_significant_digit)`
 
@@ -193,4 +176,3 @@ This is because clients and servers must all implement the specific logic of the
 On the other hand, oracles can create new namespaces independently.
 Obviously it would be ideal if the namespaces are consistent across oracles but we hope that this can happen through ad-hoc cooperation.
 We expect that useful namespace conventions will emerge across oracles and if those conventions becomes widespread enough and clients rely on them then they can be specified later.
-
