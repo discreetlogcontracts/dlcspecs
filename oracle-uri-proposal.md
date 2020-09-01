@@ -18,7 +18,7 @@ A single URI string that uniquely identifies an event has the following benefits
 
 ## Specification
 
-An event identifier (_event id_) is a relative URI reference (a URI without the scheme and authority) with a query string.
+An event identifier (_event id_) is a URI reference (a URI without the scheme and authority) with a query string.
 The path of the URI is interpreted as a description of an event in time and space.
 The query string is interpreted as an _measurement_ and describes a certain fact that will be observed by an oracle on the object described by the path.
 
@@ -46,7 +46,7 @@ _how to encode the data is left for a future revision_
 ### Attestation
 
 When attesting to a particular outcome for the event the oracle appends `=` and the outcome text onto the event id and signs the result.
-For example, if the outcome of `NBA/s2019/2020-08-11/PHI_PHX?vs` is `PHX_win` then the oracle signs `NBA/s2019/2020-08-11/PHI_PHX?vs=PHX_win`.
+For example, if the outcome of `/NBA/s2019/2020-08-11/PHI_PHX?vs` is `PHX_win` then the oracle signs `/NBA/s2019/2020-08-11/PHI_PHX?vs=PHX_win`.
 
 ### Event Types
 
@@ -97,15 +97,15 @@ This trial event type only has one outcome `true`.
 It can be used to mark the occurrence of some event (that may or may not ever happen).
 For example, it can be useful to mark the passage of time itself.
 
-- Example event id: `time/2020-08-16T08:00:00?occur`
-- Example outcome sting:  `time/2020-08-16T08:00:00?occur=true` (after the event has happened)
+- Example event id: `/time/2020-08-16T08:00:00?occur`
+- Example outcome sting:  `/time/2020-08-16T08:00:00?occur=true` (after the event has happened)
 
 ### `weather`
 
 The weather has a number of discrete outcomes e.g. cloudy, raining, snowing, clear etc.
 
-- Example event id: `Earth/Australia/Sydney?weather`
-- Example outcome id: `Earth/Australia/Sydney?weather=☀️` (if there's sunny weather).
+- Example event id: `/Earth/Australia/Sydney?weather`
+- Example outcome id: `/Earth/Australia/Sydney?weather=☀️` (if there's sunny weather).
 
 ### `digits(n_digits,least_significant_digit)`
 
@@ -119,14 +119,14 @@ It has two parameters:
 
 If the actual value is above or equal to the maximum number expressible by the digits then the oracle must attest to the maximum number.
 
-For example, to attest to the bid price of Bitcoin on Binance between \$0 and \$99,999 the oracle would announce `Binance/BTC_USDT/bid/2021-05-16T08:00:00?digits(5)`.
+For example, to attest to the bid price of Bitcoin on Binance between \$0 and \$99,999 the oracle would announce `/Binance/BTC_USDT/bid/2021-05-16T08:00:00?digits(5)`.
 If the bid price on the date is \$20,421 the oracle would release five signatures on the following messages:
 
-  1. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).0=1`
-  2. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).1=2`
-  3. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).2=4`
-  4. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).3=0`
-  5. `Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).4=2`
+  1. `/Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).0=1`
+  2. `/Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).1=2`
+  3. `/Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).2=4`
+  4. `/Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).3=0`
+  5. `/Binance/BTC_USDT/bid-price/2021-05-16T08:00:00?digits(5).4=2`
 
 If `digits(5)` turns out to be insufficient later on because the bitcoin price appreciates too much the oracle can always announce a new `digits(6)` event on the same path.
 However, this new event would not share any of the same signatures/nonces; it would be a completely separate event.
@@ -143,10 +143,10 @@ This event type is for competitive matches where the one team wins and one team 
 Competitions where drawing is impossible can still use the `vs` event type and just use the `draw` outcome to indicate the match being cancelled due to some act of god.
 
 The `vs` event type requires that the path segment preceding it be in the form `<team1>_<team2>` where `<team1>_<team2>` are the competing teams.
-For example, `NBA/s2019/2020-08-11/PHI_PHX?vs` describes a team named `PHI` is playing against another team named `PHX`.
+For example, `/NBA/s2019/2020-08-11/PHI_PHX?vs` describes a team named `PHI` is playing against another team named `PHX`.
 Additionally the client can infer the date of the match.
 
-Clients that are familiar with the `NBA` namespace will be able to infer that the game is part of the 2019 season and that `PHI` refers to the Phoenix Suns and `PHX` refers to the Philadelphia 76ers.
+Clients that are familiar with the `/NBA` namespace will be able to infer that the game is part of the 2019 season and that `PHI` refers to the Phoenix Suns and `PHX` refers to the Philadelphia 76ers.
 
 The outcomes for this event are `PHI_win`, `PHX_win` or `draw`. 
 Note that the team names are somewhat redundantly included to make the winning team explicit rather than using something like `left-team-won`.
@@ -166,7 +166,7 @@ Instead this piece of code can be written as `return "{winning_team}_win"` and a
 ### `left-win/right-win` 
 
 These are just like `vs` except they assert a particular team will win and are therefore binary.
-For the event `NBA/s2019/2020-08-11/PHI_PHX?left-win` the outcomes are `PHI_win` or `PHX_win-or-draw`.
+For the event `/NBA/s2019/2020-08-11/PHI_PHX?left-win` the outcomes are `PHI_win` or `PHX_win-or-draw`.
 
 ## Extensibility
 
