@@ -50,6 +50,12 @@ All funding inputs must be Segwit or nested P2SH(Segwit) in order to protect aga
 
 * Where both `pubkey`s are in compressed format.
 
+## Rationale
+
+We order the pubkeys lexicographically to comply with [BIP 67](https://github.com/bitcoin/bips/blob/master/bip-0067.mediawiki), as well as have the same fingerprint as a
+[lightning funding output](https://github.com/lightningnetwork/lightning-rfc/blob/master/03-transactions.md#funding-transaction-output).
+This will improve the privacy for users as DLCs will share the same fingerprint as lightning channels as well as all other 2-of-2 multisig contracts compliant with BIP 67.
+
 ## Change Outputs
 
 The funding transaction's change outputs should pay to the address specified in the relevant offer/accept message. A change output's value should equal the total funding amount of that party subtracted by their total collateral, their fees for this transaction, and their fees for the largest possible closing transaction. If this value is below the dust limit of `1000 satoshis`, then that party must include additional funding in order to ensure they have a valid anchor output.
@@ -67,6 +73,8 @@ Also known as a CET.
   * `txin[0]` witness: `0 <signature_for_pubkey1> <signature_for_pubkey2>`
 
 The output script public keys and `contract_maturity_bound` are negotiated in the offer and accept messages.
+
+In the witness `pubkey1` is the lexicographically lesser of `offer_funding_pubkey` and `accept_funding_pubkey`, and where `pubkey2` is the lexicographically greater of the two.
 
 There will be one CET for every possible outcome, the output values correspond to such an outcome and are negotiated in the offer message.
 
