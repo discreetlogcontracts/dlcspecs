@@ -3,7 +3,7 @@
 ## Overview
 
 This protocol assumes an underlying authenticated and ordered transport mechanism that takes care of framing individual messages.
-[BOLT #8](08-transport.md) specifies the canonical transport layer used in Lightning, though it can be replaced by any transport that fulfills the above guarantees.
+[BOLT #8](https://github.com/lightningnetwork/lightning-rfc/blob/master/08-transport.md) specifies the canonical transport layer used in Lightning, though it can be replaced by any transport that fulfills the above guarantees.
 
 All data fields are unsigned big-endian unless otherwise specified.
 
@@ -40,13 +40,13 @@ integers can be omitted:
 
 The following convenience types are also defined:
 
-* `chain_hash`: a 32-byte chain identifier (see [BOLT #0](00-introduction.md#glossary-and-terminology-guide))
+* `chain_hash`: a 32-byte chain identifier (see [BOLT #0](https://github.com/lightningnetwork/lightning-rfc/blob/master/00-introduction.md#chain_hash))
 * `contract_id`: a 32-byte contract_id (see [Protocol Specification](Protocol.md))
 * `sha256`: a 32-byte SHA2-256 hash
 * `signature`: a 64-byte bitcoin Elliptic Curve signature
 * `point`: a 33-byte Elliptic Curve point (compressed encoding as per [SEC 1 standard](http://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3))
 * `spk`: A bitcoin script public key encoded as ASM prefixed with a Bitcoin CompactSize unsigned integer
-* `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](07-routing-gossip.md#definition-of-short-channel-id))
+* `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
 * `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](01-messaging.md#appendix-a-bigsize-test-vectors).
 * `contract_info`: ???
 * `oracle_info`: ???

@@ -75,7 +75,7 @@ the funding transaction and CETs.
    * [`u16`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
    * [`spk`:`change_spk`]
-   * [`u64`:`feerate_per_kw`]
+   * [`u64`:`feerate_per_vb`]
    * [`u32`:`contract_maturity_bound`]
    * [`u32`:`contract_timeout`]
 
@@ -100,7 +100,7 @@ the sender and `funding_inputs` contains outputs, outpoints, and expected weight
 of the sender's funding inputs. `change_spk` specifies the script pubkey that funding
 change should be sent to.
 
-`feerate_per_kw` indicates the fee rate in satoshi per 1000-weight that both
+`feerate_per_vb` indicates the fee rate in satoshi per virtual byte that both
 sides will use to compute fees in the funding transaction, as described in the
 [transaction specification](Transactions.md).
 
@@ -114,18 +114,20 @@ The sending node MUST:
   - ensure the `chain_hash` value identifies the chain it wishes to open the contract within.
   - set `funding_pubkey` to a valid secp256k1 pubkey in compressed format.
   - set `total_collateral_satoshis` to a value greater than or equal to 1000.
-  - set `contract_maturity_bound` and `contract_timeout` to either both be UNIX timestamps, or both be block heights as distinguished in [BIP 65](https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki).
+  - set `contract_maturity_bound` and `contract_timeout` to either both be UNIX timestamps, or both be block heights as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
   - set `contract_maturity_bound` to be less than `contract_timeout`.
 
 The sending node SHOULD:
 
-  - set `feerate_per_kw` to at least the rate it estimates would cause the transaction to be immediately included in a block.
-  - set `contract_maturity_bound` to the earliest expected oracle signature time.
-  - set `contract_timeout` sufficiently long after `contract_maturity_bound` to allow for late oracle signatures and other delays to closing the contract.
+  - set `feerate_per_vb` to at least the rate it estimates would cause the transaction to be immediately included in a block.
+  - set `contract_maturity_bound` to no later than the earliest expected oracle signature time.
+  - set `contract_timeout` sufficiently long after the latest possible oracle signature added to all other delays to closing the contract.
+  - set `payout_spk` to a previously unused script public key.
+  - set `change_spk` to a previously unused script public key.
 
 The receiving node MUST:
 
-  - ignore undefined bits in `channel_flags`.
+  - ignore undefined bits in `contract_flags`.
 
 The receiving node MAY reject the contract if:
 
@@ -133,15 +135,17 @@ The receiving node MAY reject the contract if:
   - the `contract_info` is missing relevant events.
   - it does not want to use the oracle(s) specified in `oracle_info`.
   - `total_collateral_satoshis` is too small.
+  - `feerate_per_vb` is too small.
+  - `feerate_per_vb` is too large.
 
 The receiving node MUST reject the contract if:
 
   - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
   - the `contract_info` refers to events unknown to the receiver.
-  - the `oracle_info` refers to an oracle unknown to the receiver.
-  - it considers `feerate_per_kw` too small for timely processing or unreasonably large.
+  - the `oracle_info` refers to an oracle unknown or inaccessible to the receiver.
+  - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
-  - the funder's amount for the funding transaction is not sufficient for their full [fee payment](Transactions.md#fee-payment).
+  - `funding_inputs` do not contribute at least `total_collateral_satohis` plus full [fee payment](Transactions.md#fee-payment).
 
 ### The `accept_dlc` Message
 
@@ -173,12 +177,19 @@ The sender MUST:
   - include an adaptor signature in `cet_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
 
+The sender SHOULD:
+
+  - set `payout_spk` to a previously unused script public key.
+  - set `change_spk` to a previously unused script public key.
+
 The receiver:
 
   - if `total_collateral_satoshis` is not large enough:
     - MAY reject the contract.
   - if `cet_signatures` or `refund_signature` fail validation:
     - MUST reject the contract.
+- if `funding_inputs` do not contribute at least `total_collateral_satohis` plus [fee payment](Transactions.md#fee-payment)
+  - MUST reject the contract.
 
 Other fields have the same requirements as their counterparts in `offer_dlc`.
 
@@ -206,7 +217,7 @@ The sender MUST:
   - include an adaptor signature in `cet_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
   - set `funding_signatures` to valid input signatures.
-  - include a signature in `funding_signatures` for every funding input specified in the`offer_dlc` message.
+  - include a signature in `funding_signatures` for every funding input specified in the `offer_dlc` message.
 
 The recipient:
 
