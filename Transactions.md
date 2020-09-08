@@ -1,182 +1,291 @@
 # DLC Transactions
 
-## A Note on Key Derivation
+This details the exact format of all on-chain transactions, which both sides need to agree on to ensure signatures are valid.
 
-There is no strict constraint on how the two keys (Funding and ToLocal) and one address (Final Address) used in a DLC are generated. We do note that absent external considerations, it does seem reasonable to use [BIP 44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) with three sequential address indices. We think this will usually be the best option for implementing key derivation because it is compatible with [normal wallet account discovery](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#account-discovery).
+# Table of Contents
 
-## Funding Transaction
-### <a name="FundingKnownValues">Known Values</a>
-  * Local Funding Inputs: `List[TransactionInput]`
-  * Local Change Address: `BitcoinAddress`
-  * Local Funding Public Key: `ECPublicKey`
-  * Remote Funding Inputs: `List[TransactionInput]`
-  * Remote Change Address: `BitcoinAddress`
-  * Remote Funding Public Key: `ECPublicKey`
-  * Total Local Collateral: `CurrencyUnit`
-  * Total Remote Collateral: `CurrencyUnit`
-  * Fee Rate: `FeeUnit`
+* [Funding Transaction](#funding-transaction)
+  * [Funding Transaction Input and Output Ordering](#funding-transaction-input-and-output-ordering)
+  * [Funding Inputs](#funding-inputs)
+  * [FundingOutput](#funding-output)
+  * [Change Outputs](#change-outputs)
+* [Contract Execution Transaction](#contract-execution-transaction)
+  * [CET Outputs](#cet-outputs)
+    * [Offerer Output](#offerer-output)
+    * [Accepter Output](#accepter-output)
+* [Refund Transaction](#refund-transaction)
+* [Fees](#fees)
+  * [Expected Weight of the Funding Transaction](#expected-weight-of-the-funding-transaction)
+  * [Expected Weight of the Contract Execution or Refund Transaction](#expected-weight-of-the-contract-execution-or-refund-transaction)
+* [Test Vectors](#test-vectors)
+* [References](#references)
+* [Authors](#authors)
 
-Where
-  - The sum of the values of each `Funding Inputs` value is at least that of its corresponding `Total Collateral`
-  - `Funding Public Key`s are both 33-byte compressed public keys
-### <a name="FundingGlobal">Global</a>
-  * nLockTime is `0`
-### <a name="FundingInputs">Inputs</a>
-  * Local Funding Inputs
-      * All should have nSequence of `0xffffffff`
-  * Remote Funding Inputs
-      * All should have nSequence of `0xffffffff`
-### <a name="FundingOutputs">Outputs</a>
-  * P2WSH(DLC Funding Output)
-  * Local Change Address
-  * Remote Change Address
+# Funding Transaction
 
-Where
-  - `P2WSH(DLC Funding Output)`'s value is `Total Local Collateral + Total Remote Collateral + Computed CET Fee + Computed ToLocal Closing Fee`
-  - `DLC Funding Output`'s script is
-   
-        OP_2 <Local Funding Public Key> <Remote Funding Public Key> OP_2 OP_CHECKMULTISIG
-   
-  - Each `Change Address`'s value is at most that of its respective `Sum(Funding Inputs) - Total Collateral - Computed Fees - (Computed CET Fee + Computed ToLocal Closing Fee)/2` with `Computed Fees` being proportional to each party's total input weight and `Computed CET Fee` being the estimated fee for a [Contract Execution Transaction](#contract-execution-transaction) and `Computed ToLocal Closing Fee` being the estimated fee for a [Unilateral Closing Transaction](#ClosingUnilateral)
+* version: 2
+* locktime: 0
 
-## Contract Execution Transaction
-### <a name="CETKnownValues">Known Values</a>
-  * Oracle Signature Point: `ECPublicKey`
-  * Local Funding Public Key: `ECPublicKey`
-  * Local Sweep Public Key: `ECPublicKey`
-  * Local Payout: `CurrencyUnit`
-  * Remote Sweep Public Key: `ECPublicKey`
-  * Remote Final Address: `BitcoinAddress`
-  * Remote Payout: `CurrencyUnit`
-  * nLockTime: `UInt32`
-  * Timeout: `UInt32`
-  * DLC Funding Output: `ScriptPubKey`
-  * Fee Rate: `FeeUnit`
+The funding inputs and change output script public keys are negotiated in the offer and accept messages.
 
-Where
-  - `Oracle Signature Point` is the 33-byte public key associated with this CET's outcome
-  - `Local Funding Public Key` is the local key from the [funding transaction](#funding-transaction)
-  - Both `Sweep Public Key`s are 33-byte compressed public keys
-  - `Local Payout + Remote Payout = (DLC Funding Output).value`
-  - `nLockTime` is set to the contract maturity time
-  - `Timeout` is a CSV locktime after which [penalty transactions](#ClosingPenalty) are valid
-  - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
-### <a name="CETGlobal">Global</a>
-  * nLockTime
-### <a name="CETInputs">Inputs</a>
-  * Input Spending(P2WSH(DLC Funding Output))
-      * nSequence is `0xfffffffe`
-### <a name="CETOutputs">Outputs</a>
-  * P2WSH(ToLocalOutput)
-  * ToRemoteOutput
+## Funding Transaction Input and Output Ordering
 
-Where
-  - `P2WSH(ToLocalOutput).value = Local Payout + Computed ToLocal Closing Fee`
-  - `ToRemoteOutput.value = Remote Payout`
-  - `ToLocalOutput`'s script is:
-  
-        OP_IF
-          <Oracle Signature Point + Local Funding Public Key + SHA256(Local Sweep Public Key)*G>
-        OP_ELSE
-          <Timeout> OP_CHECKSEQUENCEVERIFY OP_DROP
-          <Remote Sweep Public Key>
-        OP_ENDIF
-        OP_CHECKSIG
-      
-      - Note that the addition in the `IF` case is elliptic curve point addition
-  - `ToRemoteOutput`'s script corresponds to `Remote CET Final Address`
+The Offerer/Initiator's inputs come first and in the order that they were listed in the Offer message, the Accepter's inputs come after this in the order they are listed in the Accept message. The funding output comes first, followed by the Offerer's change output if applicable, and then the Accepter's change output if applicable.
 
-## Refund Transaction
-### <a name="RefundKnownValues">Known Values</a>
-  * Local Final Address: `BitcoinAddress`
-  * Total Local Collateral: `CurrencyUnit`
-  * Remote Final Address: `BitcoinAddress`
-  * Total Remote Collateral: `CurrencyUnit`
-  * Timeout: `UInt32`
-  * DLC Funding Output: `ScriptPubKey`
-  * Fee Rate: `FeeUnit`
+Note that this will likely change in the future.
 
-Where
-  - Unlike CETs in a DLC, there is only one Refund Transaction that both parties share, similar to how there is only one [Funding Transaction](#funding-transaction)
-  - `Total Local Collateral + Total Remote Collateral = (DLC Funding Output).value`
-  - `Timeout` is a CLTV locktime set well after the contract maturity time
-  - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
-### <a name="RefundGlobal">Global</a>
-  * nLockTime is `Timeout`
-### <a name="RefundInputs">Inputs</a>
-  * Input Spending(P2WSH(DLC Funding Output))
-      * nSequence is `0xfffffffe`
-### <a name="RefundOutputs">Outputs</a>
-  * ToLocalOutput
-  * ToRemoteOutput
+## Funding Inputs
 
-Where
-  - `ToLocalOutput`'s value is `Total Local Collateral + RefundFeeDelta/2`
-  - `ToRemoteOutput`'s value is `Total Remote Collateral + RefundFeeDelta/2`
-  - `RefundFeeDelta = Computed CET Fee + Computed ToLocal Closing Fee - Computed Refund Tx Fee` (note that the Refund Transaction is smaller than any CET)
-  - `ToLocalOutput`'s script is that of `Local Final Address`
-  - `ToRemoteOutput`'s script is that of `Remote Final Address`
+All funding inputs must be Segwit or nested P2SH(Segwit) in order to protect against malleability attacks.
 
-## Mutual Closing Transaction
-### <a name="MutualClosingKnownValues">Known Values</a>
-  * Local Final Address: `BitcoinAddress`
-  * Local Payout: `CurrencyUnit`
-  * Remote Final Address: `BitcoinAddress`
-  * Remote Payout: `CurrencyUnit`
-  * DLC Funding Output: `ScriptPubKey`
-  * Fee Rate: `FeeUnit`
+## Funding Output
 
-Where
-  - After the contract maturity time, Mutual Closing Transaction is created in cooperation for fee reduction and improvement in privacy 
-  - `Local Payout = (Contract Execution Transaction Local Payout).value`
-  - `Remote Payout = (Contract Execution Transaction Remote Payout).value`
-  - `DLC Funding Output` is of the form [specified above](#FundingOutputs)
-### <a name="MutualClosingGlobal">Global</a>
-  * nLockTime is `0`
-### <a name="MutualClosingInputs">Inputs</a>
-  * Input Spending(P2WSH(DLC Funding Output))
-      * nSequence is `0xffffffff`
-### <a name="MutualClosingOutputs">Outputs</a>
-  * ToLocalOutput
-  * ToRemoteOutput
+* The funding output script is a P2WSH to:
 
-Where
-  - `ToLocalOutput`'s value is `Local Payout + MutualClosingFeeDelta/2`
-  - `ToRemoteOutput`'s value is `Remote Payout + MutualClosingFeeDelta/2`
-  - `MutualClosingFeeDelta = Computed CET Fee + Computed ToLocal Closing Fee - Computed MutualClosing Tx Fee` (note that the Mutual Closing Transaction is smaller than any CET)
-  - `ToLocalOutput`'s script is that of `Local Final Address`
+```
+2 <offer_funding_pubkey> <accept_funding_pubkey> 2 OP_CHECKMULTISIG
+```
 
-  - `ToRemoteOutput`'s script is that of `Remote Final Address`
+* Where both `pubkey`s are in compressed format.
 
-## <a name="ClosingUnilateral">Closing Transaction (Unilateral)</a>
-### <a name="ClosingKnownValues">Known Values</a>
-  * Local Final Address: `BitcoinAddress`
-  * nLockTime: `UInt32`
-  * Local Payout: `CurrencyUnit`
-  * ToLocalOutput: `ScriptPubKey`
-  * Fee Rate: `FeeUnit`
+## Change Outputs
 
-Where
-  - `ToLocalOutput` is of the form [specified above](#CETOutputs)
-### <a name="ClosingGlobal">Global</a>
-  * nLockTime is `0`
-### <a name="ClosingInputs">Inputs</a>
-  * Input Spending(P2WSH(ToLocalOutput))
-      * nSequence is `0xffffffff`
-### <a name="ClosingOutputs">Outputs</a>
-  * One output corresponding to `Local Final Address` with value `Local Payout`
+The funding transaction's change outputs should pay to the address specified in the relevant offer/accept message. A change output's value should equal the total funding amount of that party subtracted by their total collateral, their fees for this transaction, and their fees for the largest possible closing transaction. If this value is below the dust limit of `1000 satoshis`, then that party must include additional funding in order to ensure they have a valid anchor output.
 
-## <a name="ClosingPenalty">Closing Transaction (Penalty)</a>
-### <a name="ClosingKnownValues">Known Values</a>
-  * Local Address: `BitcoinAddress`
-  * Remote's ToLocalOutput: `ScriptPubKey`
-  * Fee Rate: `FeeUnit`
+# Contract Execution Transaction
 
-Where
-  - `Local Address` is any unused local address
-  - `Remote's ToLocalOutput` is of the form [specified above](#CETOutputs)
-### <a name="ClosingInputs">Inputs</a>
-  * Input Spending(P2WSH(Remote's ToLocalOutput))
-### <a name="ClosingOutputs">Outputs</a>
-  * One output corresponding to `LocalAddress` with value `P2WSH(Remote's ToLocalOutput).value - fee`
+Also known as a CET.
 
+* version: 2
+* locktime: `contract_maturity_bound`
+* txin count: 1
+  * `txin[0]` outpoint: `txid` of funding transaction and `output_index` 0
+  * `txin[0]` sequence: 0xFFFFFFFE
+  * `txin[0]` script bytes: 0
+  * `txin[0]` witness: `0 <signature_for_offer_pubkey> <signature_for_accept_pubkey>`
+
+The output script public keys and `contract_maturity_bound` are negotiated in the offer and accept messages.
+
+There will be one CET for every possible outcome, the output values correspond to such an outcome and are negotiated in the offer message.
+
+## CET Outputs
+
+The Offerer/Initiator's output comes first, the Accepter's output comes second.
+
+Note that this will likely change in the future.
+
+If either party receives less than the dust limit of `1000 satoshis` for this outcome, then their output is not produced.
+
+### Offerer Output
+
+This output sends funds won by the offerer corresponding to this CET's outcome to the offerer's final address specified in the offer message.
+
+### Accepter Output
+
+This output sends funds won by the accepter corresponding to this CET's outcome to the accepter's final address specified in the accept message.
+
+# Refund Transaction
+
+The refund transaction is exactly the same as a [Contract Execution Transaction](#contract-execution-transaction) except that its locktime is `contract_timeout` (as negotiated in the offer message) instead of `contract_maturity_bound` and the output values for the offerer and the accepter are their respective total collateral values from their offer/accept messages.
+
+# Fees
+
+### Fee Calculation
+
+All fee calculations for all transactions is based on the fee rate specified in the offer message and the *expected weight* of the transaction in question.
+
+The actual and expected weights vary for several reasons:
+
+* Bitcoin uses DER-encoded signatures, which vary in size.
+* Bitcoin also uses variable-length integers, so a large number of outputs will take 3 bytes to encode rather than 1.
+* The offerer output may be below the dust limit.
+* The accepter output may be below the dust limit.
+
+Thus, a simplified formula for *expected weight* is used, which assumes:
+
+* Signatures are 72 bytes long.
+* There are a small number of outputs (thus 1 byte to count them).
+
+This yields the following *expected weights* (details of the computation below):
+
+```
+Funding Transaction weight:    286 + 4 * total_change_length + 272 * num_inputs
+CET/Refund Transaction weight: 500 + 4 * total_output_length
+```
+
+### Fee Payment
+
+The funding output's value is composed of the sum of both parties' `total_collateral` (from offer/accept messages) plus the `max_fee` of closing transactions. In this way all fees are paid for in the [Funding Transaction](#funding-transaction) so that the funding output's value is inflated and the outputs of CETs and the refund transaction are the exact amounts specified in the offer message's contract information (or total collateral specified in the offer and accept messages for the refund transaction) with no fees subtracted from closing transactions.
+
+All fees are currently paid evenly between the two parties, though this will change in a future version.
+
+Note that if an outcome occurs in which one party's output is below the dust limit of `1000 satoshis`, then the resulting fee rate will be larger than *expected*.
+
+## Expected Weight of the Funding Transaction
+
+The *expected weight* of a funding transaction is calculated as follows:
+
+```
+p2wpkh: 22 bytes
+	- OP_0: 1 byte
+	- OP_DATA: 1 byte (public_key_HASH160 length)
+	- public_key_HASH160: 20 bytes
+
+p2wsh: 34 bytes
+	- OP_0: 1 byte
+	- OP_DATA: 1 byte (witness_script_SHA256 length)
+	- witness_script_SHA256: 32 bytes
+
+funding_input: 41 bytes
+	- previous_out_point: 36 bytes
+		- hash: 32 bytes
+		- index: 4 bytes
+	- var_int: 1 byte (script_sig length)
+	- script_sig: 0 bytes
+	- witness <----	"witness" is used instead of "script_sig" for
+ 			transaction validation; however, "witness" is stored
+ 			separately, and the cost for its size is smaller. So,
+ 		    the calculation of ordinary data is separated
+ 			from the witness data.
+	- sequence: 4 bytes
+
+witness_header: 2 bytes
+	- flag: 1 byte
+	- marker: 1 byte
+
+witness: 108 bytes
+	- number_of_witness_elements: 1 byte
+	- sig_length: 1 byte
+	- sig: 72 bytes
+	- pub_key_length: 1 byte
+	- pub_key: 33 bytes
+
+change_output: 9 + change_spk_script length bytes
+	- value: 8 bytes
+	- var_int: 1 byte (pk_script length)
+	- pk_script: change_spk_script length
+
+funding_output: 43 bytes
+	- value: 8 bytes
+	- var_int: 1 byte (pk_script length)
+	- pk_script (p2wsh): 34 bytes
+
+funding_transaction: 71 + offer_change_spk_script length + accept_change_spk_script length + 41 * num_inputs bytes
+	- version: 4 bytes
+	- witness_header <---- part of the witness data
+	- count_tx_in: 1 byte
+	- tx_in: 41 bytes * num_inputs
+		funding_input
+	- count_tx_out: 1 byte
+	- tx_out: 61 + offer_change_spk_script length + accept_change_spk_script length
+		funding_ouptut (43 bytes),
+		change_output (9 + offer_change_spk_script length bytes),
+		change_output (9 + accept_change_spk_script length bytes)
+	- lock_time: 4 bytes
+```
+
+Multiplying non-witness data by 4 results in a weight of:
+
+```
+// total_change_length = offer_change_spk_script length + accept_change_spk_script length
+// 284 + 4 * total_change_length + 164 * num_inputs weight
+funding_transaction_weight = 4 * funding_transaction
+
+// 2 + 108 * num_inputs weight
+witness_weight = witness_header + witness * num_inputs
+
+overall_funding_tx_weight = 286 + 4 * total_change_length + 272 * num_inputs weight
+```
+
+## Expected Weight of the Contract Execution or Refund Transaction
+
+The *expected weight* of a contract execution or refund transaction is calculated as follows:
+
+```
+multi_sig: 71 bytes
+	- OP_2: 1 byte
+	- OP_DATA: 1 byte (offer_pubkey length)
+	- offer_pubkey: 33 bytes
+	- OP_DATA: 1 byte (accept_pubkey length)
+	- accept_pubkey: 33 bytes
+	- OP_2: 1 byte
+	- OP_CHECKMULTISIG: 1 byte
+
+funding_tx_input: 41 bytes
+	- previous_out_point: 36 bytes
+		- hash: 32 bytes
+		- index: 4 bytes
+	- var_int: 1 byte (script_sig length)
+	- script_sig: 0 bytes
+	- witness <----	"witness" is used instead of "script_sig" for
+ 			transaction validation; however, "witness" is stored
+ 			separately, and the cost for its size is smaller. So,
+ 		    the calculation of ordinary data is separated
+ 			from the witness data.
+	- sequence: 4 bytes
+
+witness_header: 2 bytes
+	- flag: 1 byte
+	- marker: 1 byte
+
+witness: 222 bytes
+	- number_of_witness_elements: 1 byte
+	- nil_length: 1 byte
+	- sig_offer_length: 1 byte
+	- sig_offer: 73 bytes
+	- sig_accept_length: 1 byte
+	- sig_accept: 73 bytes
+	- witness_script_length: 1 byte
+	- witness_script (multi_sig): 71 bytes
+
+offer_output: 9 + offer_output_script length bytes
+	- value: 8 bytes
+	- var_int: 1 byte (pk_script length)
+	- pk_script: offer_output_script length
+
+accept_output: 9 + accept_output_script length bytes
+	- value: 8 bytes
+	- var_int: 1 byte (pk_script length)
+	- pk_script: accept_output_script length
+
+cet: 69 + offer_output_script length + accept_output_script length bytes
+	- version: 4 bytes
+	- witness_header <---- part of the witness data
+	- count_tx_in: 1 byte
+	- tx_in: 41 bytes
+		funding_tx_input
+	- count_tx_out: 1 byte
+	- tx_out: 18 + offer_output_script length + accept_output_script length bytes
+		offer_ouptut ((9 + offer_output_script length bytes)),
+		accept_output (9 + accept_output_script length bytes)
+	- lock_time: 4 bytes
+```
+
+Multiplying non-witness data by 4 results in a weight of:
+
+```
+// total_output_length = offer_output_script length + accept_output_script length
+// 276 + 4 * total_output_length weight
+cet_weight = 4 * cet
+
+// 224 weight
+witness_weight = witness_header + witness
+
+overall_cet_weight = overall_refund_tx_weight = 500 + 4 * total_output_length weight
+```
+
+# Test Vectors
+
+TODO
+
+# References
+
+* [Bitcoin-S implementation](https://github.com/bitcoin-s/bitcoin-s/blob/adaptor-dlc/dlc/src/main/scala/org/bitcoins/dlc/builder)
+
+# Authors
+
+Nadav Kohen <nadavk25@gmail.com>
+
+![Creative Commons License](https://i.creativecommons.org/l/by/4.0/88x31.png "License CC-BY")
+<br>
+This work is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
