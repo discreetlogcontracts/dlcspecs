@@ -43,10 +43,18 @@ All funding inputs must be Segwit or nested P2SH(Segwit) in order to protect aga
 * The funding output script is a P2WSH to:
 
 ```
-2 <offer_funding_pubkey> <accept_funding_pubkey> 2 OP_CHECKMULTISIG
+2 <pubkey1> <pubkey2> 2 OP_CHECKMULTISIG
 ```
 
+* Where `pubkey1` is the lexicographically lesser of `offer_funding_pubkey` and `accept_funding_pubkey`, and where `pubkey2` is the lexicographically greater of the two.
+
 * Where both `pubkey`s are in compressed format.
+
+## Rationale
+
+We order the pubkeys lexicographically to comply with [BIP 67](https://github.com/bitcoin/bips/blob/master/bip-0067.mediawiki), as well as have the same fingerprint as a
+[lightning funding output](https://github.com/lightningnetwork/lightning-rfc/blob/master/03-transactions.md#funding-transaction-output).
+This will improve the privacy for users as DLCs will share the same fingerprint as lightning channels as well as all other 2-of-2 multisig contracts compliant with BIP 67.
 
 ## Change Outputs
 
@@ -62,9 +70,11 @@ Also known as a CET.
   * `txin[0]` outpoint: `txid` of funding transaction and `output_index` 0
   * `txin[0]` sequence: 0xFFFFFFFE
   * `txin[0]` script bytes: 0
-  * `txin[0]` witness: `0 <signature_for_offer_pubkey> <signature_for_accept_pubkey>`
+  * `txin[0]` witness: `0 <signature_for_pubkey1> <signature_for_pubkey2>`
 
 The output script public keys and `contract_maturity_bound` are negotiated in the offer and accept messages.
+
+In the witness `pubkey1` is the lexicographically lesser of `offer_funding_pubkey` and `accept_funding_pubkey`, and where `pubkey2` is the lexicographically greater of the two.
 
 There will be one CET for every possible outcome, the output values correspond to such an outcome and are negotiated in the offer message.
 
