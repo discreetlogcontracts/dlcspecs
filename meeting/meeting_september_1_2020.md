@@ -51,6 +51,7 @@
     * [Pinning Issue](https://github.com/discreetlogcontracts/dlcspecs/pull/57#discussion_r479337318)
   * Specify fee-bumping mechanism (CPFP)
   * @ariard has volunteered to do this!
+* Discuss adding and suggesting Rationales
 * Anything else?
 
 ## Miscellaneous Changes up for Discussion
@@ -67,11 +68,9 @@
 * https://github.com/bitcoin-s/bitcoin-s/tree/adaptor-dlc
 * rust-dlc continues progress
   * https://github.com/p2pderivatives/rust-dlc/tree/ecdsa-adaptor-dlc
+* C# Partial Impl
+  * https://github.com/dgarage/NDLC
 * Initial TLV implementations for contract setup messages
   * https://github.com/bitcoin-s/bitcoin-s/pull/1898
 * Test Vectors incoming soon
   * https://github.com/discreetlogcontracts/dlcspecs/issues/47
-
-## Rust DLC/Rust LN
-
-* 
