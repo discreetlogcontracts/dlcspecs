@@ -13,22 +13,16 @@ For learning more about DLC have a look at the [resources](Resources.md) page.
 
 ### Works in Progress
 
-- Funding, CET, and Closing Transaction input and output ordering ([#18](https://github.com/discreetlogcontracts/dlcspecs/issues/18))
-
-- Transaction dust limits ([#11](https://github.com/discreetlogcontracts/dlcspecs/issues/11))
-
-- Transaction fees determination ([#12](https://github.com/discreetlogcontracts/dlcspecs/issues/12))
-
+- DLC transaction specification ([Transactions.md](Transactions.md))
 - DLC negoation protocol ([Protocol.md](Protocol.md))
+- Oracle Specification Proposals
+  - [Descriptor Approach](https://github.com/discreetlogcontracts/dlcspecs/pull/55)
+  - [URI Approach](https://github.com/discreetlogcontracts/dlcspecs/pull/63)
 
 ### TODO
 
-- Specify how an event Id should be calculated ([#20](https://github.com/discreetlogcontracts/dlcspecs/issues/20))
-
-- Oracle signature specification ([#21](https://github.com/discreetlogcontracts/dlcspecs/issues/21))
-
-- P2P communication specification ([#13](https://github.com/discreetlogcontracts/dlcspecs/issues/13))
-
+- [ECDSA Adaptor Signature Variant Specification](https://github.com/discreetlogcontracts/dlcspecs/issues/50)
+- [On-Chain Handling](https://github.com/discreetlogcontracts/dlcspecs/issues/78)
 - For more information on TODO see our [v0.1 project dashboard](https://github.com/discreetlogcontracts/dlcspecs/projects/1)
 
 ### Future Work
@@ -37,13 +31,21 @@ For learning more about DLC have a look at the [resources](Resources.md) page.
 
 ## Implementations
 
-### [bitcoin-s](https://github.com/bitcoin-s/bitcoin-s)
+### [bitcoin-s](https://github.com/bitcoin-s/bitcoin-s/tree/adaptor-dlc/dlc/src/main/scala/org/bitcoins/dlc)
 
 The team at Suredbits is working on a implementation of discreet log contracts in bitcoin-s. 
 
 1. [Documentation](https://bitcoin-s.org/docs/next/wallet/dlc)
-2. [Github branch](https://github.com/bitcoin-s/bitcoin-s/tree/adaptor-dlc)
+2. [Github branch](https://github.com/bitcoin-s/bitcoin-s/tree/adaptor-dlc/dlc/src/main/scala/org/bitcoins/dlc)
 3. [Interactive DLC Demo](https://scastie.scala-lang.org/nkohen/OVWMOXwPRryREhVNw7pjLw/11)
+
+### [rust-dlc](https://github.com/p2pderivatives/rust-dlc)
+
+@Tibo-lg and others are working on a new Rust DLC implementation
+
+### [NDLC](https://github.com/dgarage/NDLC)
+
+@NicolasDorier has created a wip DLC implementation in C# which can be used with BTCPayServer
 
 ---
 
