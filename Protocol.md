@@ -63,7 +63,7 @@ This message contains information about a node and indicates its
 desire to enter into a new contract. This is the first step toward creating
 the funding transaction and CETs.
 
-1. type: ??? (`offer_dlc`)
+1. type: 42778 (`offer_dlc_v0`)
 2. data:
    * [`byte`:`contract_flags`]
    * [`chain_hash`:`chain_hash`]
@@ -154,7 +154,7 @@ acceptance of the new DLC, as well as its CET and refund transaction
 signatures. This is the second step toward creating the funding transaction
 and closing transactions.
 
-1. type: ??? (`accept_dlc`)
+1. type: 42780 (`accept_dlc_v0`)
 2. data:
    * [`32*byte`:`temporary_contract_id`]
    * [`u64`:`total_collateral_satoshis`]
@@ -201,7 +201,7 @@ all closing transactions.
 
 This message introduces the [`contract_id`](#definition-of-contract_id) to identify the contract.
 
-1. type: ??? (`sign_dlc`)
+1. type: 42782 (`sign_dlc_v0`)
 2. data:
    * [`contract_id`:`contract_id`]
    * [`cet_signatures`:`cet_signatures`]
