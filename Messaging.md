@@ -55,8 +55,8 @@ The following convenience types are also defined:
 * `contract_id`: a 32-byte contract_id (see [Protocol Specification](Protocol.md))
 * `sha256`: a 32-byte SHA2-256 hash
 * `signature`: a 64-byte bitcoin Elliptic Curve signature
-* `adaptor_signature`: a 162-byte ECDSA adaptor signature
-* `x_point`: a 32-byte x-only public key (with implicit y-coordinate being even)
+* `ecdsa_adaptor_signature`: a 162-byte ECDSA adaptor signature (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done)
+* `x_point`: a 32-byte x-only public key with implicit y-coordinate being even as in [BIP 340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#design)
 * `point`: a 33-byte Elliptic Curve point (compressed encoding as per [SEC 1 standard](http://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3))
 * `spk`: A bitcoin script public key encoded as ASM prefixed with a Bitcoin CompactSize unsigned integer
 * `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
@@ -64,9 +64,9 @@ The following convenience types are also defined:
 
 ## DLC Specific Types
 
-The following DLC-specific types are used throughout the specification:
+The following DLC-specific types are used throughout the specification. All type numbers are placeholders subject to change both here and in [Protocol.md](Protocol.md).
 
-### The contract_info Message
+### The `contract_info` Message
 
 This message contains information about a contracts outcomes and their corresponding payouts. To save space, only one side's POV is included in this message as the other can be derived using `remote_payout = total_collateral - local_payout`.
 
@@ -124,11 +124,11 @@ This message contains CET signatures and any necessary information linking the s
 
 1. type: 42774 (`cet_signatures_v0`)
 2. data:
-   * [`adaptor_signature`:`signature_1`]
+   * [`ecdsa_adaptor_signature`:`signature_1`]
    * ...
-   * [`adaptor_signature`:`signature_n`]
+   * [`ecdsa_adaptor_signature`:`signature_n`]
 
-This type should be used with [`contract_info_v0`](#version-0-contract_info) where each indexed signature in the data corresponds to the outcome of the same index. And as in [`contract_info_v0`](#version-0-contract_info), the number of signatures is omitted as it can be derived from the length field of the TLV.
+This type should be used with [`contract_info_v0`](#version-0-contract_info) where each indexed signature in the data corresponds to the outcome of the same index. As in [`contract_info_v0`](#version-0-contract_info), the number of signatures is omitted as it can be derived from the length field of the TLV.
 
 ### The `funding_signatures` Message
 
