@@ -39,6 +39,12 @@ The team at Suredbits is working on a implementation of discreet log contracts i
 2. [Github branch](https://github.com/bitcoin-s/bitcoin-s/tree/adaptor-dlc/dlc/src/main/scala/org/bitcoins/dlc)
 3. [Interactive DLC Demo](https://scastie.scala-lang.org/nkohen/OVWMOXwPRryREhVNw7pjLw/11)
 
+### [cfd-dlc](https://github.com/p2pderivatives/cfd-dlc)
+
+The team at CryptoGarage is working on a C++ implementation library.
+A [JavaScript wrapper](https://github.com/p2pderivatives/cfd-dlc) is also available.
+This wrapper is currently used as inside the [p2pderivatives application](https://github.com/p2pderivatives/p2pderivatives-client).
+
 ### [rust-dlc](https://github.com/p2pderivatives/rust-dlc)
 
 @Tibo-lg and others are working on a new Rust DLC implementation
