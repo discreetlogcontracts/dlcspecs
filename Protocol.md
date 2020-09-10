@@ -70,12 +70,8 @@ the funding transaction and CETs.
    * [`contract_info`:`contract_info`]
    * [`oracle_info`:`oracle_info`]
    * [`point`:`funding_pubkey`]
-   * [`spk`:`payout_spk`]
+   * [`psbt`:`partial_funding_psbt`]
    * [`u64`:`total_collateral_satoshis`]
-   * [`u16`:`num_funding_inputs`]
-   * [`num_funding_inputs*funding_input`:`funding_inputs`]
-   * [`spk`:`change_spk`]
-   * [`u64`:`feerate_per_vb`]
    * [`u32`:`contract_maturity_bound`]
    * [`u32`:`contract_timeout`]
 
@@ -91,20 +87,15 @@ blockchains opened to the same peer (if it supports the target chains).
 specifies the oracle(s) to be used as well as their commitments to events.
 
 `funding_pubkey` is the public key in the 2-of-2 multisig script of
-the funding transaction output. `payout_spk` specifies the script
-pubkey that CETs and the refund transaction should use in the sender's output.
+the funding transaction output.
 
 `total_collateral_satoshis` is the amount the sender is putting into the
-contract. `num_funding_inputs` is the number of funding inputs contributed by
-the sender and `funding_inputs` contains outputs, outpoints, and expected weights
-of the sender's funding inputs. `change_spk` specifies the script pubkey that funding
-change should be sent to.
-
-`feerate_per_vb` indicates the fee rate in satoshi per virtual byte that both
-sides will use to compute fees in the funding transaction, as described in the
-[transaction specification](Transactions.md).
+contract.
 
 `contract_maturity_bound` is the nLockTime to be put on CETs. `contract_timeout` is the nLockTime to be put on the refund transaction.
+
+`funding_psbt` is a funded PSBT with one output paying exactly `total_collateral_satoshis` and optionally another change output.
+The script pubkey of the output paying `total_collateral_satoshis` is the script pubkey that CETs and the refund transaction should use in the sender's output.
 
 #### Requirements
 
@@ -119,11 +110,8 @@ The sending node MUST:
 
 The sending node SHOULD:
 
-  - set `feerate_per_vb` to at least the rate it estimates would cause the transaction to be immediately included in a block.
   - set `contract_maturity_bound` to no later than the earliest expected oracle signature time.
   - set `contract_timeout` sufficiently long after the latest possible oracle signature added to all other delays to closing the contract.
-  - set `payout_spk` to a previously unused script public key.
-  - set `change_spk` to a previously unused script public key.
 
 The receiving node MUST:
 
@@ -135,17 +123,16 @@ The receiving node MAY reject the contract if:
   - the `contract_info` is missing relevant events.
   - it does not want to use the oracle(s) specified in `oracle_info`.
   - `total_collateral_satoshis` is too small.
-  - `feerate_per_vb` is too small.
-  - `feerate_per_vb` is too large.
+  - the fee rate of the `partial_funding_psbt` is insufficient
 
 The receiving node MUST reject the contract if:
 
   - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
   - the `contract_info` refers to events unknown to the receiver.
   - the `oracle_info` refers to an oracle unknown or inaccessible to the receiver.
-  - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
-  - `funding_inputs` do not contribute at least `total_collateral_satohis` plus full [fee payment](Transactions.md#fee-payment).
+  - The inputs in `partial_funding_psbt` do not contribute at least `total_collateral_satohis`.
+  - the fee rate of the `partial_funding_psbt` is below twice the minimum fee rate relay fee.
 
 ### The `accept_dlc` Message
 
@@ -159,10 +146,7 @@ and closing transactions.
    * [`32*byte`:`temporary_contract_id`]
    * [`u64`:`total_collateral_satoshis`]
    * [`point`:`funding_pubkey`]
-   * [`spk`:`payout_spk`]
-   * [`u16`:`num_funding_inputs`]
-   * [`num_funding_inputs*funding_input`:`funding_inputs`]
-   * [`spk`:`change_spk`]
+   * [`psbt`:`partial_funding_psbt`]
    * [`cet_signatures`:`cet_signatures`]
    * [`signature`:`refund_signature`]
 
@@ -188,8 +172,6 @@ The receiver:
     - MAY reject the contract.
   - if `cet_signatures` or `refund_signature` fail validation:
     - MUST reject the contract.
-- if `funding_inputs` do not contribute at least `total_collateral_satohis` plus [fee payment](Transactions.md#fee-payment)
-  - MUST reject the contract.
 
 Other fields have the same requirements as their counterparts in `offer_dlc`.
 
