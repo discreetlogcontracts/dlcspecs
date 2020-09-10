@@ -133,6 +133,7 @@ The receiving node MUST reject the contract if:
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
   - The inputs in `partial_funding_psbt` do not contribute at least `total_collateral_satohis`.
   - the fee rate of the `partial_funding_psbt` is below twice the minimum fee rate relay fee.
+  - the inputs in `partial_funding_psbt` does not contains `PSBT_IN_REDEEM_SCRIPT` and `PSBT_IN_WITNESS_SCRIPT` if inputs are P2SH or P2WSH.
 
 ### The `accept_dlc` Message
 
