@@ -216,13 +216,14 @@ The sender MUST:
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
-  - set `funding_signatures` to valid input signatures.
-  - include a signature in `funding_signatures` for every funding input specified in the `offer_dlc` message.
+  - set `funding_signatures` to contain valid witnesses for every funding input specified in the `offer_dlc` message and in the same order.
 
 The recipient:
 
-  - if any `signature` is incorrect:
+  - if any `signature` or `witness` is incorrect:
     - MUST reject the contract.
+- if any witness exceeds its corresponding `max_witness_len` from the `offer_dlc` message:
+  - MAY reject the contract.
   - MUST NOT broadcast the funding transaction before receipt of a valid `sign_dlc`.
   - on receipt of a valid `sign_dlc`:
     - SHOULD broadcast the funding transaction.

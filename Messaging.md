@@ -100,22 +100,26 @@ This type of oracle info is for single-oracle, single signature (and hence singl
 
 This message contains information about a specific input to be used in a funding transaction, as well as its corresponding on-chain UTXO.
 
-#### Temporary `funding_input`
+#### Version 0  `funding_input`
 
-1. type: 42772 (`funding_input_temp`)
+1. type: 42772 (`funding_input_v0`)
 2. data:
-   * [`sha256`:`prev_txid`]
-   * [`u32`:`vout`]
-   * [`u64`:`value`]
-   * [`spk`:`spk`]
+   * [`u16`:`prevtx_len`]
+   * [`prevtx_len*byte`:`prevtx`]
+   * [`u32`:`prevtx_vout`]
+   * [`u32`:`sequence`]
+   * [`u16`:`max_witness_len`]
+   * [`u16`:`redeemscript_len`]
+   * [`redeemscript_len*byte`:`script`]
 
-This type is not actually being proposed and will be replaced with a more suitable type in the near future. This is however needed to get a start on static test vectors and compatibility between implementations so it is currently included here for use in test vectors (and will later be replaced both here and in test vectors).
+`prevtx_tx` is the serialized transaction whose `prevtx_vout` output is being spent.
+The transaction is used to validate this output's value and to validate that it is a SegWit output.
 
-`prev_txid` is the little-endian TXID of the transaction on which this UTXO resides at `vout`.
-`value` is the output amount of the UTXO and `spk` is the script public key that must be satisfied by this input.
+`max_witness_len` is the total serialized length of the witness data that will be supplied
+(e.g. sizeof(varint) + sizeof(witness) for each) in `funding_signatures`.
 
-Note that `prev_txid || vout` form a serialized Transaction Outpoint and ` value || spk` form a serialized Transaction Output
-so that the data on this TLV can be parsed by most libraries conveniently as `outpoint || output`.
+`script` is the script signature field for the input. Only applicable for P2SH-wrapped inputs.
+The length of the script should not be included in the transmitted script data.
 
 ### The `cet_adaptor_signatures` Message
 
@@ -141,19 +145,19 @@ This message contains signatures of the funding transaction and any necessary in
 
 1. type: 42776 (`funding_signatures_v0`)
 2. data:
-   * [`sha256`:`prev_txid_1`]
-   * [`u32`:`vout_1`]
-   * [`signature`:`signature_1`]
+   * [`u16`:`num_witnesses`]
+   * [`u16`:`num_witness_elems_1`]
+   * [`num_witness_elems_1*witness_element`:`witness_elements_1`]
    * ...
-   * [`sha256`:`prev_txid_n`]
-   * [`u32`:`vout_n`]
-   * [`signature`:`signature_n`]
+   * [`u16`:`num_witness_elems_num_witnesses`]
+   * [`num_witness_elems_num_witnesses*witness_element`:`witness_elements_num_witnesses`]
+3. subtype: `witness_element`
+4. data:
+   * [`u16`:`len`]
+   * [`len*byte`:`witness`]
 
-This version requires all inputs be spending P2WPKH UTXOs.
-`prev_txid` is the little-endian TXID of the transaction on which this UTXO resides at `vout`.
-Note that `prev_txid || vout` form a serialized Transaction Outpoint and can be parsed this way.
-Because the number of funding inputs is constrained, the number of signatures is omitted as it can
-still be derived from the length field of the TLV unless there are over 100 inputs (which there can't be). 
+`witness` is the data for a witness element in a witness stack. An empty `witness_stack` is an error,
+as every input must be Segwit. Witness elements should *not* include their length as part of the witness data.
 
 ## Authors
 
