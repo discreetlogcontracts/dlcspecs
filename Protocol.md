@@ -163,7 +163,7 @@ and closing transactions.
    * [`u16`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
    * [`spk`:`change_spk`]
-   * [`cet_signatures`:`cet_signatures`]
+   * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
 
 #### Requirements
@@ -173,8 +173,8 @@ The `temporary_contract_id` MUST be the SHA256 hash of the `offer_dlc` message.
 The sender MUST:
 
   - set `total_collateral_satoshis` sufficiently large so that the sum of both parties' total collaterals is at least as large as the largest payout in the `offer_dlc`'s `contract_info`.
-  - set `cet_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
-  - include an adaptor signature in `cet_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
+  - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
+  - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
 
 The sender SHOULD:
@@ -186,7 +186,7 @@ The receiver:
 
   - if `total_collateral_satoshis` is not large enough:
     - MAY reject the contract.
-  - if `cet_signatures` or `refund_signature` fail validation:
+  - if `cet_adaptor_signatures` or `refund_signature` fail validation:
     - MUST reject the contract.
 - if `funding_inputs` do not contribute at least `total_collateral_satohis` plus [fee payment](Transactions.md#fee-payment)
   - MUST reject the contract.
@@ -204,7 +204,7 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
 1. type: 42782 (`sign_dlc_v0`)
 2. data:
    * [`contract_id`:`contract_id`]
-   * [`cet_signatures`:`cet_signatures`]
+   * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
    * [`funding_signatures`:`funding_signatures`]
 
@@ -213,8 +213,8 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
 The sender MUST:
 
   - set `contract_id` by exclusive-OR of the `funding_txid` and the `funding_output_index` from the `offer_dlc` and `accept_dlc` messages.
-  - set `cet_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
-  - include an adaptor signature in `cet_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
+  - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
+  - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
   - set `funding_signatures` to valid input signatures.
   - include a signature in `funding_signatures` for every funding input specified in the `offer_dlc` message.

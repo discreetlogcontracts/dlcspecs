@@ -19,8 +19,8 @@ All data fields are unsigned big-endian unless otherwise specified.
       * [Version 0 `oracle_info`](#version-0-oracle_info)
     * [The `funding_input` Message](#the-funding_input-message)
       * [Temporary `funding_input`](#temporary-funding_input)
-    * [The `cet_signatures` Message](#the-cet_signatures-message)
-      * [Version 0 `cet_signatures`](#version-0-cet_signatures)
+    * [The `cet_adaptor_signatures` Message](#the-cet_adaptor_signatures-message)
+      * [Version 0 `cet_adaptor_signatures`](#version-0-cet_adaptor_signatures)
     * [The `funding_signatures` Message](#the-funding_signatures-message)
       * [Version 0 `funding_signatures`](#version-0-funding_signatures)
 * [Authors](#authors)
@@ -55,7 +55,8 @@ The following convenience types are also defined:
 * `contract_id`: a 32-byte contract_id (see [Protocol Specification](Protocol.md))
 * `sha256`: a 32-byte SHA2-256 hash
 * `signature`: a 64-byte bitcoin Elliptic Curve signature
-* `ecdsa_adaptor_signature`: a 162-byte ECDSA adaptor signature (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done)
+* `ecdsa_adaptor_signature`: a 65-byte ECDSA adaptor signature (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done)
+* `dleq_proof`: a 97-byte zero-knowledge proof of discrete log equality (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done)
 * `x_point`: a 32-byte x-only public key with implicit y-coordinate being even as in [BIP 340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#design)
 * `point`: a 33-byte Elliptic Curve point (compressed encoding as per [SEC 1 standard](http://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3))
 * `spk`: A bitcoin script public key encoded as ASM prefixed with a Bitcoin CompactSize unsigned integer
@@ -116,17 +117,19 @@ This type is not actually being proposed and will be replaced with a more suitab
 Note that `prev_txid || vout` form a serialized Transaction Outpoint and ` value || spk` form a serialized Transaction Output
 so that the data on this TLV can be parsed by most libraries conveniently as `outpoint || output`.
 
-### The `cet_signatures` Message
+### The `cet_adaptor_signatures` Message
 
 This message contains CET signatures and any necessary information linking the signatures to their corresponding outcome.
 
-#### Version 0 `cet_signatures`
+#### Version 0 `cet_adaptor_signatures`
 
-1. type: 42774 (`cet_signatures_v0`)
+1. type: 42774 (`cet_adaptor_signatures_v0`)
 2. data:
    * [`ecdsa_adaptor_signature`:`signature_1`]
+   * [`dleq_proof`:`dleq_prf_1`]
    * ...
    * [`ecdsa_adaptor_signature`:`signature_n`]
+   * [`dleq_proof`:`dleq_prf_n`]
 
 This type should be used with [`contract_info_v0`](#version-0-contract_info) where each indexed signature in the data corresponds to the outcome of the same index. As in [`contract_info_v0`](#version-0-contract_info), the number of signatures is omitted as it can be derived from the length field of the TLV.
 
@@ -140,11 +143,11 @@ This message contains signatures of the funding transaction and any necessary in
 2. data:
    * [`sha256`:`prev_txid_1`]
    * [`u32`:`vout_1`]
-   * [`signatures`:`signature_1`]
+   * [`signature`:`signature_1`]
    * ...
    * [`sha256`:`prev_txid_n`]
    * [`u32`:`vout_n`]
-   * [`signatures`:`signature_n`]
+   * [`signature`:`signature_n`]
 
 This version requires all inputs be spending P2WPKH UTXOs.
 `prev_txid` is the little-endian TXID of the transaction on which this UTXO resides at `vout`.
