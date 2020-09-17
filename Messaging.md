@@ -20,7 +20,7 @@ Implementations MUST use a single connection per peer; contract messages (which 
 
 ## Message Format
 
-We reuse the [Lightning Message Format](01-messaging.md#lightning-message-format) and the [Type-Length-Value Format](01-messaging.md#type-length-value-format)
+We reuse the [Lightning Message Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#lightning-message-format) and the [Type-Length-Value Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format)
 
 ## Fundamental Types
 
@@ -47,7 +47,7 @@ The following convenience types are also defined:
 * `point`: a 33-byte Elliptic Curve point (compressed encoding as per [SEC 1 standard](http://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3))
 * `spk`: A bitcoin script public key encoded as ASM prefixed with a Bitcoin CompactSize unsigned integer
 * `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
-* `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](01-messaging.md#appendix-a-bigsize-test-vectors).
+* `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#appendix-a-bigsize-test-vectors).
 * `contract_info`: ???
 * `oracle_info`: ???
 * `funding_input`: ???
