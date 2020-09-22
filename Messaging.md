@@ -19,7 +19,7 @@ All data fields are unsigned big-endian unless otherwise specified.
       * [Version 0 `oracle_info`](#version-0-oracle_info)
     * [The `funding_input` Type](#the-funding_input-type)
       * [Temporary `funding_input`](#temporary-funding_input)
-    * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-Type)
+    * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
       * [Version 0 `cet_adaptor_signatures`](#version-0-cet_adaptor_signatures)
     * [The `funding_signatures` Type](#the-funding_signatures-type)
       * [Version 0 `funding_signatures`](#version-0-funding_signatures)
@@ -83,7 +83,7 @@ This type contains information about a contracts outcomes and their correspondin
 
 This type of contract info is a simple enumeration where the value `n` is omitted from being explicitly included as it can be derived from the length field of the TLV.
 
-### The `oracle_info`Type
+### The `oracle_info` Type
 
 This type contains information about the oracle(s) to be used in executing a DLC, and possibly the outcomes possible if these are not specified in the corresponding `contract_info`.
 
@@ -96,7 +96,7 @@ This type contains information about the oracle(s) to be used in executing a DLC
 
 This type of oracle info is for single-oracle, single signature (and hence single nonce) events.
 
-### The `funding_input`Type
+### The `funding_input` Type
 
 This type contains information about a specific input to be used in a funding transaction, as well as its corresponding on-chain UTXO.
 
@@ -121,7 +121,7 @@ The transaction is used to validate this output's value and to validate that it 
 `script` is the script signature field for the input. Only applicable for P2SH-wrapped inputs.
 The length of the script should not be included in the transmitted script data.
 
-### The `cet_adaptor_signatures`Type
+### The `cet_adaptor_signatures` Type
 
 This type contains CET signatures and any necessary information linking the signatures to their corresponding outcome.
 
