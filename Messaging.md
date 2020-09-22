@@ -13,15 +13,15 @@ All data fields are unsigned big-endian unless otherwise specified.
   * [Message Format](#message-format)
   * [Fundamental Types](#fundamental-types)
   * [DLC Specific Types](#dlc-specific-types)
-    * [The `contract_info` Message](#the-contract_info-message)
+    * [The `contract_info` Type](#the-contract_info-type)
       * [Version 0 `contract_info`](#version-0-contract_info)
-    * [The `oracle_info` Message](#the-oracle_info-message)
+    * [The `oracle_info` Type](#the-oracle_info-type)
       * [Version 0 `oracle_info`](#version-0-oracle_info)
-    * [The `funding_input` Message](#the-funding_input-message)
+    * [The `funding_input` Type](#the-funding_input-type)
       * [Temporary `funding_input`](#temporary-funding_input)
-    * [The `cet_adaptor_signatures` Message](#the-cet_adaptor_signatures-message)
+    * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-Type)
       * [Version 0 `cet_adaptor_signatures`](#version-0-cet_adaptor_signatures)
-    * [The `funding_signatures` Message](#the-funding_signatures-message)
+    * [The `funding_signatures` Type](#the-funding_signatures-type)
       * [Version 0 `funding_signatures`](#version-0-funding_signatures)
 * [Authors](#authors)
 
@@ -67,9 +67,9 @@ The following convenience types are also defined:
 
 The following DLC-specific types are used throughout the specification. All type numbers are placeholders subject to change both here and in [Protocol.md](Protocol.md).
 
-### The `contract_info` Message
+### The `contract_info` Type
 
-This message contains information about a contracts outcomes and their corresponding payouts. To save space, only one side's POV is included in this message as the other can be derived using `remote_payout = total_collateral - local_payout`.
+This type contains information about a contracts outcomes and their corresponding payouts. To save space, only one side's POV is included in this message as the other can be derived using `remote_payout = total_collateral - local_payout`.
 
 #### Version 0 `contract_info`
 
@@ -83,9 +83,9 @@ This message contains information about a contracts outcomes and their correspon
 
 This type of contract info is a simple enumeration where the value `n` is omitted from being explicitly included as it can be derived from the length field of the TLV.
 
-### The `oracle_info` Message
+### The `oracle_info`Type
 
-This message contains information about the oracle(s) to be used in executing a DLC, and possibly the outcomes possible if these are not specified in the corresponding `contract_info`.
+This type contains information about the oracle(s) to be used in executing a DLC, and possibly the outcomes possible if these are not specified in the corresponding `contract_info`.
 
 #### Version 0 `oracle_info`
 
@@ -96,9 +96,9 @@ This message contains information about the oracle(s) to be used in executing a 
 
 This type of oracle info is for single-oracle, single signature (and hence single nonce) events.
 
-### The `funding_input` Message
+### The `funding_input`Type
 
-This message contains information about a specific input to be used in a funding transaction, as well as its corresponding on-chain UTXO.
+This type contains information about a specific input to be used in a funding transaction, as well as its corresponding on-chain UTXO.
 
 #### Version 0  `funding_input`
 
@@ -121,9 +121,9 @@ The transaction is used to validate this output's value and to validate that it 
 `script` is the script signature field for the input. Only applicable for P2SH-wrapped inputs.
 The length of the script should not be included in the transmitted script data.
 
-### The `cet_adaptor_signatures` Message
+### The `cet_adaptor_signatures`Type
 
-This message contains CET signatures and any necessary information linking the signatures to their corresponding outcome.
+This type contains CET signatures and any necessary information linking the signatures to their corresponding outcome.
 
 #### Version 0 `cet_adaptor_signatures`
 
@@ -137,9 +137,9 @@ This message contains CET signatures and any necessary information linking the s
 
 This type should be used with [`contract_info_v0`](#version-0-contract_info) where each indexed signature in the data corresponds to the outcome of the same index. As in [`contract_info_v0`](#version-0-contract_info), the number of signatures is omitted as it can be derived from the length field of the TLV.
 
-### The `funding_signatures` Message
+### The `funding_signatures` Type
 
-This message contains signatures of the funding transaction and any necessary information linking the signatures to their inputs.
+This type contains signatures of the funding transaction and any necessary information linking the signatures to their inputs.
 
 #### Version 0 `funding_signatures`
 
