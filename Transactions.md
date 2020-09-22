@@ -108,6 +108,7 @@ The actual and expected weights vary for several reasons:
 
 * Bitcoin uses DER-encoded signatures, which vary in size.
 * Bitcoin also uses variable-length integers, so a large number of outputs will take 3 bytes to encode rather than 1.
+* Witnesses may be less than `max_witness_len`
 * The offerer output may be below the dust limit.
 * The accepter output may be below the dust limit.
 
@@ -115,11 +116,13 @@ Thus, a simplified formula for *expected weight* is used, which assumes:
 
 * Signatures are 72 bytes long.
 * There are a small number of outputs (thus 1 byte to count them).
+* All witnesses are of size `max_witness_len`
 
 This yields the following *expected weights* (details of the computation below):
 
 ```
-Funding Transaction weight:    286 + 4 * total_change_length + 272 * num_inputs
+Funding Transaction weight:    214 + (72 + 4*total_change_length)
+                                   + sum(164 + 4*script_sig_len + max_witness_len)
 CET/Refund Transaction weight: 500 + 4 * total_output_length
 ```
 
@@ -127,33 +130,45 @@ CET/Refund Transaction weight: 500 + 4 * total_output_length
 
 The funding output's value is composed of the sum of both parties' `total_collateral` (from offer/accept messages) plus the `max_fee` of closing transactions. In this way all fees are paid for in the [Funding Transaction](#funding-transaction) so that the funding output's value is inflated and the outputs of CETs and the refund transaction are the exact amounts specified in the offer message's contract information (or total collateral specified in the offer and accept messages for the refund transaction) with no fees subtracted from closing transactions.
 
-All fees are currently paid evenly between the two parties, though this will change in a future version.
+Shared fields' fees are paid evenly between the two parties, while fields that belong to a specific party (i.e. funding inputs, change outputs, CET outputs) are paid by the contributing party. Specifically, a party's funding transaction and closing transaction weights are computed as (details of computation below):
 
-Note that if an outcome occurs in which one party's output is below the dust limit of `1000 satoshis`, then the resulting fee rate will be larger than *expected*.
+```
+input_weight = sum(164 + 4*script_sig_len + max_witness_len) (over party's funding inputs)
+output_weight = 36 + 4*change_spk_script length
+total_funding_weight = 107 + output_weight + input_weight
+
+cet_weight = 250 + 4*payout_spk length
+```
+
+These weights must be divided by `4` (rounding up) to get vbytes after which these numbers are multiplied by the fee rate. The resulting funding fee is subtracted in value from the change output while the CET fee is added to the funding output's value and also subtracted from this party's change output.
+
+Note that if a CET occurs in which one party's output is below the dust limit of `1000 satoshis`, then the resulting fee rate will be larger than *expected*.
+
+### Computation of `max_witness_len`
+
+The `max_witness_len` should be computed to be an upper bound on the byte size of all elements on the witness stack (and no other data). For example, a P2WPKH funding input should have a `max_witness_len` of `108`: 
+
+```
+p2wpkh witness: 108 bytes
+	- number_of_witness_elements: 1 byte
+	- sig_length: 1 byte
+	- sig: 72 bytes
+	- pub_key_length: 1 byte
+	- pub_key: 33 bytes
+```
 
 ## Expected Weight of the Funding Transaction
 
 The *expected weight* of a funding transaction is calculated as follows:
 
 ```
-p2wpkh: 22 bytes
-	- OP_0: 1 byte
-	- OP_DATA: 1 byte (public_key_HASH160 length)
-	- public_key_HASH160: 20 bytes
-
-p2wsh: 34 bytes
-	- OP_0: 1 byte
-	- OP_DATA: 1 byte (witness_script_SHA256 length)
-	- witness_script_SHA256: 32 bytes
-
-funding_input: 41 bytes
+funding_input: 41 + script_sig_len bytes
 	- previous_out_point: 36 bytes
 		- hash: 32 bytes
 		- index: 4 bytes
 	- var_int: 1 byte (script_sig length)
-	- script_sig: 0 bytes
-	- witness <----	"witness" is used instead of "script_sig" for
- 			transaction validation; however, "witness" is stored
+	- script_sig: script_sig_len bytes
+	- witness <----	"witness" is stored
  			separately, and the cost for its size is smaller. So,
  		    the calculation of ordinary data is separated
  			from the witness data.
@@ -162,13 +177,6 @@ funding_input: 41 bytes
 witness_header: 2 bytes
 	- flag: 1 byte
 	- marker: 1 byte
-
-witness: 108 bytes
-	- number_of_witness_elements: 1 byte
-	- sig_length: 1 byte
-	- sig: 72 bytes
-	- pub_key_length: 1 byte
-	- pub_key: 33 bytes
 
 change_output: 9 + change_spk_script length bytes
 	- value: 8 bytes
@@ -180,14 +188,14 @@ funding_output: 43 bytes
 	- var_int: 1 byte (pk_script length)
 	- pk_script (p2wsh): 34 bytes
 
-funding_transaction: 71 + offer_change_spk_script length + accept_change_spk_script length + 41 * num_inputs bytes
+funding_transaction: 53 + (9 + offer_change_spk_script length) + (9 + accept_change_spk_script length) + sum(41 + script_sig_len) bytes
 	- version: 4 bytes
 	- witness_header <---- part of the witness data
 	- count_tx_in: 1 byte
-	- tx_in: 41 bytes * num_inputs
-		funding_input
+	- tx_in: sum(41 + script_sig_len) bytes
+		funding_inputs
 	- count_tx_out: 1 byte
-	- tx_out: 61 + offer_change_spk_script length + accept_change_spk_script length
+	- tx_out: 43 + (9 + offer_change_spk_script length) + (9 + accept_change_spk_script length) bytes
 		funding_ouptut (43 bytes),
 		change_output (9 + offer_change_spk_script length bytes),
 		change_output (9 + accept_change_spk_script length bytes)
@@ -198,13 +206,19 @@ Multiplying non-witness data by 4 results in a weight of:
 
 ```
 // total_change_length = offer_change_spk_script length + accept_change_spk_script length
-// 284 + 4 * total_change_length + 164 * num_inputs weight
+// 212 + (72 + 4*total_change_length) + sum(164 + 4*script_sig_len) weight
 funding_transaction_weight = 4 * funding_transaction
 
-// 2 + 108 * num_inputs weight
+// 2 + sum(offer_max_witness_len) + sum(accept_max_witness_len) weight
 witness_weight = witness_header + witness * num_inputs
 
-overall_funding_tx_weight = 286 + 4 * total_change_length + 272 * num_inputs weight
+overall_funding_tx_weight = 214 + (72 + 4*total_change_length) + sum(164 + 4*script_sig_len + max_witness_len) weight
+
+offer_funding_tx_weight = 107 + (36 + 4*offer_change_spk_script length) + sum(164 + 4*offer_script_sig_len + offer_max_witness_len) weight
+offer_funding_tx_vbytes = Ceil(offer_funding_tx_weight / 4.0) vbytes
+
+accept_funding_tx_weight = 107 + (36 + 4*accept_change_spk_script length) + sum(164 + 4*accept_script_sig_len + accept_max_witness_len) weight
+accept_funding_tx_vbytes = Ceil(accept_funding_tx_weight / 4.0) vbytes
 ```
 
 ## Expected Weight of the Contract Execution or Refund Transaction
@@ -282,6 +296,12 @@ cet_weight = 4 * cet
 witness_weight = witness_header + witness
 
 overall_cet_weight = overall_refund_tx_weight = 500 + 4 * total_output_length weight
+ 
+offer_cet_weight = 250 + 4 * offer_output_script_length weight
+offer_cet_vbytes = Ceil(offer_cet_weight / 4.0) vbytes
+
+accept_cet_weight = 250 + 4 * accept_output_script_length weight
+accept_cet_vbytes = Ceil(accept_cet_weight / 4.0) vbytes
 ```
 
 # Test Vectors
