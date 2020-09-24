@@ -119,7 +119,7 @@ This type contains information about a specific input to be used in a funding tr
    * [`redeemscript_len*byte`:`script`]
 
 `prevtx_tx` is the serialized transaction whose `prevtx_vout` output is being spent.
-The transaction is used to validate this output's value and to validate that it is a SegWit output.
+The transaction is used to validate this spent output's value and to validate that it is a SegWit output.
 
 `max_witness_len` is the total serialized length of the witness data that will be supplied
 (e.g. sizeof(varint) + sizeof(witness) for each) in `funding_signatures`.
