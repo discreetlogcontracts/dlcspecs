@@ -123,7 +123,7 @@ This yields the following *expected weights* (details of the computation below):
 ```
 Funding Transaction weight:    214 + (72 + 4*total_change_length)
                                    + sum(164 + 4*script_sig_len + max_witness_len)
-CET/Refund Transaction weight: 500 + 4 * total_output_length
+CET/Refund Transaction weight: 498 + 4 * total_output_length
 ```
 
 ### Fee Payment
@@ -137,7 +137,7 @@ input_weight = sum(164 + 4*script_sig_len + max_witness_len) (over party's fundi
 output_weight = 36 + 4*change_spk_script length
 total_funding_weight = 107 + output_weight + input_weight
 
-cet_weight = 250 + 4*payout_spk length
+cet_weight = 249 + 4*payout_spk length
 ```
 
 These weights must be divided by `4` (rounding up) to get vbytes after which these numbers are multiplied by the fee rate. The resulting funding fee is subtracted in value from the change output while the CET fee is added to the funding output's value and also subtracted from this party's change output.
@@ -252,13 +252,13 @@ witness_header: 2 bytes
 	- flag: 1 byte
 	- marker: 1 byte
 
-witness: 222 bytes
+witness: 220 bytes
 	- number_of_witness_elements: 1 byte
 	- nil_length: 1 byte
 	- sig_offer_length: 1 byte
-	- sig_offer: 73 bytes
+	- sig_offer: 72 bytes
 	- sig_accept_length: 1 byte
-	- sig_accept: 73 bytes
+	- sig_accept: 72 bytes
 	- witness_script_length: 1 byte
 	- witness_script (multi_sig): 71 bytes
 
@@ -292,15 +292,15 @@ Multiplying non-witness data by 4 results in a weight of:
 // 276 + 4 * total_output_length weight
 cet_weight = 4 * cet
 
-// 224 weight
+// 222 weight
 witness_weight = witness_header + witness
 
-overall_cet_weight = overall_refund_tx_weight = 500 + 4 * total_output_length weight
+overall_cet_weight = overall_refund_tx_weight = 498 + 4 * total_output_length weight
  
-offer_cet_weight = 250 + 4 * offer_output_script_length weight
+offer_cet_weight = 249 + 4 * offer_output_script_length weight
 offer_cet_vbytes = Ceil(offer_cet_weight / 4.0) vbytes
 
-accept_cet_weight = 250 + 4 * accept_output_script_length weight
+accept_cet_weight = 249 + 4 * accept_output_script_length weight
 accept_cet_vbytes = Ceil(accept_cet_weight / 4.0) vbytes
 ```
 

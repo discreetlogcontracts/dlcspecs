@@ -31,7 +31,13 @@ Implementations MUST use a single connection per peer; contract messages (which 
 
 ## Message Format
 
-We reuse the [Lightning Message Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#lightning-message-format) and the [Type-Length-Value Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format)
+We reuse the [Lightning Message Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#lightning-message-format) and the [Type-Length-Value Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format) (TLV).
+To be clear, any encoded binary blob that can be sent over the wire will follow the Lightning Message Format
+while all sub-types internal to these messages will follow the Type-Length-Value Format.
+This means that types on outer-messages will be represented with `u16` integers (defined below) and their length
+is omitted from their encoding because the transport layer has the length in a separate unencrypted field.
+Meanwhile all typed sub-messages (which follow TLV format) will have their types represented using `bigsize` integers
+(defined below) and their lengths (also `bigsize`) are included in their encodings.
 
 ## Fundamental Types
 
