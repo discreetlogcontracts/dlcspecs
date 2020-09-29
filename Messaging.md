@@ -66,6 +66,7 @@ The following convenience types are also defined:
 * `x_point`: a 32-byte x-only public key with implicit y-coordinate being even as in [BIP 340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#design)
 * `point`: a 33-byte Elliptic Curve point (compressed encoding as per [SEC 1 standard](http://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3))
 * `spk`: A bitcoin script public key encoded as ASM prefixed with a Bitcoin CompactSize unsigned integer
+* `script_sig`: A bitcoin script signature encoded as ASM prefixed with a Bitcoin CompactSize unsigned integer
 * `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
 * `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#appendix-a-bigsize-test-vectors).
 
@@ -115,8 +116,7 @@ This type contains information about a specific input to be used in a funding tr
    * [`u32`:`prevtx_vout`]
    * [`u32`:`sequence`]
    * [`u16`:`max_witness_len`]
-   * [`u16`:`redeemscript_len`]
-   * [`redeemscript_len*byte`:`script`]
+   * [`script_sig`:`redeemscript`]
 
 `prevtx_tx` is the serialized transaction whose `prevtx_vout` output is being spent.
 The transaction is used to validate this spent output's value and to validate that it is a SegWit output.
@@ -124,8 +124,8 @@ The transaction is used to validate this spent output's value and to validate th
 `max_witness_len` is the total serialized length of the witness data that will be supplied
 (e.g. sizeof(varint) + sizeof(witness) for each) in `funding_signatures`.
 
-`script` is the script signature field for the input. Only applicable for P2SH-wrapped inputs.
-The length of the script should not be included in the transmitted script data.
+`redeemscript` is the script signature field for the input. Only applicable for P2SH-wrapped inputs.
+In all native Segwit inputs, `redeemscript` will be a `0` byte (from the `script_sig` size prefix).
 
 ### The `cet_adaptor_signatures` Type
 
