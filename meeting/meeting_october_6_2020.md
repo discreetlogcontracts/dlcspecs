@@ -43,7 +43,7 @@
 * Lloyd will write a doc like BIP 340 describing our variant of ECDSA Adaptor Signatures
 * Oracle Specification
   * What should be merged?
-* Using SIGHASH_SINGLE (or other) for winner-take-all cases?
+* Using SIGHASH_SINGLE (or other sighashes)?
   * https://github.com/discreetlogcontracts/dlcspecs/issues/91
 * At some point we will need to begin work on the following, any volunteers?
   * Non-enumerated outcomes (multiple nonces)
