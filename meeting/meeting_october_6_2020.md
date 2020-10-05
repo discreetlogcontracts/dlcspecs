@@ -1,5 +1,9 @@
 # October 6th (7 PM CST)/7th (9 AM JST) Meeting 2020
 
+## Housekeeping
+
+* Discuss the results of the form responses
+
 ## Secp256k1 Branch Progress
 
 * schnorrsig merged into secp256k1 ([#558](https://github.com/bitcoin-core/secp256k1/pull/558))!
@@ -17,6 +21,7 @@
 * [URI format proposal](https://github.com/discreetlogcontracts/dlcspecs/pull/63)
 * [Descriptor proposal](https://github.com/discreetlogcontracts/dlcspecs/pull/55)
 * ["Oracle Address" proposal](https://github.com/discreetlogcontracts/dlcspecs/issues/99)
+* [Oracle Key Rotation/Public Key Infrastructure discussion](https://github.com/discreetlogcontracts/dlcspecs/issues/93)
 
 ## TLV and LN Message Format
 
@@ -45,6 +50,8 @@
   * What should be merged?
 * Using SIGHASH_SINGLE (or other sighashes)?
   * https://github.com/discreetlogcontracts/dlcspecs/issues/91
+* Tibo wants Antoine to clarify whether change (anchor) outputs on funding tx is a MAY or a MUST
+  * That is, is it a security issue or a convenience or something else?
 * At some point we will need to begin work on the following, any volunteers?
   * Non-enumerated outcomes (multiple nonces)
   * Multiple-oracle DLCs
