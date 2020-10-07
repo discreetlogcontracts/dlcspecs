@@ -2,7 +2,7 @@
 
 ## Housekeeping
 
-* Discuss the results of the form responses
+* There is a google form asking for feedback about our meeting format
 
 ## Secp256k1 Branch Progress
 
@@ -20,8 +20,14 @@
 
 * [URI format proposal](https://github.com/discreetlogcontracts/dlcspecs/pull/63)
 * [Descriptor proposal](https://github.com/discreetlogcontracts/dlcspecs/pull/55)
+  * We have decided to move forward with the descriptor proposal where we will add a kind of event descriptor allowing for Lloyd's URI-based events
 * ["Oracle Address" proposal](https://github.com/discreetlogcontracts/dlcspecs/issues/99)
+  * We have decided we want a serialized blob which can be copy/pasted that the oracle signs for each event
+    * Nadav proposes we use TLV format to be inter-operable with P2P messaging, Ben will implement a proposal
 * [Oracle Key Rotation/Public Key Infrastructure discussion](https://github.com/discreetlogcontracts/dlcspecs/issues/93)
+  * Everyone agrees that oracles should not have too many events for a single signing key
+  * Everyone agrees that having multiple keys is part (or all) of the solution
+  * Not everyone agrees about the idea of rotating publicly known keys
 
 ## TLV and LN Message Format
 
@@ -35,6 +41,10 @@
 * Nicholas proposes we use existing TOR client infrastructure
 * Alternative is to have users set up their own port forwarding
 * Any other ideas?
+  * BIP 324?
+    * Impl not moving forward
+      * Maybe Lloyd wants to do something about this?
+    * Antoine doesn't like BIP 324
 
 ## Specification Writing
 
@@ -46,15 +56,21 @@
   * ariard has received and responded to initial review
   * https://github.com/discreetlogcontracts/dlcspecs/pull/87
 * Lloyd will write a doc like BIP 340 describing our variant of ECDSA Adaptor Signatures
+  * High level section (motivation, abstract) are higher priority because people ask for resources
+  * Actual variant specification is lower priority as everyone is using the same binaries right now
 * Oracle Specification
-  * What should be merged?
+  * See above
 * Using SIGHASH_SINGLE (or other sighashes)?
   * https://github.com/discreetlogcontracts/dlcspecs/issues/91
+  * Contract flag bit?
+  * Double CETs?
+  * Discussion to be continued online
 * Tibo wants Antoine to clarify whether change (anchor) outputs on funding tx is a MAY or a MUST
   * That is, is it a security issue or a convenience or something else?
 * At some point we will need to begin work on the following, any volunteers?
   * Non-enumerated outcomes (multiple nonces)
   * Multiple-oracle DLCs
+  * Antoine volunteers to write a doc for [client-side oracle validation](https://github.com/discreetlogcontracts/dlcspecs/issues/97)
 * Anything else?
 
 ## Miscellaneous TODOs
@@ -67,6 +83,7 @@
 * [Pretty Pictures!](https://github.com/discreetlogcontracts/dlcspecs/issues/77)
 * [Linter for Specs](https://github.com/discreetlogcontracts/dlcspecs/issues/85)
 * [Non-prev_tx DLC version](https://github.com/discreetlogcontracts/dlcspecs/issues/98)
+* [I've been hacked message](https://github.com/discreetlogcontracts/dlcspecs/issues/94)
 
 ## Lightning DLCs
 
