@@ -76,7 +76,7 @@ The following convenience types are also defined:
 * `script_sig`: A bitcoin script signature encoded as ASM prefixed a `u16` value indicating its length.
 * `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
 * `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#appendix-a-bigsize-test-vectors).
-* `utf8_string`: a UTF-8 encoded string
+* `string`: a UTF-8 encoded string using [NFC for normalization](https://github.com/discreetlogcontracts/dlcspecs/issues/89)
 
 ## DLC Specific Types
 
@@ -175,15 +175,15 @@ as every input must be Segwit. Witness elements should *not* include their lengt
 
 ### The `event_descriptor` Type
 
-This type contains information about the outcomes in an event for which an oracle plans on releasing a signature over.
+This type contains information about the *exact* and fully specified outcomes  in an event for which an oracle plans on releasing a signature over.
 
 #### Version 0 `external_event_descriptor`
 
 1. type: 55300 (`external_event_descriptor_v0`)
 2. data:
-   * [`utf8_string`:`string`]
+   * [`string`:`external_name`]
 
-`string` can refer to anything here and it is up to the oracle and user to agree on how to interpret it.
+`external_name` can refer to anything here and it is up to the oracle and user to agree on how to interpret it.
 
 #### Version 0 `enum_event_descriptor`
 
@@ -195,9 +195,9 @@ This type contains information about the outcomes in an event for which an oracl
    * [`u16`:`outcome_n_len`]
    * [`utf8_string`:`outcome_n`]
 
-This type of event descriptor is a simple enumeration where the value `n` is omitted from being explicitly included as it can be derived from the length field of the TLV.
+This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event. `n` is not given because it can be found by parsing each outcome's length followed by the actual outcome until you has parsed the same number of bytes as the length field of the TLV.
 
-Each `outcome_n` corresponds to the pre-image of a possible outcome that the oracle could sign.
+Each `outcome_i` corresponds to the pre-image of a possible outcome that the oracle could sign.
 
 ### The `oracle_event` Type
 
@@ -213,7 +213,7 @@ This type contains information about an event for which an oracle plans on relea
    * [`event_descriptor`:`event_descriptor`]
    * [`utf8_string`:`event_uri`]
 
-`event_maturity_epoch` refers to the earliest time this event is expected to be signed, in epoch seconds.
+`event_maturity_epoch` refers to the earliest time this event (UTC) is expected to be signed, in epoch seconds.
 
 `event_uri` is a name and/or categorization of this event given by the oracle.
 
@@ -228,7 +228,7 @@ This type contains information about an announcement of an oracle to attest to a
    * [`signature`:`annoucement_signature`]
    * [`oracle_event`:`oracle_event`]
 
-The `annoucement_signature` is a signature of the hash of the serialized `oracle_event` using the `oracle_public_key`.
+The `annoucement_signature` is a signature of the hash of the serialized `oracle_event` using the `oracle_public_key`. This can be shared with peers that have already verified this oracle's public key.
 
 ## Authors
 
