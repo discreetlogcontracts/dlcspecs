@@ -26,6 +26,7 @@ All data fields are unsigned big-endian unless otherwise specified.
     * [The `event_descriptor` Type](#the-event_descriptor-type)
       * [Version 0 `external_event_descriptor`](#version-0-external_event_descriptor)
       * [Version 0 `enum_event_descriptor`](#version-0-enum_event_descriptor)
+      * [Version 0 `range_event_descriptor`](#version-0-range_event_descriptor)
     * [The `oracle_event` Type](#the-oracle_event-type)
       * [Version 0 `oracle_event`](#version-0-oracle_event)
     * [The `oracle_announcement` Type](#the-oracle_announcement-type)
@@ -54,6 +55,7 @@ Various fundamental types are referred to in the message specifications:
 * `u16`: a 2 byte unsigned integer
 * `u32`: a 4 byte unsigned integer
 * `u64`: an 8 byte unsigned integer
+* `int32`: a 4 byte signed integer
 
 Inside TLV records which contain a single value, leading zeros in
 integers can be omitted:
@@ -198,6 +200,20 @@ This type contains information about the *exact* and fully specified outcomes  i
 This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event. `n` is omitted because it can be deduced by parsing each outcome until reaching the end of the TLV.
 
 Each `outcome_i` corresponds to the pre-image of a possible outcome that the oracle could sign.
+
+#### Version 0 `range_event_descriptor`
+
+1. type: 55304 (`range_event_descriptor_v0`)
+2. data:
+   * [`int32`:`start`]
+   * [`int32`:`stop`]
+   * [`u16`:`step`]
+
+`start` refers to the first possible outcome number
+
+`end` refers to the last possible outcome number
+
+`step` refers to the increment between each outcome
 
 ### The `oracle_event` Type
 
