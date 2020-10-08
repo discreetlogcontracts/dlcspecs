@@ -191,13 +191,14 @@ This type contains information about the *exact* and fully specified outcomes  i
 
 1. type: 55302 (`enum_event_descriptor_v0`)
 2. data:
+   * [`u16`:`num_outcomes`]
    * [`u16`:`outcome_1_len`]
    * [`string`:`outcome_1`]
    * ...
    * [`u16`:`outcome_n_len`]
    * [`string`:`outcome_n`]
 
-This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event. `n` is omitted because it can be deduced by parsing each outcome until reaching the end of the TLV.
+This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
 
 Each `outcome_i` corresponds to the pre-image of a possible outcome that the oracle could sign.
 
