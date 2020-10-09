@@ -102,7 +102,10 @@ The refund transaction is exactly the same as a [Contract Execution Transaction]
 
 ### Fee Calculation
 
-All fee calculations for all transactions is based on the fee rate specified in the offer message and the *expected weight* of the transaction in question.
+All fee calculations for all transactions are based on the fee rate specified in the offer message and the *expected weight* of the transaction in question.
+
+Hereafter, the `sum(calc)` function means computing `calc` for each of the input in the scope of the current computation and adding the results together.
+As an example, if two inputs are in scope, `sum(script_sig_len) = script_sig_len_input_1 + script_sig_len_2`.
 
 The actual and expected weights vary for several reasons:
 
