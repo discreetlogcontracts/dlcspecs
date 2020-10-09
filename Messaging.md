@@ -18,7 +18,7 @@ All data fields are unsigned big-endian unless otherwise specified.
     * [The `oracle_info` Type](#the-oracle_info-type)
       * [Version 0 `oracle_info`](#version-0-oracle_info)
     * [The `funding_input` Type](#the-funding_input-type)
-      * [Temporary `funding_input`](#temporary-funding_input)
+      * [Version 0 `funding_input`](#version-0-funding_input)
     * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
       * [Version 0 `cet_adaptor_signatures`](#version-0-cet_adaptor_signatures)
     * [The `funding_signatures` Type](#the-funding_signatures-type)
@@ -117,7 +117,7 @@ This type of oracle info is for single-oracle, single signature (and hence singl
 
 This type contains information about a specific input to be used in a funding transaction, as well as its corresponding on-chain UTXO.
 
-#### Version 0  `funding_input`
+#### Version 0 `funding_input`
 
 1. type: 42772 (`funding_input_v0`)
 2. data:
