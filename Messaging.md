@@ -86,17 +86,18 @@ The following DLC-specific types are used throughout the specification. All type
 
 This type contains information about a contracts outcomes and their corresponding payouts. To save space, only one side's POV is included in this message as the other can be derived using `remote_payout = total_collateral - local_payout`.
 
-#### Version 0 `contract_info`
+#### Version 0 `enum_contract_info`
 
-1. type: 42768 (`contract_info_v0`)
+1. type: 42768 (`enum_contract_info_v0`)
 2. data:
-   * [`sha256`:`outcome_1`]
    * [`u64`:`outcome_1_local_payout`]
    * ...
-   * [`sha256`:`outcome_n`]
    * [`u64`:`outcome_n_local_payout`]
 
-This type of contract info is a simple enumeration where the value `n` is omitted from being explicitly included as it can be derived from the length field of the TLV.
+This type of contract info is a simple enumeration where the value `n` is omitted from being
+explicitly included as it can be derived from the length field of the TLV and should already be
+known from the corresponding `oracle_announcement`.
+The order of payouts matches the order of the outcomes in the `oracle_announcement`.
 
 ### The `funding_input` Type
 
