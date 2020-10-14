@@ -15,8 +15,6 @@ All data fields are unsigned big-endian unless otherwise specified.
   * [DLC Specific Types](#dlc-specific-types)
     * [The `contract_info` Type](#the-contract_info-type)
       * [Version 0 `contract_info`](#version-0-contract_info)
-    * [The `oracle_info` Type](#the-oracle_info-type)
-      * [Version 0 `oracle_info`](#version-0-oracle_info)
     * [The `funding_input` Type](#the-funding_input-type)
       * [Version 0 `funding_input`](#version-0-funding_input)
     * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
@@ -99,19 +97,6 @@ This type contains information about a contracts outcomes and their correspondin
    * [`u64`:`outcome_n_local_payout`]
 
 This type of contract info is a simple enumeration where the value `n` is omitted from being explicitly included as it can be derived from the length field of the TLV.
-
-### The `oracle_info` Type
-
-This type contains information about the oracle(s) to be used in executing a DLC, and possibly the outcomes possible if these are not specified in the corresponding `contract_info`.
-
-#### Version 0 `oracle_info`
-
-1. type: 42770 (`oracle_info_v0`)
-2. data:
-   * [`x_point`:`oracle_public_key`]
-   * [`x_point`:`oracle_nonce`]
-
-This type of oracle info is for single-oracle, single signature (and hence single nonce) events.
 
 ### The `funding_input` Type
 

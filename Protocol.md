@@ -67,8 +67,8 @@ the funding transaction and CETs.
 2. data:
    * [`byte`:`contract_flags`]
    * [`chain_hash`:`chain_hash`]
+   * [`oracle_announcement`:`oracle_announcement`]
    * [`contract_info`:`contract_info`]
-   * [`oracle_info`:`oracle_info`]
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
    * [`u64`:`total_collateral_satoshis`]
@@ -87,8 +87,8 @@ The existence of the `chain_hash` allows nodes to open contracts
 across many distinct blockchains as well as have contracts within multiple
 blockchains opened to the same peer (if it supports the target chains).
 
-`contract_info` specifies the sender's payouts for all events. `oracle_info`
-specifies the oracle(s) to be used as well as their commitments to events.
+`oracle_announcment` specifies the oracle(s) to be used as well as their
+commitments to events. `contract_info` specifies the sender's payouts for all events.
 
 `funding_pubkey` is the public key in the 2-of-2 multisig script of
 the funding transaction output. `payout_spk` specifies the script
@@ -133,7 +133,7 @@ The receiving node MAY reject the contract if:
 
   - it does not agree to the terms in `contract_info`.
   - the `contract_info` is missing relevant events.
-  - it does not want to use the oracle(s) specified in `oracle_info`.
+  - it does not want to use the oracle(s) specified in `oracle_announcement`.
   - `total_collateral_satoshis` is too small.
   - `feerate_per_vb` is too small.
   - `feerate_per_vb` is too large.
@@ -142,7 +142,7 @@ The receiving node MUST reject the contract if:
 
   - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
   - the `contract_info` refers to events unknown to the receiver.
-  - the `oracle_info` refers to an oracle unknown or inaccessible to the receiver.
+  - the `oracle_announcement` refers to an oracle unknown or inaccessible to the receiver.
   - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
   - `funding_inputs` do not contribute at least `total_collateral_satohis` plus full [fee payment](Transactions.md#fee-payment).
@@ -173,7 +173,7 @@ The `temporary_contract_id` MUST be the SHA256 hash of the `offer_dlc` message.
 The sender MUST:
 
   - set `total_collateral_satoshis` sufficiently large so that the sum of both parties' total collaterals is at least as large as the largest payout in the `offer_dlc`'s `contract_info`.
-  - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
+  - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_announcement` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
 
@@ -213,7 +213,7 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
 The sender MUST:
 
   - set `contract_id` by exclusive-OR of the `funding_txid` and the `funding_output_index` from the `offer_dlc` and `accept_dlc` messages.
-  - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
+  - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_announcement` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
   - set `funding_signatures` to contain valid witnesses for every funding input specified in the `offer_dlc` message and in the same order.
