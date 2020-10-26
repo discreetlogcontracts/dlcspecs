@@ -105,9 +105,9 @@ If the BTC/USD price is >= $11,000 Alice will receive everything.
 Below $10,000 Bob receives all the money in the DLC.
 Since our oracle is signing six digits, we can decompose this to `$00x,xxx`
 
-The first CET needs to be predicated on the following nonces being signed with digit `0`: `R0`,`R1`.
+The first CET needs to be predicated on nonces `R0` and `R1` being used to to sign the digit `0` at digit positions `D0` and `D1`.
 
-The rest of the digits (`R2`,`R3`,`R4`,`R5`) are irrelevant for this case.
+The rest of the digits (`D2`,`D3`,`D4`,`D5`) are irrelevant for this case.
 
 #### Case 1: BTC/USD is >= $11,000
 
@@ -115,9 +115,9 @@ If the BTC/USD price is `>= $11,000` Alice receives all the money in the DLC
 Since our oracle is signing six digits, we can think of this as `$0[!1]x,xxx`
 In plain english, this means that the most significant digit is zero, second most signifcant digit is NOT 1.
 
-Since we do not have the ability to represent a logical NOT in our signing scheme, the 9 CETs need to be constructed here.
+Since we do not have the ability to represent a logical NOT in our signing scheme, 9 CETs need to be constructed here.
 
-For Alice to receive the money, she needs `R0=0` AND (`R1=0` OR `R1=2,3,4...9`).
+For Alice to receive the money, she needs `D0=0` AND (`D1=0` OR `D1=2,3,4...9`).
 
 This means we have to construct `1 * 9 = 9` CETs for the outcome of Alice winning all the money in the DLC where BTC/USD is >= $11,000.
 
@@ -126,13 +126,13 @@ This means we have to construct `1 * 9 = 9` CETs for the outcome of Alice winnin
 If the BTC/USD price is `[$10,001-$10,499]` Bob receives all the money in the DLC.
 Since our oracle is signing six digits, we can think of this as `$01[0...4],xxx`
 
-In plain english, this means that the most significant digit (`R0`) is required to be `0`.
+In plain english, this means that the most significant digit (`D0`) is required to be `0`.
 
-The 2nd most significant digit (`R1`) is required to be `1`.
+The 2nd most significant digit (`D1`) is required to be `1`.
 
-The third most significant digit (`R2`) MUST be in the range `[0-4]`
+The third most significant digit (`D2`) MUST be in the range `[0-4]`
 
-The rest of the digits (`R3`,`R4`,`R5`) can be any value.
+The rest of the digits (`D3`,`D4`,`D5`) can be any value.
 
 Since we do not have the ability to represent ranges, we need to construct individual CETs for each outcome.
 This means we have to construct `1 * 1 * 5 * 10 * 10 = 500` CETs for the outcome Bob's winning outcome where BTC/USD is >= $10,000 and <= $10,499
@@ -142,13 +142,13 @@ This means we have to construct `1 * 1 * 5 * 10 * 10 = 500` CETs for the outcome
 IIf the BTC/USD price is `[$10,500-$10,999]` Alice receives all the money in the DLC.
 Since our oracle is signing six digits, we can think of this as `$01[5...9],xxx`
 
-In plain english, this means that the most significant digit (`R0`) is required to be `0`.
+In plain english, this means that the most significant digit (`D0`) is required to be `0`.
 
-The 2nd most significant digit (`R1`) is required to be `1`.
+The 2nd most significant digit (`D1`) is required to be `1`.
 
-The third most significant digit (`R2`) MUST be in the range `[5-9]`
+The third most significant digit (`D2`) MUST be in the range `[5-9]`
 
-The rest of the digits (`R3`,`R4`,`R5`) can be any value.
+The rest of the digits (`D3`,`D4`,`D5`) can be any value.
 
 Since we do not have the ability to represent ranges, we need to construct individual CETs for each outcome.
 This means we have to construct `1 * 1 * 5 * 10 * 10 = 500` CETs for the outcome Alice's winning outcome where BTC/USD is >= $10,500 and <= $10,999
