@@ -269,6 +269,11 @@ The first integer is called `event_outcome` and contains the actual number that 
 The second integer is called `outcome_payout` and is set equal to the local party's payout should
 `event_outcome` be signed which corresponds to a y-coordinate on the payout curve.
 
+Note that if you wish to construct the counter-party's `payout_function`, then this can be accomplished by replacing
+all `outcome_payout`s in your `payout_function` with `total_collateral - outcome_payout` and interpolating the
+resulting function will yield the same result as defining your counter-party's function to be `total_collateral - computed_payout`
+at every possible `event_outcome`.
+
 #### Requirements
 
 * `num_pts` MUST be at least `2`.
@@ -341,8 +346,32 @@ If `begin_range_1` is strictly greater than `0`, then the interval between `0` a
 
 ## Contract Execution Transaction Calculation
 
-Putting it all together
+Given a payout function, a `total_collateral` amount and precision ranges, we wish to compute a list of pairs of arrays of
+integers (corresponding to digits) and Satoshi values.
+Each of these pairs will then be turned into a CET whose adaptor point is computed from the list of integers and whose values
+will be equal to the Satoshi value and `total_collateral` minus that value.
 
-## Contract Execution Transaction Validation
+We must first modify the pure function given to us by interpolating points by applying precision ranges, as well as setting all
+negative payouts to `0` and all computed payouts above `total_collateral` to equal `total_collateral`.
+
+Next, we split the function's domain into two kinds of intervals:
+
+1. Intervals in which the modified function's value is constant.
+2. Intervals in which the modified function's values are changing at every point.
+
+This can be done by evaluating the modified function at every point in the domain and keeping track of whether or not the value has
+changed to construct the intervals, but this is not a particularly efficient solution.
+There are countless ways to go about making this process more efficient such as binary searching for function value changes or looking
+at the unmodified function's derivatives.
+
+Regardless of how these intervals are computed, it is required that the constant-valued intervals be as large as possible.
+For example if you have two constant-valued intervals in a row with the same value, these must be merged.
+
+Finally, once these intervals have been computed, the [CET compression](#contract-execution-transaction-compression) algorithm is run on each constant-valued interval which generates
+a list of integers to be paired with the (constant) value for that interval.
+For variable-value intervals, a unique CET is constructed for every `event_outcome` where all digits of that `event_outcome` are included
+in the list of integers and the Satoshi value is equal to the output of the modified function for that `event_outcome`.
+
+## Contract Execution Transaction Signature Validation
 
 blah blah blah
