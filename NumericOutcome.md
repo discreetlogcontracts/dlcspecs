@@ -239,11 +239,24 @@ def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Ve
 
 ### Design
 
-blah blah blah Polynomial Interpolation blah blah blah but really you should use splines blah blah blah
+The goal of this specification is to enable general payout curve shapes efficiently and compactly while also ensuring that
+simpler and more common payout curves (such as a straight line for a forward contract) do not become complex
+while conforming to the generalized structure. 
+
+To this end, we let the set of all supported payout curves be the set of piecewise polynomial functions (with no continuity
+requirements between pieces).
+Since lines are polynomials, simple curves remain simple when represented in the language of piecewise polynomial functions.
+Any interesting (e.g. non-random) payout curve can be closely approximated using a cleverly constructed [polynomial interpolation](https://en.wikipedia.org/wiki/Polynomial_interpolation).
+And lastly, serializing these functions can be done compactly by providing only a few points of each polynomial piece so as to 
+enable the receiving party in the communication to interpolate the polynomials from this minimal amount of information.
+
+It is important to note however, that due to [Runge's phenomenon](https://en.wikipedia.org/wiki/Runge%27s_phenomenon), it will usually be preferable for clients to construct their payout curves
+using some choice of [spline interpolation](https://en.wikipedia.org/wiki/Spline_interpolation) instead of directly using polynomial interpolation (unless linear approximation is sufficient)
+where a spline is made up of polynomial pieces so that the resulting interpolation can be written as a piecewise polynomial one.
 
 ### Curve Serialization
 
-blah blah blah
+In this section we detail the TLV serialization for a general `payout_function`.
 
 #### Version 0 payout_function
 
@@ -283,7 +296,11 @@ at every possible `event_outcome`.
 
 ### General Function Evaluation
 
-blah blah blah Lagrange Interpolation link blah blah blah there are alternative ways of doing interpolation computation like Vandermonde matrix or Divided Differences and other ways blah blah blah just make sure not to use an approximation algorithm that will be off by more than the precision
+There are many ways to compute the unique polynomial determined by some set of interpolation points.
+I choose to detail [Lagrange Interpolation](https://en.wikipedia.org/wiki/Lagrange_polynomial) here due to its relative simplicity, but any algorithm should work so long is it does
+not result in approximations with an error too large so as to fail [validation](#contract-execution-transaction-signature-validation).
+To name only a few other algorithms, if you are interested in alternatives you may wish to use a [Vandermonde matrix](https://en.wikipedia.org/wiki/Polynomial_interpolation#Constructing_the_interpolation_polynomial) or
+another alternative, the method of [Divided Differences](https://en.wikipedia.org/wiki/Newton_polynomial#Divided-Difference_Methods_vs._Lagrange).
 
 Given a potential `event_outcome` compute the `outcome_payout` as follows:
 
@@ -314,12 +331,21 @@ when repeatedly and sequentially evaluating an interpolation as is done during C
 
 ### Precision Ranges
 
-blah blah blah
+As detailed in the section on [CET compression](#contract-execution-transaction-compression), any time some continuous interval of the domain results in the same payout value, we can
+compress the CETs required by that interval to be logarithmic in size compared to using one CET per point on that interval.
+As such, it can be beneficial to reduce the precision of the payout function to allow for bounded approximation of pieces of the payout
+curve by constant-valued intervals.
+For example, if me and my counter-party are both willing to round payout values to the nearest 100 satoshis, we can have significant savings
+on the number of CETs required to enforce our contract.
+To this end, we allow parties to negotiate precision ranges which may vary along the curve, allowing more precision near more probably outcomes
+and allowing more rounding to occur near extremes.
 
 Each party has their own minimum `precision_ranges` and the precision to be used at a given `event_outcome` is the minimum of both party's precisions.
 
 If `P` is the precision to be used for a given `event_outcome` and the result of function evaluation for that `event_outcome` is `value`, then the amount
-to be used in the CET output for this party will be the closer of `value - (value % P)` or `value - (value % P) + P`, rounding up in the case of a tie. 
+to be used in the CET output for this party will be the closer of `value - (value % P)` or `value - (value % P) + P`, rounding up in the case of a tie.
+
+#### Precision Range Serialization
 
 1. type: ??? (`precision_ranges_v0`)
 2. data:
