@@ -94,65 +94,211 @@ unit: dollars
 precision: 0
 ```
 
-Alice and Bob create a DLC with "relevant" outcomes between $10,000 and $10,999.
-These relevant outcomes will be in $500 increments between $10,000 and $10,999.
-If the BTC/USD price is < $10,000 Bob will receive everything.
-If the BTC/USD price is >= $11,000 Alice will receive everything.
+case 0: Price is < $10,250 in which Bob receives all funds
+case 1: Price is $10,250 <= price < $10,750 Alice and Bob receive refunds
+case 2: Price is >= $10,750 Bob receives all funds
 
 
-#### Case 0: BTC/USD is < $10,000
+#### Case 0: BTC/USD is < $010,000 (Bob win)
 
-Below $10,000 Bob receives all the money in the DLC.
-Since our oracle is signing six digits, we can decompose this to `$00x,xxx`
+Below $10,000 Bob receives all the money in the DLC. This is distinct from case 1 because the third digit (`D2`) is not contextual to `D1` in this case.
 
-The first CET needs to be predicated on nonces `R0` and `R1` being used to to sign the digit `0` at digit positions `D0` and `D1`.
+Since our oracle is signing six digits, we can decompose this to `$00x,xxx`.
 
-The rest of the digits (`D2`,`D3`,`D4`,`D5`) are irrelevant for this case.
+In plain english, if the first two digits (`D0` and `D1`) are `0`.
 
-#### Case 1: BTC/USD is >= $11,000
+This means we need `1 * 1 = 1` CETs to represent the case of `price < $010,000`
 
-If the BTC/USD price is `>= $11,000` Alice receives all the money in the DLC
-Since our oracle is signing six digits, we can think of this as `$0[!1]x,xxx`
-In plain english, this means that the most significant digit is zero, second most signifcant digit is NOT 1.
+#### Case 1: BTC/USD is $010,000 <= price < $010,200 (Bob win)
 
-Since we do not have the ability to represent a logical NOT in our signing scheme, 9 CETs need to be constructed here.
+Below $10,200 Bob receives all the money in the DLC. The reason this case is different than case 0 is that the third digit (`D2`) MUST be `0` when the second digit is `1`.
+This means the validity of `D2` is contextual to `D1`. We decompose this as a separate case for reader clarity.
+Since our oracle is signing six digits, we can decompose this to `$010,[0-1]xx`
+In plain english we need to construct a set of CETs that can be executed if
 
-For Alice to receive the money, she needs `D0=0` AND (`D1=0` OR `D1=2,3,4...9`).
+the first digit (`D0`) is `0` AND
 
-This means we have to construct `1 * 9 = 9` CETs for the outcome of Alice winning all the money in the DLC where BTC/USD is >= $11,000.
+the second digit (`D1`) is `1` AND
 
-#### Case 2: BTC/USD is >= $10,000 and <= $10,499
+the third digit (`D2`) is `0` AND
 
-If the BTC/USD price is `[$10,001-$10,499]` Bob receives all the money in the DLC.
-Since our oracle is signing six digits, we can think of this as `$01[0...4],xxx`
+the fourth digit (`D3`) is in range `[0-1]` AND
 
-In plain english, this means that the most significant digit (`D0`) is required to be `0`.
+`D5` and `D6` can be any value.
 
-The 2nd most significant digit (`D1`) is required to be `1`.
+This means we need `1 * 1 * 1 * 2 = 2` CETs to represent the case `$010,000 <= price < $010,200`
 
-The third most significant digit (`D2`) MUST be in the range `[0-4]`
+#### Case 2: BTC/USD is $010,200 <= price < $010,250 (Bob win)
 
-The rest of the digits (`D3`,`D4`,`D5`) can be any value.
+Below $10,250 Bob receives all money in the DLC.
+The reason this case is different than case 0 and case 1 is the fifth digit (`D4`) needs to be in range [0-4] when previous digits are `$010,2[0-4]x`
+In plain english, we need to construct a set of CETs that can be executed if
 
-Since we do not have the ability to represent ranges, we need to construct individual CETs for each outcome.
-This means we have to construct `1 * 1 * 5 * 10 * 10 = 500` CETs for the outcome Bob's winning outcome where BTC/USD is >= $10,000 and <= $10,499
+the first digit (`D0`) is `0` AND
 
-#### Case 3: BTC/USD is >= $10,500 and < $11,000
+the second digit (`D1`) is `1` AND
 
-IIf the BTC/USD price is `[$10,500-$10,999]` Alice receives all the money in the DLC.
-Since our oracle is signing six digits, we can think of this as `$01[5...9],xxx`
+the third digit (`D2`) is `0` AND
 
-In plain english, this means that the most significant digit (`D0`) is required to be `0`.
+the fourth digit (`D3`) is `2` AND
 
-The 2nd most significant digit (`D1`) is required to be `1`.
+the fifth digit (`D4`) is in range [0-4] AND
 
-The third most significant digit (`D2`) MUST be in the range `[5-9]`
+the sixth digit (`D5`) can be any value.
 
-The rest of the digits (`D3`,`D4`,`D5`) can be any value.
+This means we need `1 * 1 * 1 * 1 * 4 = 4` CETs to represent the case of the BTC/USD price being between `$010,200 <= price < $010,250`.
 
-Since we do not have the ability to represent ranges, we need to construct individual CETs for each outcome.
-This means we have to construct `1 * 1 * 5 * 10 * 10 = 500` CETs for the outcome Alice's winning outcome where BTC/USD is >= $10,500 and <= $10,999
+#### Case 3: BTC/USD is $10,250 <= price < $10,300 (refund case)
 
+If the DLC is in the price range of $010,250 <= price < $010,300 Alice and Bob receive refunds.
+This case is needed because the fifth digits (`D5`) validity is contextual based on previous digits (`D0-D4`).
+
+Since our oracle is signing six digits, we can think of this as `$010,2[5-9]x`
+In plain english, we need to construct a set of CETs that can be executed if
+
+the first digit (`D0`) is `0` AND
+
+the second digit (`D1`) is `1` AND
+
+the third digit (`D2`) is `0` AND
+
+the fourth digit (`D3`) is `2` AND
+
+the fifth digit (`D4`) is in range [5-9] AND
+
+the sixth digit (`D5`) can be any value.
+
+This means we need `1 * 1 * 1 * 1 * 4 = 4` CETs to represent the case of the BTC/USD price being between `$010,250 <= price < $10,300`.
+
+### Case 4: BTC/USD is $010,300 <= price < $010,700 (refund case)
+
+If $10,300 <= price < $10,700 Alice and Bob receive refunds.
+The reason this case is different than case 3 fourth digit (`D3`) needs to be in range [3-7] when previous digits are `$010,[3-7]xx`
+In plain english, we need to construct a set of CETs that can be executed if
+
+the first digit (`D0`) is `0` AND
+
+the second digit (`D1`) is `1` AND
+
+the third digit (`D2`) is `0` AND
+
+the fourth digit (`D3`) is in range [3-7] AND
+
+the fifth and sixth digits (`D4`,`D5`) can be any value.
+
+This means we need `1 * 1 * 1 * 5` CETs to represent the case of BTC/SD price being between `$010,300 <= price < $010,700`
+
+### Case 5: BTC/USD is $010,700 <= price < $010,750 (refund case)
+
+If $10,700 <= price < $010,750 Alice and Bob receive refunds.
+The reason this case is different than case 4 is that the fifth digit `D4` needs to be in range [0-4] when previous digits are `$010,7[0-4]x`
+In plain english, we need to construct a set of CETs that can be executed if
+
+the first digit (`D0`) is `0` AND
+
+the second digit (`D1`) is `1` AND
+
+the third digit (`D2`) is `0` AND
+
+the fourth digit (`D3`) is `7` AND
+
+the fifth digit (`D4`) is in range `[0-4]` AND
+
+the sixth digit (`D5`) can be any value.
+
+This means we need `1 * 1 * 1 * 1 * 5 = 5` CETs to represent the case of BTC/USD price being between `$010,700 <= price < $010,750`
+
+#### Case 6: BTC/USD is $010,750 <= price < $010,800 (Alice win)
+
+If $10,750 <= price < $010,800 Alice wins the DLC.
+The 5th digit (`D4`) needs to be in range [5-9] when previous digits are `$010,7[5-9]x`
+In plain english, we need to construct a set of CETs that can be executed if
+
+the first digit (`D0`) is `0` AND
+
+the second digit (`D1`) is `1` AND
+
+the third digit (`D2`) is `0` AND
+
+the fourth digit (`D3`) is `7` AND
+
+the fifth digit (`D4`) is in range `[5-9]` AND
+
+the sixth digit (`D5`) can be any value.
+
+This means we need `1 * 1 * 1 * 1 * 5 = 5` CETs to represent the case of BTC/USD price being between `$010,750 <= price < $010,800`
+
+#### Case 7: BTC/USD is $010,800 <= price < $011,000 (Alice win)
+
+If $010,800 <= price < $011,000 Alice wins the DLC.
+The 4th digit (`D3`) needs to be in range [8-9] when previous digits are `$010,[8-9]xx`
+In plain english, we need to construct a set of CETs that can be executed if
+
+the first digit (`D0`) is `0` AND
+
+the second digit (`D1`) is `1` AND
+
+the third digit (`D2`) is `0` AND
+
+the fourth digit (`D3`) is in range `[8-9]` AND
+
+the fifth digit (`D4`) and sixth digit (`D5`) can be any value.
+
+This means we need `1 * 1 * 1 * 2 = 2` CETs to represent the case of BTC/USD price being between `$010,800 <= price < $011,000`
+
+
+#### Case 8: BTC/USD is $011,000 <= price < $020,000 (Alice win)
+
+If $011,000 <= price < $020,000 Alice wins the DLC.
+The 3rd digit (`D2`) needs to be in the range [1-9] when previous digits are `$01[1-9],xxx`
+In plain english, we need to construct a set of CETs that can be executed if
+
+the first digit (`D0`) is `0` AND
+
+the second digit (`D1`) is `1` AND
+
+the third digit (`D2`) is in range `[1-9]` AND
+
+the remaining digits (`D3`,`D4`,`D5`) are irrelevant for this outcome.
+
+This means we need `1 * 1 * 9 = 9` CETs to represent the case of BTC/USD price being between `$011,000 <= price < $020,000`
+
+#### Case 9: BTC/USD price is $020,000 <= price < $100,000 (Alice win)
+
+If the price is $020,000 <= price < $100,000 Alice wins the DLC.
+The 2nd digit (`D1`) needs to be in range [2-9] where the previous digits are `$0[2-9]x,xxx`
+In plain english, we need to construct a set of CETs that can be executed if
+
+the first digit (`D0`) is `0` AND
+
+the second digit (`D1`) is in range `[2-9]`
+
+the remaining digits (`D2`,`D3`,`D4`,`D5`) are irrelevant for this outcome.
+
+This means we need `1 * 8 = 8` CETs to represent the case of BTC/USD price being between `$020,000 <= price < $100,000`
+
+#### Case 10: BTC/USD price is >= $100,000 (Alice win)
+
+This is the final case! If the BTC/USD price is `>= $100,000` Alice wins the DLC.
+The first digit (`D0`) needs to be in the range `[1-9]` for this case `$[1-9]xx,xxx`
+In plain english, we need to construct a set of CETs taht can be executed if
+
+the first digit (`D0`) is in range `[1-9]` AND
+
+the remaining digits (`D1`,`D2`...`D5`) are irrelevant.
+
+This means we need 9 CETs to represent the case of BTC/USD price being `>= $100,000`.
+
+#### Conclusion
+
+We've now walked through numeric decomposition for a bet on the BTC/USD price where
+
+1. Bob receives all funds if `price < $10,250
+2. Alice & Bob receive refunds if `$10,250 <= price < $10,750`
+3. Alice receives all funds if `price >= $10,750`
+
+The total number of CETs to represent this bet is
+`9 + 8 + 9 + 2 + 5 + 5 + 5 + 4 + 4 + 2 + 1 = 54`
 
 ### Serialization and signing of outcome values
 
