@@ -237,17 +237,93 @@ def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Ve
 
 ## General Payout Curves
 
+### Design
+
+blah blah blah Polynomial Interpolation 
+
 ### Curve Serialization
 
 blah blah blah
 
+#### Version 0 payout_function
+
+1. type: ??? (`payout_function_v0`)
+2. data:
+   * [`u16`:`num_pts`]
+   * [`boolean`:`is_endpoint_1`]
+   * [`bigsize`:`event_outcome_1`]
+   * [`bigsize`:`outcome_payout_1`]
+   * ...
+   * [`boolean`:`is_endpoint_num_pts`]
+   * [`bigsize`:`event_outcome_num_pts`]
+   * [`bigsize`:`outcome_payout_num_pts`]
+   * [`u16`:`num_precision_ranges`]
+   * [`bigsize`:`begin_range_1`]
+   * [`bigsize`:`precision_1`]
+   * ...
+   * [`bigsize`:`begin_range_num_precision_ranges`]
+   * [`bigsize`:`precision_num_precision_ranges`]
+
+`num_pts` is the number of points on the payout curve that will be provided for interpolation.
+Each point consists of a `boolean` and two `bigsize` integers.
+
+The `boolean` is called `is_endpoint` and if this is true, then this point marks the end of a
+polynomial piece and the beginning of a new one. If this is false then this is a midpoint
+between the previous and next endpoints.
+The first integer is called `event_outcome` and contains the actual number that could be signed by the oracle
+(note: not in the serialization used by the oracle) which corresponds to an x-coordinate on the payout curve.
+The second integer is called `outcome_payout` and is set equal to the local party's payout should
+`event_outcome` be signed which corresponds to a y-coordinate on the payout curve.
+
+`num_precision_ranges` is the number of precision ranges specified in this function and can be
+zero in which case a precision of `1` is used everywhere.
+Each serialized precision range consists of two `bigsize` integers.
+
+The first integer is called `begin_range` and refers to the x-coordinate (`event_outcome`) at which this range begins.
+The second integer is called `precision` and contains the precision modulus to be used in this range.
+
+#### Requirements
+
+* `num_pts` MUST be at least `2`.
+* `event_outcome` MUST strictly increase.
+  If a discontinuity is desired, a sequential `event_outcome` should be used in the second point.
+  This is done to avoid ambiguity about the value at a discontinuity.
+* `begin_range_1`, if it exists, MUST be non-negative.
+* `begin_range` MUST strictly increase.
+
 ### General Function Evaluation
 
-blah blah blah
+blah blah blah Lagrange Interpolation link blah blah blah there are alternative ways of doing interpolation computation like Vandermonde matrix and other ways blah blah blah just make sure not to use an approximation algorithm that will be off by more than the precision
+
+Given a potential `event_outcome` compute the `outcome_payout` as follows:
+
+1. Binary search the endpoints by `event_outcome`
+   * If found, return `outcome_payout`
+   * Else let `points` be all of the interpolation points between (inclusive)
+     the previous and next endpoint
+2. Let `lagrange_line(i, j) = (event_outcome - points(j).event_outcome)/(points(i).event_outcome - points(j).event_outcome)`
+3. Let `lagrange(i) := PROD(j = 0, j < points.length && j != i, lagrange_line(i, j))`
+4. Return `SUM(i = 0, i < points.length, points(i).outcome_payout * lagrange(i))`
 
 ### Optimized Evaluation During CET Calculation
 
-blah blah blah
+There are many optimizations to this piecewise interpolation function that can be made
+when repeatedly and sequentially evaluating an interpolation as is done during CET calculation.
+
+* The binary search in step 1 can be avoided when computing for sequential inputs.
+
+* The value ` points(i).outcome_payout / PROD(j = 0, j < points.length && j != i, points(i).event_outcome - points(j).event_outcome)`
+  can be cached for each `i` in a polynomial piece, call this `coef_i`.
+  For a given `event_outcome` let `all_prod = PROD(i = 0, i < points.length, event_outcome - points(i).event_outcome)`.
+
+  The sum can then be computed as `SUM(i = 0, i < points.length, coef_i * all_prod / (event_outcome - points(i).event_outcome))`.
+
+* Alternatively a common difference could be used to compute consecutive values.
+
+  * That is, a degree 1 polynomial (line) has a common difference between subsequent values,
+  * A degree 2 polynomial has a common second difference (difference of differences)
+  * ...
+  * A degree n polynomial has a common nth difference (difference of difference of ... of differences)
 
 ## Contract Execution Transaction Calculation
 
