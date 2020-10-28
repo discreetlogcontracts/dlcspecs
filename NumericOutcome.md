@@ -374,4 +374,25 @@ in the list of integers and the Satoshi value is equal to the output of the modi
 
 ## Contract Execution Transaction Signature Validation
 
-blah blah blah
+To validate the adaptor signatures for CETs given in a `dlc_accept` or `dlc_sign` message, do the process above of computing the list of pairs of
+lists of digits and payout values to construct the CETs and then run the `adaptor_verify` funciton.
+
+However, if `adaptor_verify` results in a failed validation, do not terminate the CET signature process.
+Instead, you must look at whether you rounded up (to `value - (value % precision) + precision`) or down (to `value - (value % precision)`).
+If you rounded up, compute the CET resulting from rounding down or if you rounded down, compute the CET resulting from rounding up.
+Call the `adaptor_verify` function against this new CET and if it passes verification, consider that adaptor signature valid and continue.
+
+This extra step is necessary because there is no way to introduce deterministic floating point computations into this specification without also
+introducing complexity of magnitude much larger than that of this entire specification.
+This is because there are no guarantees provided by hardware, operating systems, or programming language compilers that doing the same
+floating point computation twice will yield the same results.
+Thus, this specification instead takes the stance that clients must be resilient to off-by-precision (off-by-one * precision) differences between machines.
+
+## Authors
+
+Nadav Kohen <nadavk25@gmail.com>
+
+![Creative Commons License](https://i.creativecommons.org/l/by/4.0/88x31.png "License CC-BY")
+<br>
+This work is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
+
