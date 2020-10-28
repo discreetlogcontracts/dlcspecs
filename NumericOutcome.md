@@ -18,7 +18,20 @@ signatures are used and may have any value at all other digits for which signatu
 
 ## Table of Contents
 
-TODO
+* [Adaptor Points with Multiple Signatures](#adaptor-points-with-multiple-signatures)
+* [Contract Execution Transaction Compression](#contract-execution-transaction-compression)
+  * [Example](#example)
+  * [Algorithms](#algorithms)
+* [General Payout Curves](#general-payout-curves)
+  * [Design](#design)
+  * [Curve Serialization](#curve-serialization)
+  * [General Function Evaluation](#general-function-evaluation)
+  * [Optimized Evaluation During CET Calculation](#optimized-evaluation-during-cet-calculation)
+  * [Precision Ranges](#precision-ranges)
+    * [Precision Range Serialization](#precision-range-serialization)
+* [Contract Execution Transaction Calculation](#contract-execution-transaction-calculation)
+* [Contract Execution Transaction Signature Validation](#contract-execution-transaction-signature-validation)
+* [Authors](#authors)
 
 ## Adaptor Points with Multiple Signatures
 
