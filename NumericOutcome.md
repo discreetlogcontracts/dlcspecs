@@ -239,7 +239,7 @@ def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Ve
 
 ### Design
 
-blah blah blah Polynomial Interpolation 
+blah blah blah Polynomial Interpolation blah blah blah but really you should use splines blah blah blah
 
 ### Curve Serialization
 
@@ -257,12 +257,6 @@ blah blah blah
    * [`boolean`:`is_endpoint_num_pts`]
    * [`bigsize`:`event_outcome_num_pts`]
    * [`bigsize`:`outcome_payout_num_pts`]
-   * [`u16`:`num_precision_ranges`]
-   * [`bigsize`:`begin_range_1`]
-   * [`bigsize`:`precision_1`]
-   * ...
-   * [`bigsize`:`begin_range_num_precision_ranges`]
-   * [`bigsize`:`precision_num_precision_ranges`]
 
 `num_pts` is the number of points on the payout curve that will be provided for interpolation.
 Each point consists of a `boolean` and two `bigsize` integers.
@@ -275,25 +269,16 @@ The first integer is called `event_outcome` and contains the actual number that 
 The second integer is called `outcome_payout` and is set equal to the local party's payout should
 `event_outcome` be signed which corresponds to a y-coordinate on the payout curve.
 
-`num_precision_ranges` is the number of precision ranges specified in this function and can be
-zero in which case a precision of `1` is used everywhere.
-Each serialized precision range consists of two `bigsize` integers.
-
-The first integer is called `begin_range` and refers to the x-coordinate (`event_outcome`) at which this range begins.
-The second integer is called `precision` and contains the precision modulus to be used in this range.
-
 #### Requirements
 
 * `num_pts` MUST be at least `2`.
 * `event_outcome` MUST strictly increase.
   If a discontinuity is desired, a sequential `event_outcome` should be used in the second point.
   This is done to avoid ambiguity about the value at a discontinuity.
-* `begin_range_1`, if it exists, MUST be non-negative.
-* `begin_range` MUST strictly increase.
 
 ### General Function Evaluation
 
-blah blah blah Lagrange Interpolation link blah blah blah there are alternative ways of doing interpolation computation like Vandermonde matrix and other ways blah blah blah just make sure not to use an approximation algorithm that will be off by more than the precision
+blah blah blah Lagrange Interpolation link blah blah blah there are alternative ways of doing interpolation computation like Vandermonde matrix or Divided Differences and other ways blah blah blah just make sure not to use an approximation algorithm that will be off by more than the precision
 
 Given a potential `event_outcome` compute the `outcome_payout` as follows:
 
@@ -318,12 +303,41 @@ when repeatedly and sequentially evaluating an interpolation as is done during C
 
   The sum can then be computed as `SUM(i = 0, i < points.length, coef_i * all_prod / (event_outcome - points(i).event_outcome))`.
 
-* Alternatively a common difference could be used to compute consecutive values.
+* When precision ranges are introduced, derivatives of the polynomial can be used to reduce the number of calculations needed.
+  For example, when dealing with a cubic piece, if you are going left to right and enter a new value modulo precision while the first derivative (slope) is positive and the second derivative (concavity) is negative then you can take the tangent line to the curve at this point and find it's intersection with the next value boundary modulo precision.
+  If the derivatives' signs are the same, then the interval from the current x-coordinate to the x-coordinate of the intersection is guaranteed to all be the same value modulo precision.
 
-  * That is, a degree 1 polynomial (line) has a common difference between subsequent values,
-  * A degree 2 polynomial has a common second difference (difference of differences)
-  * ...
-  * A degree n polynomial has a common nth difference (difference of difference of ... of differences)
+### Precision Ranges
+
+blah blah blah
+
+Each party has their own minimum `precision_ranges` and the precision to be used at a given `event_outcome` is the minimum of both party's precisions.
+
+If `P` is the precision to be used for a given `event_outcome` and the result of function evaluation for that `event_outcome` is `value`, then the amount
+to be used in the CET output for this party will be the closer of `value - (value % P)` or `value - (value % P) + P`, rounding up in the case of a tie. 
+
+1. type: ??? (`precision_ranges_v0`)
+2. data:
+   * [`u16`:`num_precision_ranges`]
+   * [`bigsize`:`begin_range_1`]
+   * [`bigsize`:`precision_1`]
+   * ...
+   * [`bigsize`:`begin_range_num_precision_ranges`]
+   * [`bigsize`:`precision_num_precision_ranges`]
+
+`num_precision_ranges` is the number of precision ranges specified in this function and can be
+zero in which case a precision of `1` is used everywhere.
+Each serialized precision range consists of two `bigsize` integers.
+
+The first integer is called `begin_range` and refers to the x-coordinate (`event_outcome`) at which this range begins.
+The second integer is called `precision` and contains the precision modulus to be used in this range.
+
+If `begin_range_1` is strictly greater than `0`, then the interval between `0` and `begin_range_1` has a precision of `1`.
+
+#### Requirements
+
+* `begin_range_1`, if it exists, MUST be non-negative.
+* `begin_range` MUST strictly increase.
 
 ## Contract Execution Transaction Calculation
 
