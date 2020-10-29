@@ -20,7 +20,8 @@ signatures are used and may have any value at all other digits for which signatu
 
 * [Adaptor Points with Multiple Signatures](#adaptor-points-with-multiple-signatures)
 * [Contract Execution Transaction Compression](#contract-execution-transaction-compression)
-  * [Example](#example)
+  * [Concrete Example](#concrete-example)
+  * [General Example](#general-example)
   * [Algorithms](#algorithms)
 * [General Payout Curves](#general-payout-curves)
   * [Design](#design)
@@ -78,7 +79,55 @@ The compression algorithm takes as input a range `[start, end]`, a base `B`, and
 `n` (being signed by the oracle) and returns an array of arrays of integers (which will all be in the range `[0, B-1]`).
 An array of integers corresponds to a single event equal to the concatenation of these integers (interpreted in base `B`).
 
-### Example
+### Concrete Example
+
+Before generalizing or specifying the algorithm, let us run through a concrete example.
+
+We will consider the range `[135677, 138621]`, in base `10`.
+Note that they both begin with the prefix `13` which must be included in every CET, for this purpose I omit these digits for
+the remainder of this example as we can simply examine the range `[5677, 8621]` and prepend a `13` to all results.
+
+To cover all cases while looking at as few digits as possible in this range we need only consider
+`5677`, `8621` and the following cases:
+
+```
+5678, 5679,
+568_, 569_,
+57__, 58__, 59__,
+
+6_, 7_,
+
+80__, 81__, 82__, 83__, 84__, 85__,
+860_, 861_,
+8620
+```
+
+where `_` refers to an ignored digit (an omission from the array of integers).
+(Recall that all of these are prefixed by `13`).
+Thus, we are able to cover the entire interval of `2944` outcomes using only `20` CETs!
+
+Here it is again in binary (specifically the range `[5677, 8621]`, not the original range with the `13` prefix in base 10):
+Outliers are `5677 = 01011000101101` and `8621 = 10000110101101` with cases:
+
+```
+0101100010111_,
+0101100011____,
+01011001______,
+0101101_______,
+010111________,
+011___________,
+
+100000________,
+1000010_______,
+100001100_____,
+10000110100___,
+100001101010__,
+10000110101100
+```
+
+And so again we are able to cover the entire interval of `2944` outcomes using only `14` CETs this time.
+
+### General Example
 
 Before specifying the algorithm, let us run through a general example.
 
