@@ -179,6 +179,9 @@ generated in both the front and back groupings of length at most `B-1 ` which co
 
 This counting also shows us that base 2 is the optimal base to be using in general cases as it will, in general, outperform all larger bases
 in both large and small intervals.
+Note that the concrete example above was chosen to be easy to write down in base 10 (large digits in `start`, small digits in `end`) and so it should not
+be thought of as a general candidate for this particular consideration.
+
 To help with intuition on this matter, consider an arbitrary range of three digit numbers in base 10.
 To capture the same range in base 2 we need 10 digit binary numbers.
 However, a random three digit number in base 10 is expected to have a digit sum of 15, while a random ten digit binary number expects a digit sum of only 5!
