@@ -21,7 +21,10 @@ signatures are used and may have any value at all other digits for which signatu
 * [Adaptor Points with Multiple Signatures](#adaptor-points-with-multiple-signatures)
 * [Contract Execution Transaction Compression](#contract-execution-transaction-compression)
   * [Concrete Example](#concrete-example)
-  * [General Example](#general-example)
+  * [Abstract Example](#abstract-example)
+  * [Analysis of CET Compression](#analysis-of-cet-compression)
+    * [Counting CETs](#counting-cets)
+    * [Optimizations](#optimizations)
   * [Algorithms](#algorithms)
 * [General Payout Curves](#general-payout-curves)
   * [Design](#design)
@@ -54,6 +57,7 @@ Another design that was considered was adding keys to the funding output so that
 construct `m` adaptor signatures and where `n` signatures are put on-chain in every CET which would reveal
 all oracle signatures to both parties when a CET is published.
 This design's major drawbacks is that it creates a very distinct fingerprint and makes CET fees significantly worse.
+Additionally it leads to extra complexity in contract construction.
 This design's only benefit is that it results in simpler (although larger) fraud proofs.
 
 The large multi-signature design was abandoned because the above proposal is sufficient to generate fraud proofs.
@@ -127,9 +131,9 @@ Outliers are `5677 = 01011000101101` and `8621 = 10000110101101` with cases:
 
 And so again we are able to cover the entire interval of `2944` outcomes using only `14` CETs this time.
 
-### General Example
+### Abstract Example
 
-Before specifying the algorithm, let us run through a general example.
+Before specifying the algorithm, let us run through a general example and do some analysis.
 
 Consider the range `[(prefix)wxyz, (prefix)WXYZ]` where `prefix` is some string of digits in base `B` which
 `start` and `end` share and `w, x, y, and z` are the unique digits of `start` in base `B` while `W, X, Y, and Z`
@@ -151,10 +155,15 @@ WXY0, WXY1, ..., WXY(Z-1)
 ```
 
 where `_` refers to an ignored digit (an omission from the array of integers) and all of these cases have the `prefix`.
+
+### Analysis of CET Compression
+
 This specification refers to the first three rows as the **front groupings** the fourth row as the **middle grouping** and the last three rows
 as the **back groupings**.
 
 Notice that the patterns for the front and back groupings are nearly identical.
+
+#### Counting CETs
 
 Also note that in total the number of elements in each row of the front groupings is equal to `B-1` minus the corresponding digit.
 That is to say, `B-1` minus the last digit is the number of elements in the first row and then the second to last digit and so on.
@@ -178,6 +187,16 @@ This is because using binary results in a compression where each row in the diag
 to binary compression's ability to efficiently reach the largest possible number of digits ignored which itself covers the largest number of cases.
 Meanwhile in a base like 10, each row can take up to 9 CETs before moving to a larger number of digits ignored (and cases covered).
 Another way to put this is that the inefficiency of base 10 which seems intuitive at small scales is actually equally present at *all scales*!
+
+One final abstract way of intuiting that base 2 is optimal is the following:
+We wish to maximize the amount of information that we may ignore when constructing CETs, because abstractly every bit of information ignored
+in a CET doubles the number of cases covered with a single transaction and signature.
+Thus, if we use any base other than 2, say 10, then we will almost always run into situations where redundant information is needed because we can
+only ignore a decimal digit at a time where a decimal digit has 3.3 bits of information.
+Meanwhile in binary where every digit encodes exactly a single bit of information, we are able to perfectly ignore all redundant bits of information
+resulting in some number near 3.3 times fewer CETs on average.
+
+#### Optimizations
 
 Note that there are two more possible optimizations to be made, which this specification calls the **row optimization**, using the outliers `wxyz` and `WXYZ`.
 If `z=0` then the entire first row can be replaced with `wxy_` and if `Z=B-1` then the entire last row can be replaced with `WXY_`.
@@ -208,7 +227,7 @@ def decompose(num: Long, base: Int, numDigits: Int): Vector[Int] = {
 }
 ```
 
-I will use this function for the purposes of this specification but note that when iterating through a range of sequential numbers,
+We will use this function for the purposes of this specification but note that when iterating through a range of sequential numbers,
 there are faster algorithms for computing sequential decompositions.
 
 We will then need a function to compute the shared prefix and the unique digits of `start` and `end`.
