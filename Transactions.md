@@ -149,7 +149,7 @@ Note that if a CET occurs in which one party's output is below the dust limit of
 
 ### Computation of `max_witness_len`
 
-The `max_witness_len` should be computed to be an upper bound on the byte size of all elements on the witness stack (and no other data). For example, a P2WPKH funding input should have a `max_witness_len` of `108`: 
+The `max_witness_len` should be computed to be an upper bound on the byte size of all elements on the witness stack (and no other data). For example, a P2WPKH funding input should have a `max_witness_len` of `107` or `108` depending on if you use low-R signing (which takes a byte off the sig), below is the computation for non-low-R where wallets implementing low-R can use `sig: 71 bytes` below to save a byte: 
 
 ```
 p2wpkh witness: 108 bytes
