@@ -201,25 +201,35 @@ resulting in some number near 3.3 times fewer CETs on average.
 
 #### Optimizations
 
-Because `wxyz` and `WXYZ` are outliers to the general pattern, there are a few optimizations that could potentially be made when they are added.
+Because `start` and `end` are outliers to the general grouping pattern, there are optimizations that could potentially be made when they are added.
 
-As an example, if `start = 120` (in base 10) then the first row can be reduced to a single `12_`.
-Likewise if `end = 239`, then the last row can be reduced to a single `23_`.
+Consider the example in base 10 of the range `[2200, 4999]` which has the endpoints `2200` and `4999` along with the groupings
 
-More generally, if `z=0` then the first row can be replaced with `wxy_` and if `Z=B-1` then the entire last row can be replaced with `WXYZ_`.
-This optimization is called the **row optimization**.
+```
+2201, 2202, 2203, 2204, 2205, 2206, 2207, 2208, 2209,
+221_, 222_, 223_, 224_, 225_, 226_, 227_, 228_, 229_,
+23__, 24__, 25__, 26__, 27__, 28__, 29__,
 
-As another example, if `start = 3000` (in base 10) then the all front groupings can be replaced with a single `3___`.
-Likewise, if `end = 5999`, then all of the back groupings can be replaced with a single `5___`.
+3___,
 
-More generally, if `x=y=z=0` then the front groupings can be replaced with `w___` and if `X=Y=Z=B-1` then the back groupings can be replaced with `W___`.
-This optimization is called the **grouping optimization**.
+40__, 41__, 42__, 43__, 44__, 45__, 46__, 47__, 48__,
+490_, 491_, 492_, 493_, 494_, 495_, 496_, 497_, 498_,
+4990, 4991, 4992, 4993, 4994, 4995, 4996, 4997, 4998
+```
 
-As a final example, if `start = 30000` and `end = 39999` (in base 10) then both group optimizations apply leaving an extended middle grouping which can
-be replaced with `3____` which is to say that only a CET containing the prefix is needed.
+This grouping pattern captures the exclusive range `(2200, 4999)` and then adds the endpoints in ad-hoc to get the inclusive range `[2200, 4999]`.
+But this method misses out on a good amount of compression as re-introducing the endpoints allows us to replace the first two rows with
+a single `22__` and the last 3 rows with just `4___`.
 
-More generally if both grouping optimizations can be made and `w=0` and `W=B-1` (meaning all unique digits of `start` are `0` and all unique
-digits of `end` are `B-1`), then the entire list can be replaced with a single CET corresponding to `(prefix)____`.
+More generally, if the unique digits of `start = (x1)(x2)...(xn)` then if `x(n-i+1) = x(n-i+2) = ... = xn = 0`, then the first `i` rows
+of the front groupings can be replaced by `(x1)(x2)...(x(n-i))_..._`.
+Likewise if the unique digits of `end = (y1)(y2)...(yn)` then if `y(n-j+1) = y(n-j+2) = ... = yn = B-1`, then the last `j` rows
+of the back groupings can be replaced by `(y1)(y2)...(y(n-j))_..._`.
+This optimization is called the **endpoint optimization**.
+
+There is one more optimization that can potentially be made.
+If the unique digits of `start` are all `0` and the unique digits of `end` are all `B-1` then we will have no need for a middle grouping as we can cover
+this whole interval with just a single CET of `(prefix)_..._`.
 This optimization is called the **total optimization**.
 
 ### Algorithms
@@ -267,33 +277,33 @@ Now we need the algorithms for computing the groupings.
 def frontGroupings(
     digits: Vector[Int], // The unique digits of the range's start
     base: Int): Vector[Vector[Int]] = {
-  if (digits.tail.forall(_ == 0)) { // Grouping Optimization
-    Vector(Vector(digits.head))
+  val nonZeroDigits = digits.reverse.zipWithIndex.dropWhile(_._1 == 0) // Endpoint Optimization
+  
+  if (nonZeroDigits.isEmpty) { // All digits are 0
+      Vector(Vector(0))
   } else {
-    val fromFront = digits.reverse.zipWithIndex.init.flatMap { // Note the flatMap collapses the rows of the grouping 
+    val fromFront = nonZeroDigits.init.flatMap { // Note the flatMap collapses the rows of the grouping 
       case (lastImportantDigit, unimportantDigits) =>
-        val fixedDigits = digits.dropRight(unimportantDigits + 1).reverse
+        val fixedDigits = digits.dropRight(unimportantDigits + 1)
         (lastImportantDigit + 1).until(base).map { lastDigit => // Note that this range excludes lastImportantDigit and base
           fixedDigits :+ lastDigit
         }
     }
 
-      if (digits.last == 0) { // Row Optimization
-        digits.init +: fromFront.drop(base - 1) // Note init drops the last digit and drop(base-1) drops the fist row
-      } else {
-      digits +: fromFront // Add outlier
-    }
+    nonZeroStartDigits.map(_._1).reverse +: fromFront // Add Endpoint
   }
 }
 
 def backGroupings(
     digits: Vector[Int], // The unique digits of the range's end
     base: Int): Vector[Vector[Int]] = {
-  if (digits.tail.forall(_ == base - 1)) { // Grouping Optimization
-    Vector(Vector(digits.head))
+  val nonMaxDigits = digits.reverse.zipWithIndex.dropWhile(_._1 == base - 1) // Endpoint Optimization
+
+  if (nonMaxDigits.isEmpty) { // All digits are max
+    Vector(Vector(base - 1))
   } else {
     // Here we compute the back groupings in reverse so as to use the same iteration as in front groupings
-    val fromBack = digits.reverse.zipWithIndex.init.flatMap { // Note the flatMap collapses the rows of the grouping 
+    val fromBack = nonMaxDigits.init.flatMap { // Note the flatMap collapses the rows of the grouping 
       case (lastImportantDigit, unimportantDigits) =>
         val fixedDigits = digits.dropRight(unimportantDigits + 1)
         0.until(lastImportantDigit).reverse.toVector.map { // Note that this range excludes lastImportantDigit
@@ -302,11 +312,7 @@ def backGroupings(
         }
     }
 
-    if (uniqueEndDigits.head == base - 1) { // Row Optimization
-      fromBack.drop(base - 1).reverse :+ digits.init // Note init drops the last digit and drop(base-1) drops the last row
-    } else {
-      fromBack.reverse :+ digits // Add outlier
-    }
+    fromBack.reverse :+ nonMaxDigits.map(_._1).reverse // Add Endpoint
   }
 }
 
