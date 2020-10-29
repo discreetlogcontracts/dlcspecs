@@ -201,14 +201,26 @@ resulting in some number near 3.3 times fewer CETs on average.
 
 #### Optimizations
 
-Note that there are two more possible optimizations to be made, which this specification calls the **row optimization**, using the outliers `wxyz` and `WXYZ`.
-If `z=0` then the entire first row can be replaced with `wxy_` and if `Z=B-1` then the entire last row can be replaced with `WXY_`.
-There are another two possible optimizations in the case where the front or back groupings are not needed, which
-I call **grouping optimization**, that again use the outliers to the above pattern `wxyz` and `WXYZ`.
-For the front this is the case when `x=y=z=0` so that the front groupings can be replaced with `w___`.
-Likewise if `X = Y = Z = B-1` then the back groupings can be replace with `W___`.
-Lastly, if both grouping optimizations can be made, `w = 0` and `W = B-1` then a **total optimization** can be made and the
-whole range can be represented using only a single CET corresponding to `(prefix)____`.
+Because `wxyz` and `WXYZ` are outliers to the general pattern, there are a few optimizations that could potentially be made when they are added.
+
+As an example, if `start = 120` (in base 10) then the first row can be reduced to a single `12_`.
+Likewise if `end = 239`, then the last row can be reduced to a single `23_`.
+
+More generally, if `z=0` then the first row can be replaced with `wxy_` and if `Z=B-1` then the entire last row can be replaced with `WXYZ_`.
+This optimization is called the **row optimization**.
+
+As another example, if `start = 3000` (in base 10) then the all front groupings can be replaced with a single `3___`.
+Likewise, if `end = 5999`, then all of the back groupings can be replaced with a single `5___`.
+
+More generally, if `x=y=z=0` then the front groupings can be replaced with `w___` and if `X=Y=Z=B-1` then the back groupings can be replaced with `W___`.
+This optimization is called the **grouping optimization**.
+
+As a final example, if `start = 30000` and `end = 39999` (in base 10) then both group optimizations apply leaving an extended middle grouping which can
+be replaced with `3____` which is to say that only a CET containing the prefix is needed.
+
+More generally if both grouping optimizations can be made and `w=0` and `W=B-1` (meaning all unique digits of `start` are `0` and all unique
+digits of `end` are `B-1`), then the entire list can be replaced with a single CET corresponding to `(prefix)____`.
+This optimization is called the **total optimization**.
 
 ### Algorithms
 
