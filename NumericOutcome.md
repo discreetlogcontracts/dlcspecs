@@ -102,19 +102,35 @@ WXY0, WXY1, ..., WXY(Z-1)
 ```
 
 where `_` refers to an ignored digit (an omission from the array of integers) and all of these cases have the `prefix`.
-I refer to the first three rows as the **front groupings** the fourth row as the **middle grouping** and the last three rows
+This specification refers to the first three rows as the **front groupings** the fourth row as the **middle grouping** and the last three rows
 as the **back groupings**.
 
-Notice that the patterns for the front and back groupings are nearly identical, and that in total the number of CETs that
-will be required to cover the range will be equal to the sum of the unique digits of `end` plus the sum of `B-1` minus the
-unique digits of `start`.
-This means that the number of CETs required to cover a range of length `L` will be `O(B*log_B(L))` because `log_B(L)`
+Notice that the patterns for the front and back groupings are nearly identical.
+
+Also note that in total the number of elements in each row of the front groupings is equal to `B-1` minus the corresponding digit.
+That is to say, `B-1` minus the last digit is the number of elements in the first row and then the second to last digit and so on.
+Likewise the number of elements in each row of the back groupings is equal to the corresponding digit.
+That is to say, the last digit corresponds to the last row, second to last digit is the second to last row and so on.
+This covers all but the first digit of both `start` and `end` (as well as the two outliers `wxyz` and `WXYZ`).
+Thus the total number of CETs required to cover the range will be equal to the sum of the unique digits of `end` except the first, 
+plus the sum of the unique digits of `start` except for the first subtracted from `B-1` plus the difference of the first digits plus one.
+
+A corollary of this is that the number of CETs required to cover a range of length `L` will be `O(B*log_B(L))` because `log_B(L)`
 corresponds to the number of unique digits between the start and end of the range and for each unique digit a row is
 generated in both the front and back groupings of length at most `B-1 ` which corresponds to the coefficient in the order bound.
-This counting shows us that base 2 is the optimal base to be using in general cases as it will outperform all larger bases
-in both large and small ranges in general.
 
-Note that there are two more possible optimizations to be made, which I call the **row optimization**, using the outliers `wxyz` and `WXYZ`.
+This counting also shows us that base 2 is the optimal base to be using in general cases as it will, in general, outperform all larger bases
+in both large and small intervals.
+To help with intuition on this matter, consider an arbitrary range of three digit numbers in base 10.
+To capture the same range in base 2 we need 10 digit binary numbers.
+However, a random three digit number in base 10 is expected to have a digit sum of 15, while a random ten digit binary number expects a digit sum of only 5!
+Thus we should expect base 2 to outperform base 10 by around 3x on average.
+This is because using binary results in a compression where each row in the diagram above has only a single element, which corresponds
+to binary compression's ability to efficiently reach the largest possible number of digits ignored which itself covers the largest number of cases.
+Meanwhile in a base like 10, each row can take up to 9 CETs before moving to a larger number of digits ignored (and cases covered).
+Another way to put this is that the inefficiency of base 10 which seems intuitive at small scales is actually equally present at *all scales*!
+
+Note that there are two more possible optimizations to be made, which this specification calls the **row optimization**, using the outliers `wxyz` and `WXYZ`.
 If `z=0` then the entire first row can be replaced with `wxy_` and if `Z=B-1` then the entire last row can be replaced with `WXY_`.
 There are another two possible optimizations in the case where the front or back groupings are not needed, which
 I call **grouping optimization**, that again use the outliers to the above pattern `wxyz` and `WXYZ`.
