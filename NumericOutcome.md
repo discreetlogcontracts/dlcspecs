@@ -259,8 +259,8 @@ We will then need a function to compute the shared prefix and the unique digits 
 
 ```scala
 def separatePrefix(start: Long, end: Long, base: Int, numDigits: Int): (Vector[Int], Vector[Int], Vector[Int]) = {
-    val startDigits = decompose(startIndex, base, numDigits)
-    val endDigits = decompose(endIndex, base, numDigits)
+    val startDigits = decompose(start, base, numDigits)
+    val endDigits = decompose(end, base, numDigits)
 
     val prefixDigits = startDigits
       .zip(endDigits)
@@ -332,7 +332,7 @@ def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Ve
     val (prefixDigits, startDigits, endDigits) = separatePrefix(start, end, base, numDigits)
     
     if (start == end) { // Special Case: Range Length 1
-        Vector(startDigits)
+        Vector(prefixDigits)
     } else if (startDigits.forall(_ == 0) && endDigits.forall(_ == base - 1)) { // Total Optimization
         Vector(prefixDigits)
     } else if (prefix.length == numDigits - 1) { // Special Case: Front Grouping = Back Grouping
