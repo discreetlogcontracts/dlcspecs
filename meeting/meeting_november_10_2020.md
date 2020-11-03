@@ -141,8 +141,8 @@ As per discussion after our previous meeting, we shall open our meeting with bri
 
 **#Query(Lloyd, all)**
 
-* Last meeting we discussed using TOR or BIP 342 for solving problems like port forwarding
-  * Lloyd was potentially interested in pursuing BIP 342
+* Last meeting we discussed using TOR or BIP 324 for solving problems like port forwarding
+  * Lloyd was potentially interested in pursuing BIP 324
   * Any updates or new thoughts on this subject?
 
 ## Lightning DLCs
