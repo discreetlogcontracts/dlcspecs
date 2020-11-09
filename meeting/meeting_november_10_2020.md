@@ -43,6 +43,14 @@ As per discussion after our previous meeting, we shall open our meeting with bri
 * **#Query(Matt)**
 * **#Query(all)**
 
+## Mailing List
+
+**#Discussion**
+
+* Many have asked for the creation of a mailing list
+* Setting it up?
+* Archives?
+
 ## Secp256k1 Progress
 
 **#Status_Update**
@@ -56,6 +64,9 @@ As per discussion after our previous meeting, we shall open our meeting with bri
 
 * The initial [Oracle Proposal](https://github.com/discreetlogcontracts/dlcspecs/pull/55/) has been merged!
   * Exact serialization and signing algorithm not fully specified by the current doc
+    * Ben has an initial proposal
+      * https://github.com/discreetlogcontracts/dlcspecs/pull/113
+      * Summarize **#Query(Ben)**
     * **#Discussion**
     * https://github.com/discreetlogcontracts/dlcspecs/issues/111
   * We need a doc for client-side oracle validation
@@ -93,7 +104,15 @@ As per discussion after our previous meeting, we shall open our meeting with bri
 **#Status_Update**
 
 * The initial specification for on-chain handling has been [merged](https://github.com/discreetlogcontracts/dlcspecs/pull/87)!
-  * NADAV, WRITE THIS SECTION ONCE THINGS ARE MERGED
+* Summary
+  * We rely on CPFP with BIP 125 (RBF) on the child transaction for dynamic fee handling
+  * Users may set their own attempt frequencies up to a `security_point` after which they must aggressively attempt to successfully RBF
+  * We currently discourage all double-spends of funding inputs and consider this malicious behavior
+    * If a counter party does this we suggest they be black-listed
+    * **#Discussion**
+* Still need doc with recommendations for key management
+* Any other oracle things worth discussion/mention?
+  * **#Query(all)**
 
 ## Specification Writing
 
@@ -121,11 +140,12 @@ As per discussion after our previous meeting, we shall open our meeting with bri
     * Is there anything we can do to get this to happen? Maybe post to telegram or tweet?
 * SIGHASH discussion seems to have gone stale
   * https://github.com/discreetlogcontracts/dlcspecs/issues/91
+  * Antoine has voiced that he thinks this should be considered for a future version and not for initial release to reduce complexity
   * I (Nadav) personally have been unable to follow this discussion, if there are any take-aways or proposals to be made, I will need them written and PR'd or put on that issue so that I can spend time understanding it
-  * **#Goal(Get a volunteer to write up take-away/proposal if applicable)**
 * "Key Material Compromised" Message
-  * **#Discussion**
   * https://github.com/discreetlogcontracts/dlcspecs/issues/94
+  * Antoine has volunteered to write a proposal for this
+  * **#Discussion**
 * Client-side Oracle Validation
   * https://github.com/discreetlogcontracts/dlcspecs/issues/97
   * Antoine has volunteered to work on this
