@@ -55,8 +55,12 @@ As per discussion after our previous meeting, we shall open our meeting with bri
 
 **#Status_Update**
 
-* We are still waiting on schnorrsig upstream changes to be merged into secp256k1-zkp in this [PR](https://github.com/ElementsProject/secp256k1-zkp/pull/103)
-  * There seems to have been almost no movement on this this month
+* schnorrsig has just been merged into secp256k1-zkp this week!
+* It is now time to open a PR with [ECDSA Adaptor Signatures](https://github.com/jonasnick/secp256k1/pull/14) cherry-picked onto secp256k1-zkp
+  * There are still [TODOs left on this branch](https://github.com/jonasnick/secp256k1/pull/14/files#diff-0bc5e1a03ce026e8fea9bfb91a5334cc545fbd7ba78ad83ae5489b52e4e48856R19)
+  * Jonas said he would be willing to do this work at some point if no one else does
+    * Nadav doesn't feel fully comfortable with doing this
+    * **#Query(Lloyd)**?
 
 ## Oracle Specifications
 
@@ -125,11 +129,9 @@ As per discussion after our previous meeting, we shall open our meeting with bri
 * Ordering of inputs and outputs
   * We plan to use the `serial_id` construction [here](https://github.com/niftynei/lightning-rfc/blob/1aa5dbe2987f0a0e79fa1d04718d91c6d01e07b2/02-peer-protocol.md#the-tx_add_output-message)
   * https://github.com/discreetlogcontracts/dlcspecs/issues/18
-* Adaptor Signature Specification (assigned to Lloyd)
-  * High level section (motivation, abstract) are higher priority because people have been asking for resources and there aren't any
-  * https://github.com/discreetlogcontracts/dlcspecs/issues/50
-  * **#Query(Lloyd)**
-    * A couple months ago Lloyd [mentioned](https://github.com/discreetlogcontracts/dlcspecs/issues/50#issuecomment-693101689) his anticipated approach, any updates?
+* Adaptor Signature Specification
+  * PR has just been opened!
+    * https://github.com/discreetlogcontracts/dlcspecs/pull/114
 * Adding TLV Streams for extensibility
   * Does this even make sense given the way we are using TLVs?
   * https://github.com/discreetlogcontracts/dlcspecs/issues/73
