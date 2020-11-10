@@ -3,7 +3,7 @@
 DLCs work by conditioning a transaction on the revelation of an oracle's signature .
 Concretely the approach is to encrypt a transaction signature such that the oracle's released signature is the decryption key.
 Once the oracle has revealed a signature, either party may use it to decrypt the corresponding transaction signature and broadcast the transaction.
-By this method an oracle's view of a real world event enforces a particualr distribution of funds between two parties according to their private bet. 
+By this method an oracle's view of a real world event enforces a particular distribution of funds between two parties according to their private bet.
 
 ## Adaptor Signatures
 
@@ -11,7 +11,7 @@ By this method an oracle's view of a real world event enforces a particualr dist
 Given a anticipated signature `Y` we may encrypt a signature (for the purposes of this document, an ECDSA signature) under `Y` such that once a party learns the discrete logarithm of `Y` they can decrypt it and get a valid ECDSA signature.
 
 An interesting aspect of adaptor signatures is that they leak the decryption key (the discrete logarithm of `Y`) when they are decrypted.
-In our case the leaked decryption key is is the scalar *s* value of a [[BIP340]] signature which turns out to be quite useful.
+In our case the leaked decryption key is the scalar *s* value of a [[BIP340]] signature which turns out to be quite useful.
 The ability to recover the *s* value from the on-chain transaction actually improves the security of the protocol compared to the original DLC description in [[Dry]].
 To see why, imagine an oracle who engages in bets based on their own signatures.
 In order to not maintain their credibility they must publish the correct signature scalar `s_valid` publicly, but what is to stop them from privately generating a favorable and wrong `s_cheat` to settle their own bet?
@@ -28,7 +28,7 @@ Although we do not explicitly attach proofs of knowledge, in the DLC application
   - *n* denotes the curve order of secp256k1 `0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141`
   - Scalars are integers between *0..(n-1)* inclusive.
   - Scalars have three infix operations: multiplication (`*`) and addition (`+`) and subtraction (`-`) which are done modulo *n*.
-  - Scalars have a postfix operation (`^1`) which denotes inversion modulo *n*.
+  - Scalars have a postfix operation (`⁻¹`) which denotes inversion modulo *n*.
   - Points are members of the secp256k1 group.
   - Points have two binary operations between them: addition (`+`) and subtraction (`-`) which represent the group operation and the inverse group operation respectively.
   - Points and scalars have a infix multiplication (`*`) operation which for `s * P` means adding the point `P` to itself `s` times.
@@ -135,8 +135,8 @@ and is defined as:
 - Parse `a` as `(R, R_a, s_a, proof)`
 - Check `DLEQ_verify((R_a, Y, R), proof)` or fail
 - Set `m` to `scalar(message_hash)`
-- Set `u_1` to `s_a^-1 * m`
-- Set `u_2` to `s_a^-1 * r`
+- Set `u_1` to `s_a⁻¹ * m`
+- Set `u_2` to `s_a⁻¹ * r`
 - Check `u_1 * G + u2 * X == R_a`
 
 ### Decryption
@@ -149,9 +149,9 @@ The `ecdsa_adaptor_decrypt(a, y)` algorithm takes as input:
 and is defined as:
 
 - Parse `a` as `(R, R_a, s_a, proof)`
-- Set `s` to `s_a * y^-1`
+- Set `s` to `s_a * y⁻¹`
 - Negate `s` if it is high as specified in [[BIP62]]
-- Set `r` to the x-coordinate of `R` modulo `q`
+- Set `r` to the x-coordinate of `R` modulo `n`
 - Return `r || s`
 
 The returned value is a ECDSA signature.
@@ -169,9 +169,9 @@ and is defined as follows:
 
 - Parse `a` as `(R, R_a, s_a, proof)`
 - Parse `sig` as `(r,s)`
-- Set `r_implied` to the x-coordinate of `R` modulo `q`
+- Set `r_implied` to the x-coordinate of `R` modulo `n`
 - Check `r == r_implied` or fail
-- Set `y` to `s^-1 * s_a`
+- Set `y` to `s⁻¹ * s_a`
 - Set `Y_implied` to `y * G`
 - If `Y_implied == Y` then return `y`
 - Otherwise, if `Y_implied == -Y` then return `-y`
