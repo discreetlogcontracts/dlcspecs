@@ -14,9 +14,9 @@ An interesting aspect of adaptor signatures is that they leak the decryption key
 In our case the leaked decryption key is the scalar *s* value of a [[BIP340]] signature which turns out to be quite useful.
 The ability to recover the *s* value from the on-chain transaction actually improves the security of the protocol compared to the original DLC description in [[Dry]].
 To see why, imagine an oracle who engages in bets based on their own signatures.
-In order to not maintain their credibility they must publish the correct signature scalar `s_valid` publicly, but what is to stop them from privately generating a favorable and wrong `s_cheat` to settle their own bet?
+In order to maintain their credibility they must publish the correct signature scalar `s_valid` publicly, but what is to stop them from privately generating a favorable and wrong `s_cheat` to settle their own bet?
 In the original DLC protocol this was possible and difficult to catch.
-Using adaptor signatures the wronged party can extract the malicious `s_cheat` value from the on-chain signature and use it along with `s_valid` to punish the oracle and produce a proof of fraud.
+Using adaptor signatures the wronged party can extract the malicious `s_cheat` value from the on-chain signature and use it along with `s_valid` to produce a proof of fraud.
 
 An appropriate ECDSA adaptor signature scheme that can be used in Bitcoin prior to the Taproot soft-fork was originally posted to the Bitcoin mailing list by [[Mor]] and then further refined by [[Fou],[Aum]].
 The algorithms presented here resemble the scheme from [[Fou]] but the security proof of the scheme in [[Aum]] can be applied to it which requires a proof of knowledge of the discrete logarithm to be attached to each encryption key.
@@ -27,7 +27,7 @@ Although we do not explicitly attach proofs of knowledge, in the DLC application
 - secp256k1 operations: We refer to *points* and *scalars* of the secp256k1 group and the operations between them.
   - *n* denotes the curve order of secp256k1 `0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141`
   - Scalars are integers between *0..(n-1)* inclusive.
-  - Scalars have three infix operations: multiplication (`*`) and addition (`+`) and subtraction (`-`) which are done modulo *n*.
+  - Scalars have three infix operations: multiplication (`*`), addition (`+`) and subtraction (`-`) which are done modulo *n*.
   - Scalars have a postfix operation (`⁻¹`) which denotes inversion modulo *n*.
   - Points are members of the secp256k1 group.
   - Points have two binary operations between them: addition (`+`) and subtraction (`-`) which represent the group operation and the inverse group operation respectively.
