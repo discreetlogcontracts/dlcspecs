@@ -49,7 +49,7 @@ When an event has numerical outcomes that cannot be easily enumerated, they can 
 - count: the number of possible outcomes
 - step: the increment
 - unit: the unit of the outcome value
-- precision: the precision of the outcome representing the base 10 exponent by which to multiply the signed number to obtain the actual outcome value.
+- precision: the precision of the outcome representing the base exponent by which to multiply the signed number to obtain the actual outcome value.
 
 #### Example: tomorrow's temperature
 
