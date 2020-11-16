@@ -49,7 +49,7 @@ When an event has numerical outcomes that cannot be easily enumerated, they can 
 - count: the number of possible outcomes
 - step: the increment
 - unit: the unit of the outcome value
-- precision: the precision of the outcome representing the base 10 exponent by which to multiply the signed number to obtain the actual outcome value.
+- precision: the precision of the outcome representing the base exponent by which to multiply the signed number to obtain the actual outcome value.
 
 #### Example: tomorrow's temperature
 
@@ -76,8 +76,7 @@ The event descriptor should include:
 In the case where the number of digits that make up the outcome value exceeds the number of r-values that the oracle committed to, the oracle should sign the maximal possible value that it can attest to.
 In the case where the outcome value became negative but the oracle did not provide an extra R-value, it should sign the value 0.
 The minimum and maximum values that can be attested to by an oracle should thus be interpreted as `max_value or more` and `min_value or less`.
-This enables contracting party to specify payouts for the overflow and underflow cases, and avoid having to use the refund path which in most cases would be unfair.
-More complex constructions where considered to handle these, but the simplicity of the currently specified approach is the reason that it was chosen.
+This enables contracting party to specify payouts for the overflow and underflow cases, and avoid having to use the refund path which in most cases would be unfair.<sup id="foot1">[1](#f1)</sup>
 
 The oracle must separately provide an array of R values, one for each of the digit that will be signed, with the first value of the array being used for signing the leftmost digit. If the is-signed value is true, an additional R-value must be provided as the first element in this array, which will be used to sign the string "+" in case of an outcome with a positive value or zero value and the string "-" in case of an outcome with a negative one.
 In practice this array is provided as part of the [Oracle events](#Oracle-events) structure.
@@ -195,3 +194,10 @@ The TLV serialization of oracle announcements is as follow.
    * [`oracle_event`:`oracle_event`]
 
 where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`.
+
+## Footnotes
+
+<b id="f1">1</b>: More complex constructions where considered to handle these.
+For example, one considered approach was to require the oracle to sign the number of digit that make up an outcome.
+Another one was to sign a flag indicating overflow.
+However, these make the specifications more complex, without providing any clear benefit (or without the currently specified approach having any clear downside).
