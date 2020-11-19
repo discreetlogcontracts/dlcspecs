@@ -31,8 +31,8 @@ signatures are used and may have any value at all other digits for which signatu
   * [Curve Serialization](#curve-serialization)
   * [General Function Evaluation](#general-function-evaluation)
   * [Optimized Evaluation During CET Calculation](#optimized-evaluation-during-cet-calculation)
-  * [Precision Ranges](#precision-ranges)
-    * [Precision Range Serialization](#precision-range-serialization)
+  * [Rounding Intervals](#rounding-intervals)
+    * [Rounding Interval Serialization](#rounding-interval-serialization)
 * [Contract Execution Transaction Calculation](#contract-execution-transaction-calculation)
 * [Contract Execution Transaction Signature Validation](#contract-execution-transaction-signature-validation)
 * [Authors](#authors)
@@ -71,8 +71,12 @@ announcement and `s(1..m)` is sufficient information to generate a fraud proof i
 ## Contract Execution Transaction Compression
 
 Anytime there is a range of numeric outcomes `[start, end]` which result in the same payouts for all parties,
-then a compression function can be run to reduce the number of CETs to be `O(log(L))` instead of `L` where 
-`L = end - start + 1` is the length of the interval being compressed.
+then a compression function described in this section can be run to reduce the number of CETs to be `O(log(L))`
+instead of `L` where  `L = end - start + 1` is the length of the interval being compressed.
+
+Because this compression of CETs only works for intervals which result in the same payout, the [CET calculation algorithm](#contract-execution-transaction-calculation)
+described later first splits the domain into buckets of equal payout, and then applies the compression algorithm from this
+section to individual intervals, `[start, end]` where all values in this interval have some fixed payout.
 
 Most contracts are expected to be concerned with some subset of the total possible domain and every
 outcome before or after that range will result in some constant maximal or minimal payout.
@@ -158,8 +162,8 @@ where `_` refers to an ignored digit (an omission from the array of integers) an
 
 ### Analysis of CET Compression
 
-This specification refers to the first three rows as the **front groupings** the fourth row as the **middle grouping** and the last three rows
-as the **back groupings**.
+This specification refers to the first three rows of the abstract example above as the **front groupings** the fourth row
+in the example as the **middle grouping** and the last three rows in the example as the **back groupings**.
 
 Notice that the patterns for the front and back groupings are nearly identical.
 
@@ -221,11 +225,15 @@ This grouping pattern captures the exclusive range `(2200, 4999)` and then adds 
 But this method misses out on a good amount of compression as re-introducing the endpoints allows us to replace the first two rows with
 a single `22__` and the last 3 rows with just `4___`.
 
-More generally, if the unique digits of `start = (x1)(x2)...(xn)` then if `x(n-i+1) = x(n-i+2) = ... = xn = 0`, then the first `i` rows
-of the front groupings can be replaced by `(x1)(x2)...(x(n-i))_..._`.
-Likewise if the unique digits of `end = (y1)(y2)...(yn)` then if `y(n-j+1) = y(n-j+2) = ... = yn = B-1`, then the last `j` rows
-of the back groupings can be replaced by `(y1)(y2)...(y(n-j))_..._`.
 This optimization is called the **endpoint optimization**.
+
+More generally, let the unique digits of `start` be `start = (x1)(x2)...(xn)` then if `x(n-i+1) = x(n-i+2) = ... = xn = 0`, then the
+first `i` rows of the front groupings can be replaced by `(x1)(x2)...(x(n-i))_..._`.
+In the example above, `start` ends with two zeros so that the first two rows are replaced by `22__`.
+
+Likewise, let the unique digits of `end` be `end = (y1)(y2)...(yn)` then if `y(n-j+1) = y(n-j+2) = ... = yn = B-1`, then the last `j` rows
+of the back groupings can be replaced by `(y1)(y2)...(y(n-j))_..._`.
+In the example above, `end` ends with three nines so that the last three rows can are replaced by `4___`.
 
 There is one more optimization that can potentially be made.
 If the unique digits of `start` are all `0` and the unique digits of `end` are all `B-1` then we will have no need for a middle grouping as we can cover
@@ -290,7 +298,7 @@ def frontGroupings(
         }
     }
 
-    nonZeroStartDigits.map(_._1).reverse +: fromFront // Add Endpoint
+    nonZeroDigits.map(_._1).reverse +: fromFront // Add Endpoint
   }
 }
 
@@ -333,9 +341,13 @@ def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Ve
     
     if (start == end) { // Special Case: Range Length 1
         Vector(prefixDigits)
-    } else if (startDigits.forall(_ == 0) && endDigits.forall(_ == base - 1)) { // Total Optimization
-        Vector(prefixDigits)
-    } else if (prefix.length == numDigits - 1) { // Special Case: Front Grouping = Back Grouping
+    } else if (startDigits.forall(_ == 0) && endDigits.forall(_ == base - 1)) {
+        if (prefixDigits.nonEmpty) {
+            Vector(prefixDigits) // Total Optimization
+        } else {
+            throw new IllegalArgumentException("DLCs with only one outcome are not supported.")
+        }
+    } else if (prefixDigits.length == numDigits - 1) { // Special Case: Front Grouping = Back Grouping
         startDigits.last.to(endDigits.last).toVector.map { lastDigit =>
             prefixDigits :+ lastDigit
         }
@@ -447,55 +459,57 @@ when repeatedly and sequentially evaluating an interpolation as is done during C
   For example, when dealing with a cubic piece, if you are going left to right and enter a new value modulo precision while the first derivative (slope) is positive and the second derivative (concavity) is negative then you can take the tangent line to the curve at this point and find it's intersection with the next value boundary modulo precision.
   If the derivatives' signs are the same, then the interval from the current x-coordinate to the x-coordinate of the intersection is guaranteed to all be the same value modulo precision.
 
-### Precision Ranges
+### Rounding Intervals
 
 As detailed in the section on [CET compression](#contract-execution-transaction-compression), any time some continuous interval of the domain results in the same payout value, we can
 compress the CETs required by that interval to be logarithmic in size compared to using one CET per point on that interval.
-As such, it can be beneficial to reduce the precision of the payout function to allow for bounded approximation of pieces of the payout
+As such, it can be beneficial to round the outputs of the payout function to allow for bounded approximation of pieces of the payout
 curve by constant-valued intervals.
-For example, if me and my counter-party are both willing to round payout values to the nearest 100 satoshis, we can have significant savings
-on the number of CETs required to enforce our contract.
-To this end, we allow parties to negotiate precision ranges which may vary along the curve, allowing more precision near more probably outcomes
-and allowing more rounding to occur near extremes.
+For example, if two parties are both willing to round payout values to the nearest 100 satoshis, they can have significant savings
+on the number of CETs required to enforce their contract.
+To this end, we allow parties to negotiate rounding intervals which may vary along the curve, allowing for less rounding near more
+probable outcomes and allowing for more rounding to occur near extremes.
 
-Each party has their own minimum `precision_ranges` and the precision to be used at a given `event_outcome` is the minimum of both party's precisions.
+Each party has their own minimum `rounding_intervals` and the rounding to be used at a given `event_outcome` is the minimum
+of both party's rounding moduli.
 
-If `P` is the precision to be used for a given `event_outcome` and the result of function evaluation for that `event_outcome` is `value`, then the amount
-to be used in the CET output for this party will be the closer of `value - (value % P)` or `value - (value % P) + P`, rounding up in the case of a tie.
+If `R` is the rounding modulus to be used for a given `event_outcome` and the result of function evaluation for that `event_outcome` is `value`,
+then the amount to be used in the CET output for this party will be the closer of `value - (value % R)` or `value - (value % R) + R`, rounding
+up in the case of a tie.
 
-#### Precision Range Serialization
+#### Rounding Interval Serialization
 
-1. type: ??? (`precision_ranges_v0`)
+1. type: ??? (`rounding_intervals_v0`)
 2. data:
-   * [`u16`:`num_precision_ranges`]
-   * [`bigsize`:`begin_range_1`]
-   * [`bigsize`:`precision_1`]
+   * [`u16`:`num_rounding_intervals`]
+   * [`bigsize`:`begin_interval_1`]
+   * [`bigsize`:`rounding_mod_1`]
    * ...
-   * [`bigsize`:`begin_range_num_precision_ranges`]
-   * [`bigsize`:`precision_num_precision_ranges`]
+   * [`bigsize`:`begin_interval_num_rounding_intervals`]
+   * [`bigsize`:`rounding_mod_num_rounding_intervals`]
 
-`num_precision_ranges` is the number of precision ranges specified in this function and can be
-zero in which case a precision of `1` is used everywhere.
-Each serialized precision range consists of two `bigsize` integers.
+`num_rounding_intervals` is the number of rounding intervals specified in this function and can be
+zero in which case a rounding modulus of `1` is used everywhere.
+Each serialized rounding interval consists of two `bigsize` integers.
 
-The first integer is called `begin_range` and refers to the x-coordinate (`event_outcome`) at which this range begins.
-The second integer is called `precision` and contains the precision modulus to be used in this range.
+The first integer is called `begin_interval` and refers to the x-coordinate (`event_outcome`) at which this range begins.
+The second integer is called `rounding_mod` and contains the rounding modulus to be used in this range.
 
-If `begin_range_1` is strictly greater than `0`, then the interval between `0` and `begin_range_1` has a precision of `1`.
+If `begin_interval_1` is strictly greater than `0`, then the interval between `0` and `begin_interval_1` has a precision of `1`.
 
 #### Requirements
 
-* `begin_range_1`, if it exists, MUST be non-negative.
-* `begin_range` MUST strictly increase.
+* `begin_interval_1`, if it exists, MUST be non-negative.
+* `begin_interval` MUST strictly increase.
 
 ## Contract Execution Transaction Calculation
 
-Given a payout function, a `total_collateral` amount and precision ranges, we wish to compute a list of pairs of arrays of
+Given a payout function, a `total_collateral` amount and rounding intervals, we wish to compute a list of pairs of arrays of
 integers (corresponding to digits) and Satoshi values.
 Each of these pairs will then be turned into a CET whose adaptor point is computed from the list of integers and whose values
 will be equal to the Satoshi value and `total_collateral` minus that value.
 
-We must first modify the pure function given to us by interpolating points by applying precision ranges, as well as setting all
+We must first modify the pure function given to us by interpolating points by applying rounding, as well as setting all
 negative payouts to `0` and all computed payouts above `total_collateral` to equal `total_collateral`.
 
 Next, we split the function's domain into two kinds of intervals:
@@ -522,7 +536,8 @@ To validate the adaptor signatures for CETs given in a `dlc_accept` or `dlc_sign
 lists of digits and payout values to construct the CETs and then run the `adaptor_verify` funciton.
 
 However, if `adaptor_verify` results in a failed validation, do not terminate the CET signature process.
-Instead, you must look at whether you rounded up (to `value - (value % precision) + precision`) or down (to `value - (value % precision)`).
+Instead, you must look at whether you rounded up (to `value - (value % rounding_mod) + rounding_mod`)
+or down (to `value - (value % rounding_mod)`).
 If you rounded up, compute the CET resulting from rounding down or if you rounded down, compute the CET resulting from rounding up.
 Call the `adaptor_verify` function against this new CET and if it passes verification, consider that adaptor signature valid and continue.
 
@@ -530,7 +545,7 @@ This extra step is necessary because there is no way to introduce deterministic 
 introducing complexity of magnitude much larger than that of this entire specification.
 This is because there are no guarantees provided by hardware, operating systems, or programming language compilers that doing the same
 floating point computation twice will yield the same results.
-Thus, this specification instead takes the stance that clients must be resilient to off-by-precision (off-by-one * precision) differences between machines.
+Thus, this specification instead takes the stance that clients must be resilient to off-by-precision (off-by-one * rounding_mod) differences between machines.
 
 ## Authors
 
