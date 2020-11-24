@@ -412,10 +412,14 @@ The first integer is called `event_outcome` and contains the actual number that 
 The second integer is called `outcome_payout` and is set equal to the local party's payout should
 `event_outcome` be signed which corresponds to a y-coordinate on the payout curve.
 
-Note that if you wish to construct the counter-party's `payout_function`, then this can be accomplished by replacing
-all `outcome_payout`s in your `payout_function` with `total_collateral - outcome_payout` and interpolating the
-resulting function will yield the same result as defining your counter-party's function to be `total_collateral - computed_payout`
-at every possible `event_outcome`.
+Note that this `payout_function` is from the offerer's point of view.
+To evaluate the accepter's `payout_function`, you must evaluate the offerer's `payout_function` at a given
+`event_outcome` and subtract the resulting payout from `total_collateral`.
+It is important that you do NOT construct the accepter's `payout_function` by replacing all `outcome_payout`s in the
+offerer's `payout_function` with `total_collateral - outcome_payout` and interpolating the resulting points.
+This does not work because, due to rounding, the sum of the outputs of both parties' `payout_function`s could then be
+`total_collateral - 1` and including checking this case (with one satoshi missing from either outcome) to the verification algorithm
+could make verification times up to four times slower and adds complexity to the protocol by breaking a reasonable assumption.
 
 #### Requirements
 
@@ -504,8 +508,8 @@ If `begin_interval_1` is strictly greater than `0`, then the interval between `0
 
 ## Contract Execution Transaction Calculation
 
-Given a payout function, a `total_collateral` amount and rounding intervals, we wish to compute a list of pairs of arrays of
-integers (corresponding to digits) and Satoshi values.
+Given the offerrer's payout function, a `total_collateral` amount and rounding intervals, we wish to compute a list of pairs
+of arrays of integers (corresponding to digits) and Satoshi values.
 Each of these pairs will then be turned into a CET whose adaptor point is computed from the list of integers and whose values
 will be equal to the Satoshi value and `total_collateral` minus that value.
 
