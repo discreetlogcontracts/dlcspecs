@@ -185,6 +185,19 @@ i.e. there is no strict need to verify `sig` after (or before) successfully call
 However, successfully recovering the signature does not ensure that it follows the `low_s` rule described in [[BIP62]] necessary to be able to broadcast the signature on a transaction in Bitcoin.
 This point is not relevant to on-chain DLCs since the ECDSA signatures always come from the blockchain where they have hopefully already been verified.
 
+
+## Specification tests
+
+Several verification test vectors are in [./ecdsa_adaptor.json].
+These only check that verification is done correctly.
+Implementations should use the vectors in the follwowing way:
+
+- First check `adaptor_sig` passes `ecdsa_adaptor_verify`.
+- Check that `ecdsa_adaptor_decrypt` recovers `signature`.
+- Check that  `ecdsa_adaptor_recover` recovers `decryption_key`.
+
+These should fail only when `error` is set in the test vector.
+
 [Dry]: https://adiabat.github.io/dlc.pdf
 [Mor]: https://lists.linuxfoundation.org/pipermail/lightning-dev/attachments/20180426/fe978423/attachment-0001.pdf
 [Fou]: https://github.com/LLFourn/one-time-VES/blob/master/main.pdf
