@@ -6,7 +6,7 @@ by every party involved.
 
 ## The Bet: A Short Introduction to Discreet Log Contracts
 
-DLC [were originally proposed by Thaddheus Dryja](https://adiabat.github.io/dlc.pdf).
+DLC [were originally proposed by Thaddeus Dryja](https://adiabat.github.io/dlc.pdf).
 The goal of DLC is to enable setting up contracts between two parties directly on the Bitcoin blockchain using an oracle to determine the contract outcome.
 
 ### Oracle
@@ -44,13 +44,13 @@ It should usually be broadcast together with the corresponding CET.
 
 ### Contract Execution Transaction (CET)
 
-A transaction spending from the [fund transaction](#fund-transaction) whose outputs represent a possible outcome of a DLC contract.
+A transaction spending from the [funding transaction](#funding-transaction) whose outputs represent a possible outcome of a DLC contract.
 The first output can be spent either by one of the contracting party with knowledge of an oracle signature over the outcome, or by their counter-party after a given timeout.
 The second output can be spent directly.
 
 ### Funding transaction
 
-An irreversible on-chain transaction locking the contract collateral in an output that can only be spent by mutual consent.
+An on-chain transaction locking the contract collateral in an output that can only be spent by mutual consent.
 It can also contain change outputs in the case where the amount input by a party is greater than the desired collateral.
 
 ### Mutual Close
@@ -60,7 +60,7 @@ A mutual close does not require the broadcast of any [CET](#contract-execution-t
 
 ### Mutual Closing Transaction
 
-A transaction spending from the [fund transaction](#fund-transaction) paying to each party the amount that was agreed based on the published event outcome.
+A transaction spending from the [funding transaction](#funding-transaction) paying to each party the amount that was agreed based on the published event outcome.
 
 ### Oracle
 

@@ -145,7 +145,7 @@ The receiving node MUST reject the contract if:
   - the `oracle_info` refers to an oracle unknown or inaccessible to the receiver.
   - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
-  - `funding_inputs` do not contribute at least `total_collateral_satohis` plus full [fee payment](Transactions.md#fee-payment).
+  - `funding_inputs` do not contribute at least `total_collateral_satoshis` plus full [fee payment](Transactions.md#fee-payment).
 
 ### The `accept_dlc` Message
 
@@ -188,7 +188,7 @@ The receiver:
     - MAY reject the contract.
   - if `cet_adaptor_signatures` or `refund_signature` fail validation:
     - MUST reject the contract.
-- if `funding_inputs` do not contribute at least `total_collateral_satohis` plus [fee payment](Transactions.md#fee-payment)
+- if `funding_inputs` do not contribute at least `total_collateral_satoshis` plus [fee payment](Transactions.md#fee-payment)
   - MUST reject the contract.
 
 Other fields have the same requirements as their counterparts in `offer_dlc`.
