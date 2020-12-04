@@ -27,7 +27,7 @@ For learning more about DLC have a look at the [resources](Resources.md) page.
 
 ### Future Work
 
-- Construction and neogatiation of DLCs in Lightning ([#3](https://github.com/discreetlogcontracts/dlcspecs/issues/3))
+- Construction and negotiation of DLCs in Lightning ([#3](https://github.com/discreetlogcontracts/dlcspecs/issues/3))
 
 ## Implementations
 
