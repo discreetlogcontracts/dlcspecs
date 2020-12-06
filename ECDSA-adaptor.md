@@ -8,9 +8,9 @@ By this method an oracle's view of a real world event enforces a particular dist
 ## Adaptor Signatures
 
 *Adaptor signatures* are an efficient form of verifiable signature encryption that can achieve our required structure.
-Given a anticipated signature `Y` we may encrypt a signature (for the purposes of this document, an ECDSA signature) under `Y` such that once a party learns the discrete logarithm of `Y` they can decrypt it and get a valid ECDSA signature.
+Given an anticipated signature `Y` we may encrypt a signature (for the purposes of this document, an ECDSA signature) under `Y` such that once a party learns the discrete logarithm of `Y` they can decrypt it and get a valid ECDSA signature.
 
-An interesting aspect of adaptor signatures is that they leak the decryption key (the discrete logarithm of `Y`) when they are decrypted.
+An interesting aspect of adaptor signatures is that the decryption key (the discrete logarithm of the encryption key `Y`) can be derived if both the plaintext (the valid ECDSA signature) and the ciphertext (the adaptor signature) are known.
 In our case the leaked decryption key is the scalar *s* value of a [[BIP340]] signature which turns out to be quite useful.
 The ability to recover the *s* value from the on-chain transaction actually improves the security of the protocol compared to the original DLC description in [[Dry]].
 To see why, imagine an oracle who engages in bets based on their own signatures.
@@ -28,7 +28,7 @@ Although we do not explicitly attach proofs of knowledge, in the DLC application
   - *n* denotes the curve order of secp256k1 `0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141`
   - Scalars are integers between *0..(n-1)* inclusive.
   - Scalars have three infix operations: multiplication (`*`), addition (`+`) and subtraction (`-`) which are done modulo *n*.
-  - Scalars have a postfix operation (`⁻¹`) which denotes inversion modulo *n*.
+  - Scalars have a postfix operation (`⁻¹`) which denotes multiplicative inversion modulo *n*.
   - Points are members of the secp256k1 group.
   - Points have two binary operations between them: addition (`+`) and subtraction (`-`) which represent the group operation and the inverse group operation respectively.
   - Points and scalars have a infix multiplication (`*`) operation which for `s * P` means adding the point `P` to itself `s` times.
@@ -115,7 +115,7 @@ and is defined as:
 - Set `R` to `k * Y`
 - Set `proof` to `DLEQ_prove(k, (R_a, Y, R))`
 - Set `r` to the x-coordinate of `R` modulo `n` (i.e. convert it to a scalar)
-- Set `s_a` to `k^-1 (m + r * x)`
+- Set `s_a` to `k⁻¹ (m + r * x)`
 - Set `a` to `R || R_a || s_a || proof`
 - Return `a`
 
