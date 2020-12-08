@@ -77,6 +77,16 @@
 * [Exact serialization algorithm for oracle signing](https://github.com/discreetlogcontracts/dlcspecs/pull/113) has been pretty stagnant
   * **#Query(Ben, Lloyd, Tibo)**
     * Anything we can hammer down in the meeting or do we just need to coordinate on this online later?
+* We are likely going to get rid of range outcomes in favor of only having enums and digit decomposition (which can have a single digit)
+  * This is to increase composability between oracles
+  * Any objections?
+    * **#Discussion**
+* We should consider rolling back the scope of multi-digit oracle work to require base 2 for the initial release
+  * Simplifies code, base 2 is best and higher bases cause larger multipliers in the number of CETs when using multiple oracles
+  * This should not really affect UX, this is only really a protocol level concern
+  * The only situation where larger bases can be useful is if you want to use a large number of oracles and all of them are signing the result in multiple bases (say base 2 and base 3)
+  * Any objections?
+    * **#Discussion**
 * Multi-oracle Work!
   * n-of-n is accomplished by adding signature points together (just like numeric outcome does multi-signature)
   * t-of-n is accomplished by making CETs for all n choose t combinations of t-of-t
