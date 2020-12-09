@@ -5,14 +5,24 @@
 **#Status_Update_Interrupt**
 
 * **#Query(Nadav)**
+  * Multi-Oracle work: Thresholds and allowing bounded differences between oracles 
 * **#Query(Tibo)**
-* **#Query(Nicolas)**
-* **#Query(Ben)**
+  * Got digit decomposition DLCs working on cfd
+  * Some Rust work
 * **#Query(Lloyd)**
+  * Test vectors for ECDSA Adaptor signtatures
 * **#Query(Antoine)**
+  * PR for client-side oracle validation just opened!
 * **#Query(Chris)**
+  * Working on oracle explorer with Roman
+    * https://oracle.suredbits.com/
+  * Also working on basic serializer/deserializer utilities for site
 * **#Query(Jesse)**
+  * Python impl of ECDSA Adaptor sigs passing test vectors
+  * Work on secp with the changes to Jonas' branch to match the spec
 * **#Query(Matt)**
+  * Looking into adding liquid support to cfd
+  * Designer began work on pics and diagrams
 * **#Query(all)**
 
 ## Mailing List
@@ -21,6 +31,7 @@
 
 * How is setting up the mailing list going?
   * Anything blocking?
+    * Nope, they'll work on it
 
 ## Secp256k1 Progress
 
@@ -30,6 +41,7 @@
 * It is now time to open a PR with [ECDSA Adaptor Signatures](https://github.com/jonasnick/secp256k1/pull/14) cherry-picked onto secp256k1-zkp
   * There are still [TODOs left on that branch](https://github.com/jonasnick/secp256k1/pull/14/files#diff-0bc5e1a03ce026e8fea9bfb91a5334cc545fbd7ba78ad83ae5489b52e4e48856R19)
   * Jesse has volunteered to work on this, any updates?
+* Nadav will reach out to nickler and waxwing to review the diff from the old branch
 
 ## Good Newcomer Issues
 
@@ -51,6 +63,8 @@
 * [ECDSA Adaptor Signature Specification](https://github.com/discreetlogcontracts/dlcspecs/pull/114)
   * **Query(Lloyd)**
   * I assume that this is mostly done until code is written implementing it?
+    * Needs abstract and motivations
+      * Leave comments when you want to know why things are a certain
   * **#Discussion**
     * Breaking changes are being made here to adaptor signature serialization
       * We won't be implementing these changes until there is a stable branch on secp256k1-zkp we can all use
@@ -67,6 +81,8 @@
     * How is implementation going on this so far?
 * **#Query(Lloyd)**
   * Any updates on P2P?
+    * BIP 324 is looking good and nearly wrapped up on paper
+  * Tibo also interested in starting work on P2P stuff
 * **#Discussion**
   * Anything about updates not discussed? Anything else?
 
@@ -87,13 +103,14 @@
   * The only situation where larger bases can be useful is if you want to use a large number of oracles and all of them are signing the result in multiple bases (say base 2 and base 3)
   * Any objections?
     * **#Discussion**
+      * We all agree that we should use base 2, add note in spec, .CET compression will remain general wrt base as it is already done and not much more complicated than base 2 specific, but future (e.g. multi-oracle) work will be restricted to base 2
 * Multi-oracle Work!
   * n-of-n is accomplished by adding signature points together (just like numeric outcome does multi-signature)
   * t-of-n is accomplished by making CETs for all n choose t combinations of t-of-t
     * Other schemes were considered but they all turned out complicated and most of them ended up devolving into using all combinations when differences between oracles is introduced
   * 2-of-2 with (bounded) differences allowed is accomplished by taking the single-oracle set of CETs and expanding them into a set of pairs of CETs to which normal 2-of-2 is applied (as above, with point addition)
     * Spec doc in progress
-    * [Code implementation](https://github.com/nkohen/bitcoin-s-core/blob/1472f055d76ed237ac7be63a895d058baed8ec75/app-commons/src/main/scala/org/bitcoins/commons/jsonmodels/dlc/CETCalculator.scala#L477)
+    * [Code implementation](https://github.com/bitcoin-s/bitcoin-s/pull/2314)
     * Base 2 is essential for practical use
       * Should we just require base 2 everywhere digit decomposition is done in all places?
         * **#Discussion**
