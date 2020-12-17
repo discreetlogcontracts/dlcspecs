@@ -93,13 +93,14 @@ This type contains information about a contracts outcomes and their correspondin
 
 1. type: 42768 (`contract_info_v0`)
 2. data:
+   * [`bigsize`:`nb_outcomes`]
    * [`sha256`:`outcome_1`]
    * [`u64`:`outcome_1_local_payout`]
    * ...
    * [`sha256`:`outcome_n`]
    * [`u64`:`outcome_n_local_payout`]
 
-This type of contract info is a simple enumeration where the value `n` is omitted from being explicitly included as it can be derived from the length field of the TLV.
+This type of contract info is a simple enumeration of pairs of the hash of an outcome value with the corresponding payout for the local party.
 
 ### The `oracle_info` Type
 
@@ -150,13 +151,14 @@ This type contains CET signatures and any necessary information linking the sign
 
 1. type: 42774 (`cet_adaptor_signatures_v0`)
 2. data:
+   * [`bigsize`:`nb_signatures`]
    * [`ecdsa_adaptor_signature`:`signature_1`]
    * [`dleq_proof`:`dleq_prf_1`]
    * ...
    * [`ecdsa_adaptor_signature`:`signature_n`]
    * [`dleq_proof`:`dleq_prf_n`]
 
-This type should be used with [`contract_info_v0`](#version-0-contract_info) where each indexed signature in the data corresponds to the outcome of the same index. As in [`contract_info_v0`](#version-0-contract_info), the number of signatures is omitted as it can be derived from the length field of the TLV.
+This type should be used with [`contract_info_v0`](#version-0-contract_info) where each indexed signature in the data corresponds to the outcome of the same index.
 
 ### The `funding_signatures` Type
 
