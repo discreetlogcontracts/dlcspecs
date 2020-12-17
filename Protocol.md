@@ -18,8 +18,8 @@ Prior to a contract being accepted, a `temporary_contract_id` is used,
 which is the SHA256 hash of the offer message.
 
 Most messages use a `contract_id` to identify the contract. It's
-derived from the funding transaction and the offer by combining the `funding_txid`
-and the `funding_output_index` and the `temporary_contract_id`, using big-endian
+derived from the funding transaction and the offer by combining the `funding_txid`,
+the `funding_output_index` and the `temporary_contract_id`, using big-endian
 exclusive-OR (i.e. `funding_output_index` alters the last 2 bytes of
 `funding_txid XOR temporary_contract_id`).
 
@@ -212,7 +212,7 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
 
 The sender MUST:
 
-  - set `contract_id` by exclusive-OR of the `funding_txid` and the `funding_output_index` from the `offer_dlc` and `accept_dlc` messages.
+  - set `contract_id` by exclusive-OR of the `funding_txid`, the `funding_output_index` and the `temporary_contract_id` from the `offer_dlc` and `accept_dlc` messages.
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
