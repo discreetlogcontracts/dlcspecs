@@ -153,7 +153,7 @@ Note that `outcome_i` is the outcome value itself and not its hash that will be 
    * [`bool`:`is_signed`]
    * [`string`:`unit`]
    * [`int32`:`precision`]
-   * [`uint16`:`nb_digits`]
+   * [`u16`:`nb_digits`]
 
 ### Oracle events
 
