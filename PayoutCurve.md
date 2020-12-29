@@ -71,13 +71,15 @@ In this section we detail the TLV serialization for a general `payout_function`.
    * [`boolean`:`is_endpoint_1`]
    * [`bigsize`:`event_outcome_1`]
    * [`bigsize`:`outcome_payout_1`]
+   * [`u16`:`extra_precision_1`]
    * ...
    * [`boolean`:`is_endpoint_num_pts`]
    * [`bigsize`:`event_outcome_num_pts`]
    * [`bigsize`:`outcome_payout_num_pts`]
+   * [`u16`:`extra_precision_num_pts`]
 
 `num_pts` is the number of points on the payout curve that will be provided for interpolation.
-Each point consists of a `boolean` and two `bigsize` integers.
+Each point consists of a `boolean` and two `bigsize` integers and a `u16`.
 
 The `boolean` is called `is_endpoint` and if this is true, then this point marks the end of a
 polynomial piece and the beginning of a new one. If this is false then this is a midpoint
@@ -86,6 +88,14 @@ The first integer is called `event_outcome` and contains the actual number that 
 (note: not in the serialization used by the oracle) which corresponds to an x-coordinate on the payout curve.
 The second integer is called `outcome_payout` and is set equal to the local party's payout should
 `event_outcome` be signed which corresponds to a y-coordinate on the payout curve.
+The third integer, a `u16`, is called `extra_precision` and is set to be the first 16 bits of the payout after
+the binary point which were rounded away.
+This extra precision ensures that interpolation does not contain large errors due to error in the
+`outcome_payout`s due to rounding.
+To be precise, the points used for interpolation should be:
+(`event_outcome`, `outcome_payout + double(extra_precision) >> 16`).
+For the remainder of this document, the value `outcome_payout + double(extra_precision) >> 16`
+is refered to as `outcome_payout`.
 
 Note that this `payout_function` is from the offerer's point of view.
 To evaluate the accepter's `payout_function`, you must evaluate the offerer's `payout_function` at a given
