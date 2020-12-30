@@ -34,6 +34,7 @@ Larger numbers of oracles can still be used in cases where they are needed, but 
   * [t-of-n Oracles](#t-of-n-oracles)
     * [Example Algorithm](#example-algorithm)
 * [Multiple Oracles for Numeric Outcome Events](#multiple-oracles-for-numeric-outcome-events)
+  * [Design](#design)
   * [2-of-2 Oracles with Bounded Error](#2-of-2-oracles-with-bounded-error)
     * [Algorithm](#algorithm)
   * [n-of-n Oracles with Bounded Error](#n-of-n-oracles-with-bounded-error)
@@ -44,7 +45,21 @@ Larger numbers of oracles can still be used in cases where they are needed, but 
 
 ## Multiple Oracles for Enumerated Outcome Events
 
-todo
+In the case of enumerated outcome events, where there is no macroscopic structure to the set of
+CETs and all oracles of a given event are expected to sign the same outcomes, then there is little
+work to do to support multiple oracles.
+
+The n-of-n case is accomplished by simple point addition in the same manner as is done to combine
+multiple digit signatures in numeric outcome DLCs from digit decomposition.
+This specification opts to reduce the threshold (t-of-n) case to a combination of many t-of-t constructions.
+
+If two oracles for an enumerated outcome have similar, but not exactly equivalent enumerations of all
+possible outcomes, some care must be taken to ensure expected behavior.
+For example, if one weather oracle has only the events `["rainy", "sunny", "cloudy"]` while a second
+oracle has more events, `["rainy", "sunny", "partly cloudy", "cloudy"]`, then the DLC participants
+must decide what should happen in the case that the second oracle signs the message `"partly cloudy"`.
+They can either choose to not support that event (refund), or construct CETs for when the first party signs
+`"sunny"`, `"cloudy"`, or either (that is, two individual CETs).
 
 ### n-of-n Oracles
 
@@ -122,8 +137,89 @@ Other schemes considered included:
 
 ## Multiple Oracles for Numeric Outcome Events
 
-todo (explain when bounded error should be used, and that at all other times multi-oracle support follows
-the enumerated outcome procedures)
+There are two kinds of numeric outcome DLCs when it comes to using multiple oracles: those where
+there is no expectation or allowance for variance between oracles, and those where some small
+variance is acceptable and must be supported.
+
+For example, if there is some numeric data feed which broadcasts a single number daily, and multiple
+DLC oracles attest to this number, then all of these oracles should be expected to sign exactly the same
+number, down to the last binary digit.
+
+On the other hand if there is some less precise data source, such as a continuous price feed or multiple
+price feeds from different exchanges for the same asset, then oracles may differ by some small amount due
+to the non-deterministic nature of the data sampling as they may draw from the feed at slightly different times
+or from different exchanges entirely.
+In these kinds of DLCs, some amount of difference between oracles is expected and some larger difference
+is also acceptable.
+
+When executing the first kind of DLC, where no variance is allowed, then one should simply follow the same
+procedure as was [specified for enumerated outcomes above](#multiple-oracles-for-enumerated-outcome-events) because no macroscopic structure of the numeric
+nature of the outcomes is used from a multi-oracle support perspective.
+
+If instead the second kind of DLC is being executed, then a special, more intricate procedure detailed below
+must be used to ensure proper execution.
+This procedure differs from the simple enumerated or exact numeric case as it uses the numeric structure of
+related outcomes.
+Specifically distance is used so that outcomes are related if they are sufficiently near each other.
+
+### Design
+
+It turns out that there is an exceedingly large design space of approaches that can be taken to support multiple
+oracles with some acceptable variance.
+It seems to be generally true, however, that a trade-off exists between the precision of guarantees that a procedure
+can make, and the size of the multiplier on the number of CETs required for the DLC.
+This specification chooses to prioritize CET reduction at the expense of precise guarantees so as to more easily
+support more oracles, which should generally counteract some of the imprecision surrounding variance support.
+Although this resulting design is extremely opinionated in some sense, it does leave three parameters unspecified
+to be negotiated or chosen by DLC participants.
+
+The first two parameters are the orders of magnitude of expected and of allowed difference between oracles.
+By expected difference we mean the differences for which support is required by users, and by allowed difference
+we mean the differences for which support is acceptable but not required.
+These parameters will, from now on, be called `minFail` and `maxError` as they also represent the lower bound
+on failure (non-support) and the upper bound on allowed (support) difference/error between oracles.
+When we say that the guarantees made by this proposal are not precise, we mean two things.
+First, that `minFail` is strictly less than `maxError` so that while it is true that all differences less than `minFail` and none
+greater than `maxError` are supported, there are no guarantees made for differences in between these two parameters.
+Second, that `minFail` and `maxError` are required to be powers of `2` and not arbitrary numbers so that in reality, allowed
+variance is only expressed in terms of order of magnitude, which is a somewhat coarse measure.
+These two things together also imply that `minFail` must be at most half of `maxError` so that the gap between `minFail`
+and `maxError` where no strict guarantees can be made is of significant size.
+
+The third parameter offers a minimal remedy to these lack of guarantees.
+It is a boolean flag (`true` or `false`) called `maximizeCoverage`.
+This parameter arises from the fact that there is a decision to be made when covering the `minFail` variance to
+either cover as much as possible (up to `maxError`) or as little as possible, and this decision has no consequence
+on the number of CETs.
+That is to say that maximizing or minimizing the cases of variance between `minFail` and `maxError` require exactly
+the same number of CETs, hence this choice is left to the DLC participants.
+While this flag does improve the probabilistic guarantees which can be made for the `maxError`-`minFail` gap, it
+should be noted that these are still only probabilistic as even if `maximizeCoverage` is set to `true`, there can still
+be differences of `minFail + 1` which are unsupported in the worst case and likewise, differences of `maxError - 1`
+may still succeed even if `maximizeCoverage` is set to `false` in the worst case.
+Yet in the average case this maximizing coverage will make it much more likely that cases in the `maxError`-`minFail` gap
+will succeed and minimizing coverage will make it much more likely that these cases fail (are not supported).
+
+There exist many versions of this proposal which allow more exact guarantees, such as ones that lift either or both of the
+constraints on the variance parameters, but they all require significantly more CETs.
+This proposal can be thought of as defining the maximally coarse CET coverage algorithm which results in the fewest
+possible multiplier on the number of CETs.
+
+At a high level the algorithm works as follows (many details and some special cases are omitted).
+Designate one oracle in every t-of-t grouping to be the primary oracle and generate the set of CETs required for the DLC
+in question as would be done for a single oracle.
+This primary oracle functionally determines the execution price, meaning that the UX should be the same as if this
+primary oracle was used on its own.
+Then, for each of these CETs representing the primary oracle's attested result, label the first and last outcome covered
+by this CET as `[start, end]`  and compute the largest allowed range `[end - maxError, start + maxError]` for
+secondary oracles.
+Compute the set of CETs required to cover this range (using the [CET compression algorithm](CETCompression.md#cet-compression)) and discard all but the
+largest CETs in this set, which by definition cover the vast majority of the range.
+This discarding is the primary opinion decidedly made from the design space by this proposal, and discarding any less
+leads to better guarantees at the expense of more CETs.
+The resulting CET(s) can then either be used (in the case of maximize coverage) or shrunk until they cover as little as
+possible while still containing `[start - minFail, end + minFail]` by repeatedly cutting them in half on either side.
+This process results in 1-3 secondary oracle CETs for ever single CET of the primary oracle. 
 
 ### 2-of-2 Oracles with Bounded Error
 
