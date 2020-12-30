@@ -355,6 +355,8 @@ TODO: Pictures here
 
 ### n-of-n Oracles with Bounded Error
 
+Just as in the two oracle case, mark one oracle as primary and all others as secondary.
+
 The simplest method for achieving n-of-n oracle support for n greater than 2 is to run the 2-of-2
 algorithm in a slightly modified fashion so that if, on a given primary CET, the algorithm returns
 2 secondary CETs, we instead return `2^(n-1)` aggregate secondary CETs.
@@ -419,9 +421,20 @@ Just as in the [t-of-n Oracles for enumerated outcomes](#t-of-n-oracles) case, t
 numeric outcomes with allowed (bounded) error, we simply run the t-of-t algorithm above on all of the
 `n C t` possible combinations of `t` oracles.
 
+The only additional work that must be done is that there must be a decision procedure to determine
+which oracle in a given group of `t` oracles is primary, and additionally what values should be used
+for `minFail` and `maxError` for a given group of `t` oracles (as this can vary between groups).
+
+The simplest candidate would be a negotiated ordered ranking of the oracles where the highest ranking
+oracle in any group of `t` oracles is chosen as primary.
+The values `minFail` and `maxError` can also be computed as some function of the rankings of a group
+of `t` oracles, or else they can be set as constant parameters across all groupings.
+
+TODO: Decide how this is done and communicated. 
+
 ## Reference Implementations
 
-* bitcoin-s
+* [bitcoin-s](https://github.com/nkohen/bitcoin-s-core/tree/multi-oracle)
 
 ## Authors
 
