@@ -2,7 +2,30 @@
 
 ## Introduction
 
-todo
+The Discreet Log Contract security model is entirely reliant on the existence of trustworthy oracles.
+However, even if an oracle appears trustworthy and has a good history of truth-telling, there is always
+some amount of risk associated with the oracle becoming unresponsive, or worse, corrupted.
+This risk is particularly worrisome for large value DLCs, as well as high volume DLCs where the pool
+of funds that could profitably bribe or fund attacks on oracles is relatively larger.
+This specification aims to significantly reduce oracle risk by introducing mechanisms with which to
+construct DLCs where some threshold of multiple oracles is required for successful execution.
+
+Using multiple oracles multiplies the cost of bribery and other attacks, while simultaneously offering
+protection against unresponsive and otherwise corrupted oracles.
+
+Using multiple oracles also provides a better environment for contract updates to a new oracle should
+one of the oracles being used announce that it will become unresponsive or has lost control of its keys.
+
+This document begins by examining the case of enumerated outcome event DLCs, which can also be
+applied to numeric outcome DLCs in cases where all oracles are expected and required to produce exactly
+the same events.
+The majority of this document, however, is devoted to treating the numeric case where oracles are allowed
+to have bounded disagreements.
+
+In any of these cases, using multiple oracles does introduce a multiplier on total the number of CETs.
+In general, this multiplier grows exponentially with the number of oracles, but remains low enough
+for small numbers of oracles to enable the most common use cases (2-of-3 and 3-of-5) without much trouble.
+Larger numbers of oracles can still be used in cases where they are needed, but the CET cost incurred may be large. 
 
 ## Table of Contents
 
