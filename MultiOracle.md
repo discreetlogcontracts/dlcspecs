@@ -6,7 +6,18 @@ todo
 
 ## Table of Contents
 
-todo
+* [Multiple Oracles for Enumerated Outcome Events](#multiple-oracles-for-enumerated-outcome-events)
+  * [n-of-n Oracles](#n-of-n-oracles)
+  * [t-of-n Oracles](#t-of-n-oracles)
+    * [Example Algorithm](#example-algorithm)
+* [Multiple Oracles for Numeric Outcome Events](#multiple-oracles-for-numeric-outcome-events)
+  * [2-of-2 Oracles with Bounded Error](#2-of-2-oracles-with-bounded-error)
+    * [Algorithm](#algorithm)
+  * [n-of-n Oracles with Bounded Error](#n-of-n-oracles-with-bounded-error)
+    * [Analysis](#analysis)
+  * [t-of-n Oracles with Bounded Error](#t-of-n-oracles-with-bounded-error)
+* [Reference Implementations](#reference-implementations)
+* [Authors](#authors)
 
 ## Multiple Oracles for Enumerated Outcome Events
 
