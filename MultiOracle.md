@@ -37,6 +37,7 @@ Larger numbers of oracles can still be used in cases where they are needed, but 
   * [n-of-n Oracles](#n-of-n-oracles)
   * [t-of-n Oracles](#t-of-n-oracles)
     * [Example Algorithm](#example-algorithm)
+    * [Rationale](#rationale)
 * [Multiple Oracles for Numeric Outcome Events](#multiple-oracles-for-numeric-outcome-events)
   * [Design](#design)
   * [2-of-2 Oracles with Bounded Error](#2-of-2-oracles-with-bounded-error)
