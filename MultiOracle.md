@@ -138,6 +138,8 @@ and let `maxNum = (2^numDigits) - 1`.
 
 We then split into cases:
 
+TODO: Pictures here
+
 * **Case** Small CET (`end - start + 1 < maxError`)
   * In this case we consider the primary oracle's CET's range as it relates to the `maxError`-sized
     interval, beginning at some multiple of `maxError`, which contains the CET in question.
@@ -195,7 +197,30 @@ We then split into cases:
       * This can be computed as the first `(numDigits - maxErrorExp)` binary digits of
         `end + minFail` followed by any additional `0` digits.
 * **Case** Large CET (`end - start + 1 >= maxError`)
-  * 
+  * In this case, up to three CETs are needed, a `middleCET` for when both oracles agree that
+    the outcome is within the large range of this CET, a `leftCET` for when the secondary oracle
+    is within an acceptable range to the left of the large CET, and a `rightCET` for when the
+    secondary oracle is within an acceptable range to the right of the large CET.
+    * The `leftCET` is paired with a new primary CET called `leftInnerCET`.
+    * The `rightCET` is paired with a new primary CET called `rightInnerCET`. 
+  * **Special Case** Leftmost Large CET (`start == 0`)
+    * The `leftInnerCET` and `leftCET` do not need to be computed and are not used.
+  * **Special Case** Rightmost Large CET (`end == maxNum`)
+    * The `rightInnerCET` and `rightCET` do not need to be computed and are not used.
+  * The `middleCET` is always equal to the input CET, `[start, end]`.
+    * This may actually violate the `maxError` bound but since this is one large CET, it must
+      be the case that even with this larger than `maxError` difference between the oracles,
+      the payout resulting from either outcome is the same so that this is not an issue.
+  * If `maximizeCoverage` is `true`,
+    * `leftInnerCET = numToVec(start, numDigits, maxErrorExp - 1)`
+    * `leftCET = numToVec(start - halfMaxError, numDigits, maxErrorExp - 1)`
+    * `rightInnerCET = numToVec(end - halfMaxError + 1, numDigits, maxErrorExp - 1)`
+    * `rightCET = numToVec(end + 1, numDigits, maxErrorExp - 1)`
+  * Otherwise (`maximizeCoverage` is `false`),
+    * `leftInnerCET = numToVec(start, numDigits, minFailExp)`
+    * `leftCET = numToVec(start - minFail, numDigits, minFailExp)`
+    * `rightInnerCET = numToVec(end - minFail + 1, numDigits, minFailExp)`
+    * `rightCET = numToVec(end + 1, numDigits, minFailExp)`
 
 ### n-of-n Oracles with Bounded Error
 
