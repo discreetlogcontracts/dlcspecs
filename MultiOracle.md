@@ -88,7 +88,8 @@ Other schemes considered included:
 
 ## Multiple Oracles for Numeric Outcome Events
 
-todo
+todo (explain when bounded error should be used, and that at all other times multi-oracle support follows
+the enumerated outcome procedures)
 
 ### 2-of-2 Oracles with Bounded Error
 
@@ -224,11 +225,69 @@ TODO: Pictures here
 
 ### n-of-n Oracles with Bounded Error
 
-todo
+The simplest method for achieving n-of-n oracle support for n greater than 2 is to run the 2-of-2
+algorithm in a slightly modified fashion so that if, on a given primary CET, the algorithm returns
+2 secondary CETs, we instead return `2^(n-1)` aggregate secondary CETs.
+
+For example, if there are two secondary oracles, Omar and Odette, and two CETs, A and B, returned
+by the 2-of-2 algorithm, then this modified algorithm would return four aggregate CETs:
+
+* Omar signs A and Odette signs A
+* Omar signs A and Odette signs B
+* Omar signs B and Odette signs A
+* Omar signs B and Odette signs B
+
+If the 2-of-2 algorithm returns a single secondary CET then we simply use the aggregate of all oracles
+signing an event that is covered by that one CET.
+
+However, in the large CET case where three CETs are normally returned, we can make some
+more custom alterations.
+The `middleCET` case remains the same, but where an aggregate of all oracles signing an event
+covered by that CET is used.
+But from each of the `(leftCET, leftInnerCET)` and `(rightCET, rightInnerCET)` pairs, we instead generate
+`2^(n-1)-1` tuples `(xCET, xInnerCET, middleCET)` (where `x` is `left` or `right`) where `xInnerCET` consists of
+only the primary oracle (as usual) and where `xCET` and `middleCET` are aggregations of secondary oracles such that
+
+* All secondary oracles are included in exactly one of `xCET` or `middleCET` and
+* `xCET` is non-empty.
+
+To summarize, for n-of-n oracle support, the 2-of-2 algorithm is run where the primary oracle's
+
+* Small Middle CETs result in a single aggregate CET
+* Small non-Middle CETs result in `2^(n-1)` aggregate CETs
+* Large CETs result in a total of `2^n - 1` aggregate CETs
+  * One aggregate middle CET
+  * `2^(n-1) - 1` aggregate non-middle CETs for each side
+    * Totaling `2^n - 2` non-middle aggregate CETs.
+
+#### Analysis
+
+Luckily, there are very few large CETs in any given DLC.
+Thus, the primary multiplier to be concerned with is that of small non-middle CETs.
+
+If the difference between `maxErrorExp` and `minFailExp` is only one, then all small
+CETs will be non-middle so that additional oracles are guaranteed to lead to exponential
+growth in this multiplier (though one should note that exponential growth is already likely
+when using the below t-of-n scheme so that this may not be a primary concern).
+
+If, on the other hand, the difference between `maxErrorExp` and `minFailExp` is larger
+than one, then the majority of CETs are expected to be middle CETs with exponentially larger
+numbers of middle CETs the bigger the difference between those two parameters.
+
+Therefore, there is a trade-off between the tightness of error bounds (i.e. the size of the non-
+guaranteed successes or failures between `minFail` and `maxError`)  and the number of CETs
+when using more than two oracles.
+
+It should also be noted that the actual values of `minFailExp` and `maxErrorExp` are not part of
+this trade-off, only their relative difference.
+For example, having `minFail=32` and `maxError = 128` should yield similar results to having
+`minFail = 256` and `maxError = 1024`.
 
 ### t-of-n Oracles with Bounded Error
 
-todo
+Just as in the [t-of-n Oracles for enumerated outcomes](#t-of-n-oracles) case, to support a threshold t-of-n oracles for
+numeric outcomes with allowed (bounded) error, we simply run the t-of-t algorithm above on all of the
+`n C t` possible combinations of `t` oracles.
 
 ## Reference Implementations
 
