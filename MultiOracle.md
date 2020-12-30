@@ -16,6 +16,10 @@ protection against unresponsive and otherwise corrupted oracles.
 Using multiple oracles also provides a better environment for contract updates to a new oracle should
 one of the oracles being used announce that it will become unresponsive or has lost control of its keys.
 
+A key feature of this proposal is that no change in behavior is required of oracles  when compared to
+single-oracle DLCs.
+All work is done by DLC participants using existing DLC oracles as they are.
+
 This document begins by examining the case of enumerated outcome event DLCs, which can also be
 applied to numeric outcome DLCs in cases where all oracles are expected and required to produce exactly
 the same events.
