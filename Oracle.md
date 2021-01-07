@@ -24,6 +24,7 @@ This necessary information is committed to in a so-called [_event descriptor_](#
       - [Version 0 `oracle_event`](#version-0-oracle_event)
 - [Oracle announcements](#oracle-announcements)
       - [Version 0 `oracle_announcement`](#version-0-oracle_announcement)
+- [Signing Algorithm](#signing-algorithm)
 
 ## Event descriptor
 
@@ -118,6 +119,8 @@ UTF-8 is chosen as being a widely supported and easy to implement encoding forma
 For numerical outcomes represented in bases greater than 10, each digit should be converted to base 10 before being encoded (note that base 10 numbers in UTF-8 take values in the 0x0030-0x0039 range).
 This helps preventing any confusion about the capitalization of letters or the introduction of non-standard characters.
 
+Signing should be done using the [signing algorithm](#Signing-Algorithm) using the tag `attestation/v0`.
+
 ### Serialization of event descriptors
 
 Event descriptors should be serialized using [TLV format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format) as described bellow.
@@ -193,7 +196,20 @@ The TLV serialization of oracle announcements is as follow.
    * [`x_point`:`oracle_public_key`]
    * [`oracle_event`:`oracle_event`]
 
-where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`.
+where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+
+## Signing Algorithm
+
+Signatures should be generated following the algorithm specified in [BIP 340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki).
+Tagged hashes should also be used as defined in the [design section of BIP 340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#Design).
+
+The secret key (`sk`) should be the private key corresponding to the oracle's public key.
+
+The algorithm `Sign(sk, message, tag)` is defined as:
+
+* Let H = `tag_hash("DLC/oracle/" || tag)`
+* Let `m` = H(`message`)
+* Return `BIP340_sign(sk, m)`
 
 ## Footnotes
 
