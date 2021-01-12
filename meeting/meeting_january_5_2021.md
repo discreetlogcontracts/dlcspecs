@@ -5,12 +5,26 @@
 **#Status_Update_Interrupt**
 
 * **#Query(Nadav)**
+  * Cleaning up numeric DLC PR
+  * Progress towards supporting multiple oracles
+* **#Query(Ben)**
+  * Exact oracle signing algorithm
+  * Proposed oracle_attestation TLV
 * **#Query(Tibo)**
+  * Rust-dlc work, all test vectors passing!
+    * Needs clean-up and PR coming soon
 * **#Query(Lloyd)**
-* **#Query(Antoine)**
 * **#Query(Chris)**
+  * With Roman working on oracle explorer
+    * Attestation work
 * **#Query(Jesse)**
+  * ECDSA adaptor signature implementation
+    * Almost ready for review, just needs some polishing
+      * https://github.com/ElementsProject/secp256k1-zkp/pull/117
 * **#Query(Matt)**
+  * Designer working on some diagrams
+  * Working on adding Liquid support
+    * funding transaction working
 * **#Query(all)**
 
 ## Mailing List
