@@ -68,7 +68,6 @@ the funding transaction and CETs.
    * [`byte`:`contract_flags`]
    * [`chain_hash`:`chain_hash`]
    * [`contract_info`:`contract_info`]
-   * [`oracle_info`:`oracle_info`]
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
    * [`u64`:`total_collateral_satoshis`]
@@ -87,8 +86,7 @@ The existence of the `chain_hash` allows nodes to open contracts
 across many distinct blockchains as well as have contracts within multiple
 blockchains opened to the same peer (if it supports the target chains).
 
-`contract_info` specifies the sender's payouts for all events. `oracle_info`
-specifies the oracle(s) to be used as well as their commitments to events.
+`contract_info` specifies the contract to be constructed and the oracles to be used.
 
 `funding_pubkey` is the public key in the 2-of-2 multisig script of
 the funding transaction output. `payout_spk` specifies the script
@@ -133,7 +131,7 @@ The receiving node MAY reject the contract if:
 
   - it does not agree to the terms in `contract_info`.
   - the `contract_info` is missing relevant events.
-  - it does not want to use the oracle(s) specified in `oracle_info`.
+  - it does not want to use the oracle(s) specified in `contract_info`.
   - `total_collateral_satoshis` is too small.
   - `feerate_per_vb` is too small.
   - `feerate_per_vb` is too large.
@@ -142,7 +140,7 @@ The receiving node MUST reject the contract if:
 
   - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
   - the `contract_info` refers to events unknown to the receiver.
-  - the `oracle_info` refers to an oracle unknown or inaccessible to the receiver.
+  - the `contract_info` refers to an oracle unknown or inaccessible to the receiver.
   - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
   - `funding_inputs` do not contribute at least `total_collateral_satoshis` plus full [fee payment](Transactions.md#fee-payment).
@@ -165,6 +163,7 @@ and closing transactions.
    * [`spk`:`change_spk`]
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
+   * [`negotiation_fields`:`negotiation_fields`]
 
 #### Requirements
 

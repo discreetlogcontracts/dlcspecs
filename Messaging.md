@@ -15,8 +15,18 @@ All data fields are unsigned big-endian unless otherwise specified.
   * [DLC Specific Types](#dlc-specific-types)
     * [The `contract_info` Type](#the-contract_info-type)
       * [Version 0 `contract_info`](#version-0-contract_info)
+    * [The `contract_descriptor` Type](#the-contract_descriptor-type)
+      * [Version 0 `contract_descriptor`](#version-0-contract_descriptor)
+      * [Version 1 `contract_descriptor`](#version-1-contract_descriptor)
     * [The `oracle_info` Type](#the-oracle_info-type)
       * [Version 0 `oracle_info`](#version-0-oracle_info)
+      * [Version 1 `oracle_info`](#version-1-oracle_info)
+      * [Version 2 `oracle_info`](#version-2-oracle_info)
+    * [The `oracle_params` Type](#the-oracle_params-type)
+      * [Version 0 `oracle_params`](#version-0-oracle_params)
+    * [The `negotiation_fields` Type](#the-negotiation_fields-type)
+      * [Version 0 `negotiation_fields`](#version-0-negotiation_fields)
+      * [Version 1 `negotiation_fields`](#version-1-negotiation_fields)
     * [The `funding_input` Type](#the-funding_input-type)
       * [Version 0 `funding_input`](#version-0-funding_input)
     * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
@@ -87,33 +97,121 @@ The following DLC-specific types are used throughout the specification. All type
 
 ### The `contract_info` Type
 
-This type contains information about a contracts outcomes and their corresponding payouts. To save space, only one side's POV is included in this message as the other can be derived using `remote_payout = total_collateral - local_payout`.
+This type contains information about a contract's outcomes, their corresponding payouts, and the oracles to be used.
 
 #### Version 0 `contract_info`
 
-1. type: 42768 (`contract_info_v0`)
+1. type: 55342 (`contract_info_v0`)
 2. data:
-   * [`bigsize`:`nb_outcomes`]
-   * [`sha256`:`outcome_1`]
-   * [`u64`:`outcome_1_local_payout`]
-   * ...
-   * [`sha256`:`outcome_n`]
-   * [`u64`:`outcome_n_local_payout`]
+   * [`u64`:`total_collateral`]
+   * [`contract_descriptor`:`contract_descriptor`]
+   * [`oracle_info`:`oracle_info`]
 
-This type of contract info is a simple enumeration of pairs of the hash of an outcome value with the corresponding payout for the local party.
+`total_collateral` is the Satoshi-denominated value of the sum of all party's collateral.
+
+### The `contract_descriptor` Type
+
+This type contains information about a contract's outcomes and their corresponding payouts.
+
+To save space, only one side's POV is included in this message as the other can be derived using `remote_payout = total_collateral - local_payout`.
+
+#### Version 0 `contract_descriptor`
+
+1. type: 42768 (`contract_descriptor_v0`)
+2. data:
+   * [`bigsize`:`num_outcomes`]
+   * [`string`:`outcome_1`]
+   * [`u64`:`payout_1`]
+   * ...
+   * [`string`:`outcome_num_outcomes`]
+   * [`u64`:`payout_num_outcomes`]
+
+This type represents an enumerated outcome contract.
+
+#### Version 1 `contract_descriptor`
+
+1. type: 42784 (`contract_descriptor_v1`)
+2. data:
+   * [`u16`:`num_digits`]
+   * [`payout_function`:`payout_function`]
+   * [`rounding_intervals`:`rounding_intervals`]
+
+This type represents a numeric outcome contract.
 
 ### The `oracle_info` Type
 
-This type contains information about the oracle(s) to be used in executing a DLC, and possibly the outcomes possible if these are not specified in the corresponding `contract_info`.
+This type contains information about the oracles to be used in executing a DLC.
 
 #### Version 0 `oracle_info`
 
 1. type: 42770 (`oracle_info_v0`)
 2. data:
-   * [`x_point`:`oracle_public_key`]
-   * [`x_point`:`oracle_nonce`]
+   * [`oracle_announcement`:`oracle_announcement`]
 
-This type of oracle info is for single-oracle, single signature (and hence single nonce) events.
+This type of oracle info is for single-oracle events.
+
+#### Version 1 `oracle_info`
+
+1. type: 42786 (`oracle_info_v1`)
+2. data:
+   * [`u16`:`num_oracles`]
+   * [`oracle_announcement`:`oracle_announcement_1`]
+   * ...
+   * [`oracle_announcment`:`oracle_announcement_num_oracles`]
+
+This type of oracle info is for multi-oracle events where all oracles are signing messages
+that exactly correspond to the messages being signed by the other oracles.
+
+#### Version 2 `oracle_info`
+
+1. type: 55340 (`oracle_info_v2`)
+2. data:
+   * [`u16`:`num_oracles`]
+   * [`oracle_announcement`:`oracle_announcement_1`]
+   * ...
+   * [`oracle_announcment`:`oracle_announcement_num_oracles`]
+   * [`oracle_params`:`oracle_params`]
+
+The order of the oracle announcements represents a total ordering of preference on the oracles.
+
+This type of oracle info is for multi-oracle numeric events where there is some allotted
+difference between oracles allowed and specified in `oracle_params`.
+
+### The `oracle_params` Type
+
+This type contains information about the oracles being used beyond their announcements.
+
+#### Version 0 `oracle_params` Type
+
+1. type: 55338 (`oracle_params_v0`)
+2. data
+   * [`u16`:`maxErrorExp`]
+   * [`u16`:`minFailExp`]
+   * [`bool`:`maximize_coverage`]
+
+This type is used when there is a shared error bounds requirement for any set of oracles in a
+multi-oracle numeric outcome DLC with allowed (bounded) error.
+
+### The `negotiation_fields` Type
+
+This type contains preferences of the accepter of a DLC which are taken into account during DLC construction.
+
+#### Version 0 `negotiation_fields`
+
+1. type: 55334 (`negotiation_fields_v0`)
+2. data:
+   * (empty)
+
+This type signifies that the accepter has no negotiation fields.
+
+#### Version 1 `negotiation_fields`
+
+1. type: 55336 (`negotiation_fields_v1`)
+2. data
+   * [`rounding_intervals`: `rounding_intervals`]
+
+`rounding_intervals` represents the maximum amount of allowed rounding at any possible oracle outcome
+in a numeric outcome DLC.
 
 ### The `funding_input` Type
 
