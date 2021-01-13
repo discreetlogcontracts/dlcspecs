@@ -154,6 +154,7 @@ This type of oracle info is for single-oracle events.
 
 1. type: 42786 (`oracle_info_v1`)
 2. data:
+   * [`u16`:`threshold`]
    * [`u16`:`num_oracles`]
    * [`oracle_announcement`:`oracle_announcement_1`]
    * ...
@@ -166,6 +167,7 @@ that exactly correspond to the messages being signed by the other oracles.
 
 1. type: 55340 (`oracle_info_v2`)
 2. data:
+   * [`u16`:`threshold`]
    * [`u16`:`num_oracles`]
    * [`oracle_announcement`:`oracle_announcement_1`]
    * ...
