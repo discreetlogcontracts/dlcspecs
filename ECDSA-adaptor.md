@@ -59,10 +59,9 @@ In other words the prover proves knowledge of `a` such that `X = a * G` and `b` 
 We make the resulting Sigma protocol non-interactive by applying the Fiat-Shamir transformation with SHA256 as the challenge hash.
 For background on Sigma protocols and making them non-interactive see [[Sch]].
 
-To disambiguate the proof we first *tag* a SHA256 as specified in [[BIP340]] with a string that identifies the kind of statement we are proving: `tag_string = "eq(DLG(secp256k1),DL(secp256k1))"`.
-Specifically we set `tag` to `SHA256(tag_string) || SHA256(tag_string)` and use it to prefix hash operations.
-This allows the proof system here to be used in other applications while also domain separating the proof enough so that no part of it could be used by a malicious actor in some unintended context.
-The challenge hash `H` below is then defined as `H(x) = scalar(SHA256(tag || x))`.
+To disambiguate the proof we first *tag* a SHA256 as specified in [[BIP340]] with a string that identifies the kind of statement we are proving.
+Specifically, we set `tag` to `SHA256("DLEQ") || SHA256("DLEQ")` and use it to prefix hash operations.
+The challenge hash `H` below is defined as `H(x) = scalar(SHA256(tag || x))`.
 
 ### Proving
 
@@ -183,18 +182,18 @@ In our context this is an oracle signature *s* value.
 Note that if this function returns successfully and `a` has been verified with `ecdsa_adaptor_verify` for some public key and message hash then this implies that `sig` is a valid ECDSA signature on the message hash
 i.e. there is no strict need to verify `sig` after (or before) successfully calling `ecdsa_adaptor_recover` if you have already ensured that `ecdsa_adaptor_verify` passes on the original adaptor signature.
 However, successfully recovering the signature does not ensure that it follows the `low_s` rule described in [[BIP62]] necessary to be able to broadcast the signature on a transaction in Bitcoin.
-This point is not relevant to on-chain DLCs since the ECDSA signatures always come from the blockchain where they have hopefully already been verified.
+This point is not relevant to on-chain DLCs since the ECDSA signatures always come from the blockchain where they have already been verified.
 
 
 ## Specification tests
 
-Several verification test vectors are in [./ecdsa_adaptor.json].
-These only check that verification is done correctly.
-Implementations should use the vectors in the follwowing way:
+The test vectors for this specification are in [./test/ecdsa_adaptor.json] and come in two kinds:
 
-- First check `adaptor_sig` passes `ecdsa_adaptor_verify`.
-- Check that `ecdsa_adaptor_decrypt` recovers `signature`.
-- Check that  `ecdsa_adaptor_recover` recovers `decryption_key`.
+- `verification`: These test the verifier in three stages:
+  - Check `adaptor_sig` passes `ecdsa_adaptor_verify`.
+  - Check that `ecdsa_adaptor_decrypt` yields `signature`.
+  - Check that  `ecdsa_adaptor_recover` recovers `decryption_key`.
+- `recovery`: These test only the key recovery function. The recovery function should recovery the correct decryption key.
 
 These should fail only when `error` is set in the test vector.
 
