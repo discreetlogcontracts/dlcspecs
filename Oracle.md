@@ -23,7 +23,9 @@ This necessary information is committed to in a so-called [_event descriptor_](#
    - [Oracle events](#oracle-events)
       - [Version 0 `oracle_event`](#version-0-oracle_event)
 - [Oracle announcements](#oracle-announcements)
-      - [Version 0 `oracle_announcement`](#version-0-oracle_announcement)
+  - [Version 0 `oracle_announcement`](#version-0-oracle_announcement)
+- [Oracle Attestations](#oracle-attestations)
+  - [Version 0 `oracle_attestation`](#version-0-oracle_attestation)
 - [Signing Algorithm](#signing-algorithm)
 
 ## Event descriptor
@@ -197,6 +199,30 @@ The TLV serialization of oracle announcements is as follow.
    * [`oracle_event`:`oracle_event`]
 
 where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+
+## Oracle Attestations
+
+After an event occurs, and the oracle creates signatures to attest the outcome, it needs to give them to users.
+An oracle can use an attestation tlv to give users this information.
+
+The TLV serialization of oracle attestations is as follows.
+
+#### Version 0 `oracle_attestation`
+
+1. type: 55400 (`oracle_attestation_v0`)
+2. data:
+    * [`string`:`event_id`]
+    * [`x_point`:`oracle_public_key`]
+    * [`u16`: `nb_signatures`]
+    * [`signature`:`signature_1`]
+    * ...
+    * [`signature`:`signature_n`]
+    * [`string`:`outcome_1`]
+    * ...
+    * [`string`:`outcome_n`]
+
+Where the signatures are ordered the same as the nonces in their original `oracle_event`.
+The outcomes should be the message signed, ordered the same as the signatures.
 
 ## Signing Algorithm
 
