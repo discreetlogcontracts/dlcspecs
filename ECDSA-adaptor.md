@@ -193,7 +193,7 @@ The test vectors for this specification are in [./test/ecdsa_adaptor.json] and c
   - Check `adaptor_sig` passes `ecdsa_adaptor_verify`.
   - Check that `ecdsa_adaptor_decrypt` yields `signature`.
   - Check that  `ecdsa_adaptor_recover` recovers `decryption_key`.
-- `recovery`: These test only the key recovery function. The recovery function should recovery the correct decryption key.
+- `recovery`: These test only the key recovery function. The recovery function should recover the correct decryption key.
 
 These should fail only when `error` is set in the test vector.
 
