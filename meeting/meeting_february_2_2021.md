@@ -67,6 +67,7 @@ Here is an outline:
   - Handle differences in num_digits or enumeration non-correspondence for multiple oracles
   - Disjoint union DLCs
   - Simple fraud proofs
+  - Support for 1/x shaped payout curves
 * Not included in v0
   - DLC transfers
   - Single-funded DLCs
@@ -93,6 +94,9 @@ Here is an outline:
   * **#Query(Tibo)**
 * P2P Updates?
   * **#Query(Lloyd)**
+* Documenting loss-of-funds vectors
+  * https://github.com/discreetlogcontracts/dlcspecs/issues/132
+  * **#Discussion**
 
 ## Oracle Specifications
 
