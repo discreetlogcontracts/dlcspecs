@@ -16,6 +16,9 @@
 
 **#Query(Jesse, Lloyd)**
 
+* ECDSA adaptor signatures PR is ready for review!
+  * https://github.com/ElementsProject/secp256k1-zkp/pull/117
+
 ## Good Newcomer Issues
 
 Same as last time, only cover if there's interest.
@@ -53,7 +56,7 @@ Here is an outline:
     - (unsigned) Numeric with differences
     - In all cases, oracles are assumed to have (1-1) corresponding outcome sets
 * phase 2
-  - Updated ECDSA Adaptor Signatures ([114](https://github.com/discreetlogcontracts/dlcspecs/pull/114))
+  - Updated ECDSA Adaptor Signatures ([114](https://github.com/discreetlogcontracts/dlcspecs/pull/114)) ([117](https://github.com/ElementsProject/secp256k1-zkp/pull/117))
   - Signed numeric outcomes
   - Optional prevTx ([98](https://github.com/discreetlogcontracts/dlcspecs/issues/98))
   - Links between specification documents ([60](https://github.com/discreetlogcontracts/dlcspecs/issues/60))
