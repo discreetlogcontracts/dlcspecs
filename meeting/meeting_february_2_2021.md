@@ -57,26 +57,27 @@ Here is an outline:
     - In all cases, oracles are assumed to have (1-1) corresponding outcome sets
 * phase 2
   - Updated ECDSA Adaptor Signatures ([114](https://github.com/discreetlogcontracts/dlcspecs/pull/114)) ([117](https://github.com/ElementsProject/secp256k1-zkp/pull/117))
-  - Signed numeric outcomes
-  - Optional prevTx ([98](https://github.com/discreetlogcontracts/dlcspecs/issues/98))
-  - Links between specification documents ([60](https://github.com/discreetlogcontracts/dlcspecs/issues/60))
-  - Order of inputs and outputs ([18](https://github.com/discreetlogcontracts/dlcspecs/issues/18))
-  - Requirements on change SPKs ([53](https://github.com/discreetlogcontracts/dlcspecs/issues/130))
-  - Oracle Stability
+  - Oracle Interface Stability
     - Oracle TLVs/Interface
       - Announcements
       - Attestations ([113](https://github.com/discreetlogcontracts/dlcspecs/pull/113) or Lloyd's proposal)
     - Solidify (numerical) base requirements
-  - Handle differences in num_digits or enumeration non-correspondence for multiple oracles
+  - Signed numeric outcomes
+  - Multi-oracle support for non-corresponding outcome sets
   - Disjoint union DLCs
   - Simple fraud proofs
-  - Support for 1/x shaped payout curves
+  - Minor Changes
+    - Optional prevTx ([98](https://github.com/discreetlogcontracts/dlcspecs/issues/98))
+    - Links between specification documents ([60](https://github.com/discreetlogcontracts/dlcspecs/issues/60))
+    - Order of inputs and outputs ([18](https://github.com/discreetlogcontracts/dlcspecs/issues/18))
+    - Requirements on change SPKs ([53](https://github.com/discreetlogcontracts/dlcspecs/issues/130))
+    - Support for 1/x shaped payout curves
 * Not included in v0
   - DLC transfers
-  - Single-funded DLCs
-  - One-sided signing with atomic payment DLCs
+  - One-sided signing with atomic payment (option-style) DLCs
   - Compound outcome DLCs (other than disjoint union)
   - Segwit v1 (Taproot) DLCs
+  - Lightning DLCs
 
 ## Specification Writing
 
