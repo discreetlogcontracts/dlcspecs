@@ -1,8 +1,16 @@
-# v0 Milestone
+# DLC v0 Milestone
 
 ## Introduction
 
-TODO
+Discreet Log Contracts (DLCs) are basic oracle smart-contracts compatible with the Bitcoin block-chain which enable payments to be contingent on events that are attested to by oracles.
+This specification repository, and the many implementations which realize the specification have been under development for over a year with the goal of making Bitcoin DLCs practical and available to Bitcoin and other application developers.
+
+Significant progress has been made towards this goal and we are nearly ready for a v0 release which features support for a wide range of features including numeric outcome and multi-oracle DLCs.
+This release also hopes to mark a beginning to oracle interface stability making it possible for oracles to attest to events in the distant future.
+
+This document will act as a development road-map leading to a v0 release of the DLC specification and its compliant implementations.
+This document is subject to changes which could be made by the open-source DLC developer community.
+If you wish to propose a change for this document, feel free to reach out to the DLC developers or else to open a pull request on this repository.
 
 ## Table of Contents
 
@@ -38,7 +46,13 @@ TODO
 
 ## Phase 1
 
-TODO
+The first phase of development towards the v0 milestone involves getting implementations fully functional and inter-operable with all other implementations which have completed phase 1 and not phase 2.
+
+Essentially, this is the base-level work that is required in order to reach a functional, but not final, implementation state which can enter into and execute any kind of DLC (other than [signed numeric](#signed-numeric-outcome-dlcs) and [disjoint union](#disjoint-union-dlcs) DLCs).
+
+At the time of this document's initial publishing, completion of phase 1 roughly corresponds to being caught-up and inter-operable with the bitcoin-s implementation and consequently having implemented all currently merged specifications as well as the [Numeric Outcome](https://github.com/discreetlogcontracts/dlcspecs/pull/110), [Multi-Oracle Support](https://github.com/discreetlogcontracts/dlcspecs/pull/128), and [Generalized `contract_info` TLV](https://github.com/discreetlogcontracts/dlcspecs/pull/130) proposals.
+
+Phase 1 is split into two parts, roughly corresponding to single and multiple oracle DLC support.
 
 ### Enumerated Outcome DLCs
 
@@ -228,7 +242,7 @@ Since ensuring accurate approximation by a piecewise polynomial of these kinds o
 
 ## Not Included in v0 (Future Features)
 
-TODO
+The following is an incomplete enumeration of some future DLC features which will not be included in v0, along with explanations for why they will not be included at this time.
 
 ### DLC Transfers
 
