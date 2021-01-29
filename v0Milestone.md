@@ -96,7 +96,9 @@ This is why it has been segregated into its own sub-phase which can be worked on
 
 ## Phase 2
 
-TODO
+This phase of development includes many breaking changes that have been split up into smaller pieces of work.
+
+The goal of phase 2 is to get the functional specification and implementations from phase 1 tidied up and ready for release into the wild.
 
 ### Updated ECDSA Adaptor Signatures
 
