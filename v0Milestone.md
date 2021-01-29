@@ -158,33 +158,73 @@ This is not yet fully developed or specified so further work is needed here.
 
 ### Disjoint Union DLCs
 
-TODO
+There are situations when a contract can be executed in one of two or more disjoint modes.
+For example one could imagine a contract which pays out funds with respect to some index unless that index breaches a certain lower bound, in which case a "liquidation" event occurs and all funds go to one party immediately.
+
+To enable such contracts, the only technical changes that must be made is that multiple (disjoint) sets of CETs must be pre-signed so that any of them can be used to execute the contract.
+
+At face value this is very simple and only requires the introduction of a new [Contract Info](#generalized-contract-info) version which contained a list of the non-union version.
+Other than this piece of work, the only other point left for discussion is how to properly handle race conditions where two or more different CETs become unlocked, a decision on this topic is pending further discussion.
 
 ### Simple Fraud Proofs
 
-TODO
+One of the foundational pieces to the foundation of the DLC oracle trust model is that there can be no untraceable oracle cheating/lying possible.
+
+This is made possible by the fact that oracles are public actors who's communication interface is functionally restricted to announcements, which carry (ideally) unambiguous cryptographic commitments to attest to future events, and attestations, which contain something equivalent to a digital signature of a given event.
+
+The oracle's keys are required in order to make either kind of broadcast and an announcement is all that is needed to validate an attestation.
+As such, if an oracle lies by attesting to a fraudulent outcome, then both their original announcement and this attestation put together constitute a fraud proof.
+
+However, under the constraints of current DLC implementations it may be that a cheated user is not able to obtain an attestation.
+This could be the case if multiple oracles and/or multiple digits (for a numeric outcome) are involved so that some aggregation of attestations are used and the cheated user only discovers this by looking on-chain and recovering the aggregate attestation scalar.
+Creating a fraud proof in this case is still possible and only requires a couple extra steps.
+The cheated party can compute the outcome which corresponds to this aggregate attestation by searching through the CET set (which is a practical operation as this is less demanding than the signing done during setup).
+Once the outcome for all oracles and/or digits is known, then the attestation can be proven to correspond to this outcome from the announcement(s) alone in a very similar manner to the single attestation scalar case.
+Ideally, some entity will have access to the full fraudulent attestation in its non-aggregated form, in which case they can publish an extremely compact fraud proof that can be used by all, but in the cases where this is not possible (such as the case where the lie happens in private to a party that does not betray the lier) then the aggregate mode can be used to generate the fraud proof.
+
+The scope for fraud proofs should be kept minimal so as to ensure that there are practical implementations which are useful to clients at the time of v0's release.
+In the future, it is likely that further context and other semantic information may be included in fraud proofs.
 
 ### Minor Changes
 
 #### Make prev_tx Optional
 
-TODO
+Discussion of this change [here](https://github.com/discreetlogcontracts/dlcspecs/issues/98).
+
+Full nodes and other clients with access to a full utxo set do not need to receive `prev_tx` when they are learning their counter-party's funding inputs because a txid and vout will suffice for them to query for this `prev_tx` (and txid + vout totals 36 bytes whereas a full transaction can be much much larger). Light clients which do not have access to the utxo set  should still receive `prev_tx`.
+
+We need to add an option during contract negotiation (possibly a bit of `contract_flags`) for parties to  specify which kind of client they are so that clients with access to the full utxo set can save significant space when receiving an offer/accept message. Additionally a new funding input TLV type will be needed for  non-`prev_tx` communication.
 
 #### Links Between Specification Documents
 
-TODO
+Many of the specification documents were written in parallel and/or written quickly with the goal of getting implementations in sync.
+As such, there are far fewer links between documents in places where they should or do reference each other.
+This should be remedied for all specification documents before the release.
+
+Issue open [here](https://github.com/discreetlogcontracts/dlcspecs/issues/60). 
 
 #### Ordering of Inputs and Outputs
 
-TODO
+The current specification dictates that the offerer's inputs and outputs precede the accepter's inputs and outputs and that the inputs and outputs for a given party are included in the order they are communicated during contract negotiation.
+
+Before the v0 release, we wish to move to a system which uses a `serial_id` field for each input and output as is done in the [dual-funded lightning channel proposal](https://github.com/niftynei/lightning-rfc/blob/nifty/interactive-dual-funding/02-peer-protocol.md#the-tx_add_output-message).
+
+Discussion of this change [here](https://github.com/discreetlogcontracts/dlcspecs/issues/18). 
 
 #### Requirements on Change SPKs
 
-TODO
+In the current specification, each party is allowed to specify their own change script public key and it can be any value.
+Before the release some extra restrictions and validation must be put into place to ensure the standardness of these outputs so that the funding transaction is properly propagated through the network's mempools.
+
+Discussion of this topic [here](https://github.com/discreetlogcontracts/dlcspecs/issues/53).
 
 #### Support for 1/x Shaped Curves
 
-TODO
+The current specification/proposal for payout curve interpolation supports piecewise polynomial interpolation which is sufficient for the accurate (enough) approximation of arbitrary curves.
+
+However there are many use cases, such as Contracts for Difference (CFD), in which a payout curve is specified by an inverse relationship to the (numeric) outcome forming a 1/x shape (also known as a piece of a hyperbola).
+
+Since ensuring accurate approximation by a piecewise polynomial of these kinds of curves requires a fairly large number of points, and because fully specifying these kinds of curves really only requires a small amount of information, a proposal should be made with an accompanying new TLV type to specify this class of curves directly.
 
 ## Not Included in v0 (Future Features)
 
@@ -192,20 +232,30 @@ TODO
 
 ### DLC Transfers
 
-TODO
+Nadav Kohen has written a [blog post](https://suredbits.com/transferring-discreet-log-contracts/) detailing the process by which DLCs can be transferred, but because this proposal acts on top of the base layer of abstraction which v0 specifies, and because it requires new P2P messages and a couple of new transactions (which must be deterministically derived) this proposal's specification and implementation have been delayed to a future version.
 
 ### Option-Style DLCs
 
-TODO
+There may be use cases where a DLC funding transaction may function to simultaneously create a funding output off of which CETs are built, and a payment from one party to another.
+For example, this is the case if one party pays another a premium in order to enter into a contract where that premium should not be included in the funding output and payouts as this would be unnecessarily capital inefficient.
+
+These simultaneous payments may also be accompanied with situations in which the party being paid provides adaptor signatures to all CETs but where they paying party is not required to provide such signatures and have the option to execute the DLC or else not to do so and instead to refund.
+
+While the specification and implementation costs for this kind of DLC is relatively low, it has not been deemed worth pursuing before the v0 release, in part because there are no pressing use cases (for example, there are likely more interesting use cases for this style of DLCs once more complex compound outcome DLCs are introduced).
+Another consideration is that this may be an instance of some larger class of DLCs which require some slightly more general modification to support, in which case it would be preferable to implement the more general solution directly once the uses for these kinds of DLCs are better understood.
 
 ### Complex Compound Outcome DLCs
 
-TODO
+The v0 specification will include multi-oracle and disjoint union DLCs, but no other more complicated combinations of DLCs.
+As was mentioned in the above section on [Options-style DLCs](#option-style-dlcs), there are likely more interesting combinations of DLCs that can be constructed, especially if only one party has the ability to execute certain contract branches, but these combinations and use-cases are not yet well-understood so this functionality will be delayed to a future version. 
 
 ### Segwit v1 (Taproot) DLCs
 
-TODO
+All DLC development in both specifications and implementations has occurred before Segwit v1 (Taproot)'s activation and is intended to work on Bitcoin today.
+A future version of the DLC specification will certainly be adding support for DLC transactions which utilize Taproot outputs which will lead to many improvements.
 
 ### Lightning DLCs
 
-TODO
+Putting DLCs in Lightning Channels is a long-term goal of this project.
+But at the moment Lightning DLCs operate at a level of abstraction above the v0 specification, and simultaneously there are no Lightning node implementations which are ready to handle non-HTLC outputs in their channels.
+As such, Lightning DLC specifications and implementations will be delayed to a future version.
