@@ -37,7 +37,7 @@ Same as last time, only cover if there's interest.
 
 **#Status_Update_Interrupt**
 
-Here is the formal document: TODO
+Here is the formal document: https://github.com/nkohen/dlcspecs-1/blob/v0-milestone/v0Milestone.md
 
 Here is an outline:
 
