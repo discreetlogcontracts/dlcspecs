@@ -65,7 +65,7 @@ In this section we detail the TLV serialization for a general `payout_function`.
 
 #### Version 0 payout_function
 
-1. type: ??? (`payout_function_v0`)
+1. type: 42790 (`payout_function_v0`)
 2. data:
    * [`u16`:`num_pts`]
    * [`boolean`:`is_endpoint_1`]

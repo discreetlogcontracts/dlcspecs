@@ -59,7 +59,7 @@ construct `m` adaptor signatures and where `n` signatures are put on-chain in ev
 all oracle signatures to both parties when a CET is published.
 This design's major drawbacks is that it creates a very distinct fingerprint and makes CET fees significantly worse.
 Additionally it leads to extra complexity in contract construction.
-This design's only benefit is that it results in simpler (although larger) fraud proofs.
+This design's only benefit is that it results in simpler and slightly more informative (although larger) fraud proofs.
 
 The large multi-signature design was abandoned because the above proposal is sufficient to generate fraud proofs.
 If an oracle incorrectly signs for an event, then only the sum of the digit signatures `s(1..m)`
@@ -72,8 +72,8 @@ announcement and `s(1..m)` is sufficient information to generate a fraud proof i
 ## CET Compression
 
 Anytime there is a range of numeric outcomes `[start, end]` which result in the same payouts for all parties,
-then a compression function described in this section can be run to reduce the number of CETs to be `O(log(L))`
-instead of `L` where  `L = end - start + 1` is the length of the interval being compressed.
+then a compression function described in this section can be run to reduce the number of CETs from `O(L)` to `O(log(L))`
+where  `L = end - start + 1` is the length of the interval being compressed.
 
 Because this compression of CETs only works for intervals which result in the same payout, the [CET calculation algorithm](NumericOutcome.md#contract-execution-transaction-calculation)
 first splits the domain into buckets of equal payout, and then applies the compression algorithm from this
