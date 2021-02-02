@@ -5,8 +5,8 @@
 The Discreet Log Contract security model is entirely reliant on the existence of trustworthy oracles.
 However, even if an oracle appears trustworthy and has a good history of truth-telling, there is always
 some amount of risk associated with the oracle becoming unresponsive, or worse, corrupted.
-This risk is particularly worrisome for large value DLCs, as well as high volume DLCs where the pool
-of funds that could profitably bribe or fund attacks on oracles is relatively larger.
+This risk is particularly worrisome for large value DLCs, as well as widely used DLC oracle events where
+the pool of funds that could profitably bribe or fund attacks on oracles is relatively larger.
 This specification aims to significantly reduce oracle risk by introducing mechanisms with which to
 construct DLCs where some threshold of multiple oracles is required for successful execution.
 
@@ -16,7 +16,7 @@ protection against unresponsive and otherwise corrupted oracles.
 Using multiple oracles also provides a better environment for contract updates to a new oracle should
 one of the oracles being used announce that it will become unresponsive or has lost control of its keys.
 
-A key feature of this proposal is that no change in behavior is required of oracles  when compared to
+A key feature of this proposal is that no change in behavior is required of oracles when compared to
 single-oracle DLCs.
 All work is done by DLC participants using existing DLC oracles as they are.
 
@@ -26,7 +26,7 @@ the same events.
 The majority of this document, however, is devoted to treating the numeric case where oracles are allowed
 to have bounded disagreements.
 
-In any of these cases, using multiple oracles does introduce a multiplier on total the number of CETs.
+In any of these cases, using multiple oracles does introduce a multiplier on the total number of CETs.
 In general, this multiplier grows exponentially with the number of oracles, but remains low enough
 for small numbers of oracles to enable the most common use cases (2-of-3 and 3-of-5) without much trouble.
 Larger numbers of oracles can still be used in cases where they are needed, but the CET cost incurred may be large. 
@@ -51,8 +51,8 @@ Larger numbers of oracles can still be used in cases where they are needed, but 
 ## Multiple Oracles for Enumerated Outcome Events
 
 In the case of enumerated outcome events, where there is no macroscopic structure to the set of
-CETs and all oracles of a given event are expected to sign the same outcomes, then there is little
-work to do to support multiple oracles.
+CETs and all oracles of a given event are expected to sign the same outcomes, little work is required
+to support multiple oracles.
 
 The n-of-n case is accomplished by simple point addition in the same manner as is done to combine
 multiple digit signatures in numeric outcome DLCs from digit decomposition.
@@ -72,7 +72,7 @@ In much the same way as we create [adaptor points for oracles publishing multipl
 can similarly compute aggregate adaptor points for multiple oracles' signatures by simply using
 `s(1..n) * G = (s1 + s2 + ... + sn) * G = s1 * G + s2 * G + ... + sn * G` where
 `si` is the `i`th oracle's signature scalar.
-When the oracles then broadcast their `n` signatures, the corresponding adaptor secret
+When all oracles have broadcast their signatures, the corresponding adaptor secret
 `s(1..n) = s1 + s2 + ... + sn` can be used to broadcast the CET.
 
 Thus, enumerated outcome DLCs constructed for some n-of-n oracles can be constructed
@@ -87,7 +87,7 @@ To construct a DLC for an enumerated outcome event using some threshold t-of-n o
 we construct CETs for all outcomes for all possible combinations of t-of-t oracles.
 
 For example, say there are three oracles, Olivia, Oren, and Ollivander, who will be attesting
-two one of two outcomes, A or B.
+to one of two outcomes, A or B.
 If we wish to construct a 2-of-3 DLC over these outcomes using these oracles, we will construct
 and adaptor sign a total of 6 CETs:
 
@@ -180,29 +180,30 @@ to be negotiated or chosen by DLC participants.
 
 The first two parameters are the orders of magnitude of expected and of allowed difference between oracles.
 By expected difference we mean the differences for which support is required by users, and by allowed difference
-we mean the differences for which support is acceptable but not required.
-These parameters will, from now on, be called `minFail` and `maxError` as they also represent the lower bound
+we mean the differences for which support is acceptable but not required so that they may or may not be covered
+by the multi-oracle CET construction algorithm.
+These parameters will, from now on, be called `minSupport` and `maxError` as they also represent the lower bound
 on failure (non-support) and the upper bound on allowed (support) difference/error between oracles.
 When we say that the guarantees made by this proposal are not precise, we mean two things.
-First, that `minFail` is strictly less than `maxError` so that while it is true that all differences less than `minFail` and none
+First, that `minSupport` is strictly less than `maxError` so that while it is true that all differences less than `minSupport` and none
 greater than `maxError` are supported, there are no guarantees made for differences in between these two parameters.
-Second, that `minFail` and `maxError` are required to be powers of `2` and not arbitrary numbers so that in reality, allowed
+Second, that `minSupport` and `maxError` are required to be powers of `2` and not arbitrary numbers so that in reality, allowed
 variance is only expressed in terms of order of magnitude, which is a somewhat coarse measure.
-These two things together also imply that `minFail` must be at most half of `maxError` so that the gap between `minFail`
+These two things together also imply that `minSupport` must be at most half of `maxError` so that the gap between `minSupport`
 and `maxError` where no strict guarantees can be made is of significant size.
 
 The third parameter offers a minimal remedy to these lack of guarantees.
 It is a boolean flag (`true` or `false`) called `maximizeCoverage`.
-This parameter arises from the fact that there is a decision to be made when covering the `minFail` variance to
+This parameter arises from the fact that there is a decision to be made when covering the `minSupport` variance to
 either cover as much as possible (up to `maxError`) or as little as possible, and this decision has no consequence
 on the number of CETs.
-That is to say that maximizing or minimizing the cases of variance between `minFail` and `maxError` require exactly
+That is to say that maximizing or minimizing the cases of variance between `minSupport` and `maxError` require exactly
 the same number of CETs, hence this choice is left to the DLC participants.
-While this flag does improve the probabilistic guarantees which can be made for the `maxError`-`minFail` gap, it
+While this flag does improve the probabilistic guarantees which can be made for the `maxError`-`minSupport` gap, it
 should be noted that these are still only probabilistic as even if `maximizeCoverage` is set to `true`, there can still
-be differences of `minFail + 1` which are unsupported in the worst case and likewise, differences of `maxError - 1`
+be differences of `minSupport + 1` which are unsupported in the worst case and likewise, differences of `maxError - 1`
 may still succeed even if `maximizeCoverage` is set to `false` in the worst case.
-Yet in the average case this maximizing coverage will make it much more likely that cases in the `maxError`-`minFail` gap
+Yet in the average case this maximizing coverage will make it much more likely that cases in the `maxError`-`minSupport` gap
 will succeed and minimizing coverage will make it much more likely that these cases fail (are not supported).
 
 There exist many versions of this proposal which allow more exact guarantees, such as ones that lift either or both of the
@@ -223,8 +224,8 @@ largest CETs in this set, which by definition cover the vast majority of the ran
 This discarding is the primary opinion decidedly made from the design space by this proposal, and discarding any less
 leads to better guarantees at the expense of more CETs.
 The resulting CET(s) can then either be used (in the case of maximize coverage) or shrunk until they cover as little as
-possible while still containing `[start - minFail, end + minFail]` by repeatedly cutting them in half on either side.
-This process results in 1-3 secondary oracle CETs for ever single CET of the primary oracle. 
+possible while still containing `[start - minSupport, end + minSupport]` by repeatedly cutting them in half on either side.
+This process results in 1 to 3 secondary oracle CETs for ever single CET of the primary oracle (see [algorithm below](#algorithm)). 
 
 ### 2-of-2 Oracles with Bounded Error
 
@@ -239,12 +240,12 @@ primary oracle's CET.
 The maximum possible support range is parameterized by a maximum error exponent, `maxErrorExp`,
 where all difference more than `maxError = 2^maxErrorExp` are guaranteed **not** to be supported.
 
-The minimum supported range is parameterized by a minimum failure exponent, `minFailExp`, where
-all differences of up to `minFail = 2^minFailExp` are guaranteed to be supported.
-It is required that `minFailExp` be strictly less than `maxErrorExp` because this gap is key to the 
+The minimum supported range is parameterized by a minimum failure exponent, `minSupportExp`, where
+all differences of up to `minSupport = 2^minSupportExp` are guaranteed to be supported.
+It is required that `minSupportExp` be strictly less than `maxErrorExp` because this gap is key to the 
 existence of the following algorithm.
 
-If the two oracles sign outcomes that are between `minFail` and `maxError` apart, then this procedure
+If the two oracles sign outcomes that are between `minSupport` and `maxError` apart, then this procedure
 can provide only probabilistic guarantees.
 That said, DLC participants can decide in advance whether they wish to maximize the probability of
 failure or of success in these cases.
@@ -264,9 +265,9 @@ First, let us define some subprocedures.
   the binary digits corresponding to that CET.
 
 We take as input the number of digits to be signed by the oracle, `numDigits`, the binary digits of the primary
-oracle's CET which we wish to cover with the secondary oracle, `cetDigits`, `maxErrorExp`, `minFailExp`,
+oracle's CET which we wish to cover with the secondary oracle, `cetDigits`, `maxErrorExp`, `minSupportExp`,
 and a boolean flag `maximizeCoverage` which signals whether to maximize the probability of success for
-outcomes differing by less than `maxError` and more than `minFail` or not (in which case failure is maximized).
+outcomes differing by less than `maxError` and more than `minSupport` or not (in which case failure is maximized).
 
 Let `[start, end] = computeCETIntervalBinary(cetDigits, numDigits)`,
 let `halfMaxError = 2^(maxErrorExp - 1)`,
@@ -288,13 +289,13 @@ TODO: Pictures here
     * Let `errorCET = numToVec(leftErrorCET, numDigits, maxErrorExp)`.
   * We now split into cases again depending on whether or not the small CET is near either boundary
     of its containing interval `[leftErrorCET, rightErrorCET]`.
-  * **Case** Middle CET (`start >= leftErrorCET + minFail` and `end <= rightErrorCET - minFail`)
+  * **Case** Middle CET (`start >= leftErrorCET + minSupport` and `end <= rightErrorCET - minSupport`)
     * In this case, only a single secondary CET is needed to cover all cases in which it agrees with
       the input primary CET!
     * If `maximizeCoverage` is `true`, then `errorCET` is to be used.
-    * Otherwise, use the smallest CET which contains `[start - minFail, end + minFail]`. 
+    * Otherwise, use the smallest CET which contains `[start - minSupport, end + minSupport]`. 
       * This can be computed as the common prefix between the binary digits of those two endpoints.
-  * **Case** Left CET (`start < leftErrorCET + minFail`)
+  * **Case** Left CET (`start < leftErrorCET + minSupport`)
     * In this case, two secondary CETs are needed: `leftCET` and `rightCET`, one on each side
       of `leftErrorCET`.
       * **Special Case** Leftmost CET (`leftErrorCET == 0`)
@@ -302,18 +303,18 @@ TODO: Pictures here
     * If `maximizeCoverage` is `true`, then `rightCET = errorCET`.
     * Otherwise, `rightCET` is the CET resulting from repeatedly deleting the right half of
       `errorCET` until any more deletions would no longer result in a right endpoint greater
-      than `end + minFail`.
+      than `end + minSupport`.
       * This can be computed as taking the first `(numDigits - maxErrorExp)` binary digits of
-        `end + minFail` followed by any additional `0` digits after that.
+        `end + minSupport` followed by any additional `0` digits after that.
     * If `maximizeCoverage` is `true`, then
       `leftCET = numToVec(leftErrorCET - halfMaxError, numDigits, maxErrorExp - 1)`.
       * This is the CET of width `halfMaxError` covering the interval
         `[leftErrorCET - halfMaxError, leftErrorCET - 1]`.
     * Otherwise, `leftCET` is the CET of minimum width containing
-      `[leftErrorCET - minFail, leftErrorCET - 1]`.
+      `[leftErrorCET - minSupport, leftErrorCET - 1]`.
       * This can be computed as the first `(numDigits - maxErrorExp)` binary digits of
-        `start - minFail` followed by any additional `1` digits after that.
-  * **Case** Right CET (`end > rightErrorCET - minFail`)
+        `start - minSupport` followed by any additional `1` digits after that.
+  * **Case** Right CET (`end > rightErrorCET - minSupport`)
     * In this case, two secondary CETs are needed: `leftCET` and `rightCET`, one on each side
       of `rightErrorCET`.
       * **Special Case** Rightmost CET (`rightErrorCET == maxNum`)
@@ -321,17 +322,17 @@ TODO: Pictures here
     * If `maximizeCoverage` is `true`, then `leftCET = errorCET`.
     * Otherwise, `leftCET` is the CET resulting from repeatedly deleting the left half of
       `errorCET` until any more deletions would no longer result in a left endpoint greater
-      than `start - minFail`.
+      than `start - minSupport`.
       * This can be computed as taking the first `(numDigits - maxErrorExp)` binary digits of
-        `start - minFail` followed by any additional `1` digits.
+        `start - minSupport` followed by any additional `1` digits.
     * If `maximizeCoverage` is `true` then
       `rightCET = numToVec(rightErrorCET + 1, numDigits, maxErrorExp - 1)`.
       * This is the CET of width `halfMaxError` covering the interval
         `[rightErrorCET + 1, rightErrorCET + halfMaxError]`.
     * Otherwise, `rightCET` is the CET of minimum width containing
-      `[rightErrorCET + 1, end + minFail]`.
+      `[rightErrorCET + 1, end + minSupport]`.
       * This can be computed as the first `(numDigits - maxErrorExp)` binary digits of
-        `end + minFail` followed by any additional `0` digits.
+        `end + minSupport` followed by any additional `0` digits.
 * **Case** Large CET (`end - start + 1 >= maxError`)
   * In this case, up to three CETs are needed, a `middleCET` for when both oracles agree that
     the outcome is within the large range of this CET, a `leftCET` for when the secondary oracle
@@ -353,10 +354,10 @@ TODO: Pictures here
     * `rightInnerCET = numToVec(end - halfMaxError + 1, numDigits, maxErrorExp - 1)`
     * `rightCET = numToVec(end + 1, numDigits, maxErrorExp - 1)`
   * Otherwise (`maximizeCoverage` is `false`),
-    * `leftInnerCET = numToVec(start, numDigits, minFailExp)`
-    * `leftCET = numToVec(start - minFail, numDigits, minFailExp)`
-    * `rightInnerCET = numToVec(end - minFail + 1, numDigits, minFailExp)`
-    * `rightCET = numToVec(end + 1, numDigits, minFailExp)`
+    * `leftInnerCET = numToVec(start, numDigits, minSupportExp)`
+    * `leftCET = numToVec(start - minSupport, numDigits, minSupportExp)`
+    * `rightInnerCET = numToVec(end - minSupport + 1, numDigits, minSupportExp)`
+    * `rightCET = numToVec(end + 1, numDigits, minSupportExp)`
 
 ### n-of-n Oracles with Bounded Error
 
@@ -402,23 +403,23 @@ To summarize, for n-of-n oracle support, the 2-of-2 algorithm is run where the p
 Luckily, there are very few large CETs in any given DLC.
 Thus, the primary multiplier to be concerned with is that of small non-middle CETs.
 
-If the difference between `maxErrorExp` and `minFailExp` is only one, then all small
+If the difference between `maxErrorExp` and `minSupportExp` is only one, then all small
 CETs will be non-middle so that additional oracles are guaranteed to lead to exponential
 growth in this multiplier (though one should note that exponential growth is already likely
 when using the below t-of-n scheme so that this may not be a primary concern).
 
-If, on the other hand, the difference between `maxErrorExp` and `minFailExp` is larger
+If, on the other hand, the difference between `maxErrorExp` and `minSupportExp` is larger
 than one, then the majority of CETs are expected to be middle CETs with exponentially larger
 numbers of middle CETs the bigger the difference between those two parameters.
 
 Therefore, there is a trade-off between the tightness of error bounds (i.e. the size of the non-
-guaranteed successes or failures between `minFail` and `maxError`)  and the number of CETs
+guaranteed successes or failures between `minSupport` and `maxError`)  and the number of CETs
 when using more than two oracles.
 
-It should also be noted that the actual values of `minFailExp` and `maxErrorExp` are not part of
+It should also be noted that the actual values of `minSupportExp` and `maxErrorExp` are not part of
 this trade-off, only their relative difference.
-For example, having `minFail=32` and `maxError = 128` should yield similar results to having
-`minFail = 256` and `maxError = 1024`.
+For example, having `minSupport=32` and `maxError = 128` should yield similar results to having
+`minSupport = 256` and `maxError = 1024`.
 
 ### t-of-n Oracles with Bounded Error
 
@@ -428,11 +429,11 @@ numeric outcomes with allowed (bounded) error, we simply run the t-of-t algorith
 
 The only additional work that must be done is that there must be a decision procedure to determine
 which oracle in a given group of `t` oracles is primary, and additionally what values should be used
-for `minFail` and `maxError` for a given group of `t` oracles (as this can vary between groups).
+for `minSupport` and `maxError` for a given group of `t` oracles (as this can vary between groups).
 
 The simplest candidate would be a negotiated ordered ranking of the oracles where the highest ranking
 oracle in any group of `t` oracles is chosen as primary.
-The values `minFail` and `maxError` can also be computed as some function of the rankings of a group
+The values `minSupport` and `maxError` can also be computed as some function of the rankings of a group
 of `t` oracles, or else they can be set as constant parameters across all groupings.
 
 TODO: Decide how this is done and communicated. 
