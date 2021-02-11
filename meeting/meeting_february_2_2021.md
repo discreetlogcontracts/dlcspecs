@@ -3,13 +3,37 @@
 ## Individual Updates (Sync)
 
 * **#Query(Nadav)**
+  * v0 milestone draft
+  * Work on numeric outcome and multi-oracle specs
+  * multi-oracle implementation in bitcoin-s
+  * refactors
 * **#Query(Ben)**
+  * Reviewing open spec PRs
+  * oracle attestation TLVs
+  * DLC wallet stuff for multi-oracle and numeric stuff in bitcoin-s
 * **#Query(Tibo)**
+  * rust-dlc progress and initial merges
+  * numeric outcome and multi-oracle progress
+  * spec review
+  * cfd-dlc cleanup
 * **#Query(Lloyd)**
-* **#Query(Antoine)**
+  * Test vectors for ECDSA adaptor sigs
+  * Reviewed Jesse's implementation
+  * Oracle Attestation and other DLC security work (proofs)
 * **#Query(Chris)**
+  * Recruiting oracles
+    * exchanges
+  * bitcoin-s documentation work
 * **#Query(Jesse)**
+  * ECDSA Adaptor Signature Implementation (PR)
+    * Ready for and under review!
 * **#Query(Matt)**
+  * Finalizing diagrams for the spec this weekend
+  * Working on numeric outcome-based options application
+* **#Query(Maxim)**
+  * Working on RGB which is inter-operable with DLCs
+    * Created a Lightning Node in rust that is extensible
+      * Possibility of adding DLCs to channels
 * **#Query(all)**
 
 ## Secp256k1 Progress
