@@ -44,5 +44,40 @@
         "encryption_key": "035176d24129741b0fcaa5fd6750727ce30860447e0a92c9ebebdeb7c3f93995ed",
         "decryption_key" : null,
         "error" : "the R value of the signature does not match"
+    },
+    {
+        "kind" : "recovery",
+        "adaptor_sig" : "032c637cd797dd8c2ce261907ed43e82d6d1a48cbabbbece801133dd8d70a01b1403eb615a3e59b1cbbf4f87acaf645be1eda32a066611f35dd5557802802b14b19c81c04c3fefac5783b2077bd43fa0a39ab8a64d4d78332a5d621ea23eca46bc011011ab82dda6deb85699f508744d70d4134bea03f784d285b5c6c15a56e4e1fab4bc356abbdebb3b8fe1e55e6dd6d2a9ea457e91b2e6642fae69f9dbb5258854",
+        "signature" : "2c637cd797dd8c2ce261907ed43e82d6d1a48cbabbbece801133dd8d70a01b14b5f24321f550b7b9dd06ee4fcfd82bdad8b142ff93a790cc4d9f7962b38c6a3b",
+        "encryption_key" : "02042537e913ad74c4bbd8da9607ad3b9cb297d08e014afc51133083f1bd687a62",
+        "decryption_key" : "324719b51ff2474c9438eb76494b0dc0bcceeb529f0a5428fd198ad8f886e99c",
+        "comment" : "recovery from high s signature"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "03e6d51da7bc2bf24cf9dfd9acc6c4f0a3e74d8a6273ee5a573ed6818e3095b60903f33bc98f9d2ea3511f2e24f3358557c815abd7713c9318af9f4dfab4441898ecd619acb1cb75c1a5946fbaf716d227199a6479a678d10a6d95512d674fb7703d85b58980b8e6c54bd20616bdb9461dccd8eebb7d7e7c83a91452cc20edf53be5b0fe0db44dddaaafbe737678c684b6e89b9b4b679b1855aa6ed644498b89c918",
+        "error" : null
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "03fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2c03f33bc98f9d2ea3511f2e24f3358557c815abd7713c9318af9f4dfab4441898ecd619acb1cb75c1a5946fbaf716d227199a6479a678d10a6d95512d674fb7703d85b58980b8e6c54bd20616bdb9461dccd8eebb7d7e7c83a91452cc20edf53be5b0fe0db44dddaaafbe737678c684b6e89b9b4b679b1855aa6ed644498b89c918",
+        "error" : null,
+        "comment" : "R can be above curve order"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "03e6d51da7bc2bf24cf9dfd9acc6c4f0a3e74d8a6273ee5a573ed6818e3095b60903fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2cd619acb1cb75c1a5946fbaf716d227199a6479a678d10a6d95512d674fb7703d85b58980b8e6c54bd20616bdb9461dccd8eebb7d7e7c83a91452cc20edf53be5b0fe0db44dddaaafbe737678c684b6e89b9b4b679b1855aa6ed644498b89c918",
+        "error" : null,
+        "comment" : "R_a can be above curve order"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "03e6d51da7bc2bf24cf9dfd9acc6c4f0a3e74d8a6273ee5a573ed6818e3095b60903f33bc98f9d2ea3511f2e24f3358557c815abd7713c9318af9f4dfab4441898ec000000000000000000000000000000000000000000000000000000000000000085b58980b8e6c54bd20616bdb9461dccd8eebb7d7e7c83a91452cc20edf53be5b0fe0db44dddaaafbe737678c684b6e89b9b4b679b1855aa6ed644498b89c918",
+        "error" : "s_a cannot be zero"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "03e6d51da7bc2bf24cf9dfd9acc6c4f0a3e74d8a6273ee5a573ed6818e3095b60903f33bc98f9d2ea3511f2e24f3358557c815abd7713c9318af9f4dfab4441898ecfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd036414185b58980b8e6c54bd20616bdb9461dccd8eebb7d7e7c83a91452cc20edf53be5b0fe0db44dddaaafbe737678c684b6e89b9b4b679b1855aa6ed644498b89c918",
+        "error" : "s_a too high"
     }
 ]

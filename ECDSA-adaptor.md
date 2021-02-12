@@ -187,15 +187,16 @@ This point is not relevant to on-chain DLCs since the ECDSA signatures always co
 
 ## Specification tests
 
-The test vectors for this specification are in [./test/ecdsa_adaptor.json] and come in two kinds:
+The test vectors for this specification are in [./test/ecdsa_adaptor.json] and come in three kinds:
 
 - `verification`: These test the verifier in three stages:
   - Check `adaptor_sig` passes `ecdsa_adaptor_verify`.
   - Check that `ecdsa_adaptor_decrypt` yields `signature`.
   - Check that  `ecdsa_adaptor_recover` recovers `decryption_key`.
 - `recovery`: These test only the key recovery function. The recovery function should recover the correct decryption key.
+- `serialization`: These tests check that the adaptor signatures deserialization. Additionally, implementations should check that the serialization of the adaptor signature is the same as specified.
 
-These should fail only when `error` is set in the test vector.
+Tests should fail only when `error` is set in the test vector.
 
 [Dry]: https://adiabat.github.io/dlc.pdf
 [Mor]: https://lists.linuxfoundation.org/pipermail/lightning-dev/attachments/20180426/fe978423/attachment-0001.pdf
