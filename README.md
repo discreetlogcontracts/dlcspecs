@@ -29,7 +29,7 @@ For more information on works in progress and TODOs, see our [pull requests](htt
 The team at Suredbits is working on a implementation of discreet log contracts in bitcoin-s. 
 
 1. [Documentation](https://bitcoin-s.org/docs/next/wallet/dlc)
-2. [Github branch](https://github.com/bitcoin-s/bitcoin-s/tree/adaptor-dlc/dlc/src/main/scala/org/bitcoins/adaptor-dlc)
+2. [Github branch](https://github.com/bitcoin-s/bitcoin-s/tree/adaptor-dlc/dlc/src/main/scala/org/bitcoins/dlc)
 3. [Interactive DLC Demo](https://scastie.scala-lang.org/nkohen/OVWMOXwPRryREhVNw7pjLw/11)
 
 ### [cfd-dlc](https://github.com/p2pderivatives/cfd-dlc)
