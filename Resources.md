@@ -6,6 +6,10 @@ This document provides a list of resources to learn about DLC.
 
 * [Dryja, Thaddeus. "Discreet log contracts.", 2017](https://adiabat.github.io/dlc.pdf)
 
+## Mailing List
+
+* [dlc-dev mailing list](https://mailmanlists.org/mailman/listinfo/dlc-dev)
+
 ## Blog Posts
 
 * [Discreet Log Contracts: invisible smart contracts on the Bitcoin blockchain](https://medium.com/@gertjaap/discreet-log-contracts-invisible-smart-contracts-on-the-bitcoin-blockchain-cc8afbdbf0db)

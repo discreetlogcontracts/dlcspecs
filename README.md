@@ -9,6 +9,8 @@ Please see our [introduction](Introduction.md) for what a DLC is and a glossary 
 
 For learning more about DLC have a look at the [resources](Resources.md) page.
 
+Also, check out the [dlc-dev mailing list](https://mailmanlists.org/mailman/listinfo/dlc-dev)!
+
 ## Specification Roadmap
 
 Check out our [version 0 milestone](v0Milestone.md)!
