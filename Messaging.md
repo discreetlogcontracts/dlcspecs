@@ -113,7 +113,7 @@ This type contains information about a contract's outcomes, their corresponding 
 
 This type contains information about a contract's outcomes and their corresponding payouts.
 
-To save space, only one side's POV is included in this message as the other can be derived using `remote_payout = total_collateral - local_payout`.
+To save space, only the offerer's POV is included in this message as the other can be derived using `accept_payout = total_collateral - offer_payout`.
 
 #### Version 0 `contract_descriptor`
 
@@ -138,6 +138,8 @@ This type represents an enumerated outcome contract.
 
 This type represents a numeric outcome contract.
 
+The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-interval-serialization).
+
 ### The `oracle_info` Type
 
 This type contains information about the oracles to be used in executing a DLC.
@@ -161,7 +163,8 @@ This type of oracle info is for single-oracle events.
    * [`oracle_announcment`:`oracle_announcement_num_oracles`]
 
 This type of oracle info is for multi-oracle events where all oracles are signing messages
-that exactly correspond to the messages being signed by the other oracles.
+that exactly correspond to the messages being signed by the other oracles, and `threshold`
+oracles must be in agreement for execution to happen.
 
 #### Version 2 `oracle_info`
 
@@ -176,12 +179,12 @@ that exactly correspond to the messages being signed by the other oracles.
 
 The order of the oracle announcements represents a total ordering of preference on the oracles.
 
-This type of oracle info is for multi-oracle numeric events where there is some allotted
-difference between oracles allowed and specified in `oracle_params`.
+This type of oracle info is for multi-oracle numeric events where allowed differences in the values
+signed by oracles is specified in `oracle_params`.
 
 ### The `oracle_params` Type
 
-This type contains information about the oracles being used beyond their announcements.
+contains information about how oracle information is used in a given contract.
 
 #### Version 0 `oracle_params` Type
 
@@ -191,8 +194,8 @@ This type contains information about the oracles being used beyond their announc
    * [`u16`:`minFailExp`]
    * [`bool`:`maximize_coverage`]
 
-This type is used when there is a shared error bounds requirement for any set of oracles in a
-multi-oracle numeric outcome DLC with allowed (bounded) error.
+This type is used when the error bound requirements for any set of oracles `threshold` oracles in a
+multi-oracle numeric outcome DLC with allowed error is the same.
 
 ### The `negotiation_fields` Type
 
