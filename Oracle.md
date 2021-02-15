@@ -18,7 +18,6 @@ This necessary information is committed to in a so-called [_event descriptor_](#
    - [Serialization and signing of outcome values](#serialization-and-signing-of-outcome-values)
    - [Serialization of event descriptors](#serialization-of-event-descriptors)
       - [Version 0 `enum_event_descriptor`](#version-0-enum_event_descriptor)
-      - [Version 0 `range_event_descriptor`](#version-0-range_event_descriptor)
       - [Version 0 `digit_decomposition_event_descriptor`](#version-0-digit_decomposition_event_descriptor)
    - [Oracle events](#oracle-events)
       - [Version 0 `oracle_event`](#version-0-oracle_event)
@@ -43,26 +42,6 @@ For events that have a narrow range of possible outcomes, the outcomes can simpl
 #### Example: Weather tomorrow
 
 Tomorrow's weather can be represented as the set of strings `[sunny, cloudy, rainy]`.
-
-### Range
-
-When an event has numerical outcomes that cannot be easily enumerated, they can be represented as a series with:
-
-- start: the first possible outcome number
-- count: the number of possible outcomes
-- step: the increment
-- unit: the unit of the outcome value
-- precision: the precision of the outcome representing the base exponent by which to multiply the signed number to obtain the actual outcome value.
-
-#### Example: tomorrow's temperature
-
-```
-start: -100
-count: 201
-step: 1
-unit: °C
-precision: 0
-```
 
 ### Digit decomposition
 
@@ -139,16 +118,6 @@ Event descriptors should be serialized using [TLV format](https://github.com/lig
 This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
 
 Note that `outcome_i` is the outcome value itself and not its hash that will be signed by the oracle.
-
-#### Version 0 `range_event_descriptor`
-
-1. type: 55304 (`range_event_descriptor_v0`)
-2. data:
-   * [`int32`:`start`]
-   * [`u32`:`count`]
-   * [`u16`:`step`]
-   * [`string`:`unit`]
-   * [`int32`:`precision`]
 
 #### Version 0 `digit_decomposition_event_descriptor`
 
