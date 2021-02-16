@@ -72,15 +72,15 @@ the funding transaction and CETs.
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
    * [`u64`:`payout_serial_id`]
-   * [`u64`:`total_collateral_satoshis`]
+   * [`u64`:`offer_collateral_satoshis`]
    * [`u16`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
    * [`spk`:`change_spk`]
    * [`u64`:`change_serial_id`]
    * [`u64`:`fund_output_serial_id`]
    * [`u64`:`feerate_per_vb`]
-   * [`u32`:`contract_maturity_bound`]
-   * [`u32`:`contract_timeout`]
+   * [`u32`:`cet_locktime`]
+   * [`u32`:`refund_locktime`]
 
 No bits of `contract_flags` are currently defined, this field should be ignored.
 
@@ -96,7 +96,7 @@ blockchains opened to the same peer (if it supports the target chains).
 the funding transaction output. `payout_spk` specifies the script
 pubkey that CETs and the refund transaction should use in the sender's output.
 
-`total_collateral_satoshis` is the amount the sender is putting into the
+`offer_collateral_satoshis` is the amount the sender is putting into the
 contract. `num_funding_inputs` is the number of funding inputs contributed by
 the sender and `funding_inputs` contains outputs, outpoints, and expected weights
 of the sender's funding inputs. `change_spk` specifies the script pubkey that funding
@@ -115,7 +115,7 @@ Outputs in the funding transaction will be sorted by `change_serial_id` and `fun
 sides will use to compute fees in the funding transaction, as described in the
 [transaction specification](Transactions.md).
 
-`contract_maturity_bound` is the nLockTime to be put on CETs. `contract_timeout` is the nLockTime to be put on the refund transaction.
+`cet_locktime` is the nLockTime to be put on CETs. `refund_locktime` is the nLockTime to be put on the refund transaction.
 
 #### Requirements
 
@@ -125,17 +125,17 @@ The sending node MUST:
   - ensure the `chain_hash` value identifies the chain it wishes to open the contract within.
   - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition)
   - set `funding_pubkey` to a valid secp256k1 pubkey in compressed format.
-  - set `total_collateral_satoshis` to a value greater than or equal to 1000.
-  - set `contract_maturity_bound` and `contract_timeout` to either both be UNIX timestamps, or both be block heights as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
-  - set `contract_maturity_bound` to be less than `contract_timeout`.
+  - set `offer_collateral_satoshis` to a value greater than or equal to 1000.
+  - set `cet_locktime` and `refund_locktime` to either both be UNIX timestamps, or both be block heights as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
+  - set `cet_locktime` to be less than `refund_locktime`.
   - use a unique `input_serial_id` for each input
   - set `change_serial_id` and `fund_output_serial_id` to different values
 
 The sending node SHOULD:
 
   - set `feerate_per_vb` to at least the rate it estimates would cause the transaction to be immediately included in a block.
-  - set `contract_maturity_bound` to no later than the earliest expected oracle signature time.
-  - set `contract_timeout` sufficiently long after the latest possible oracle signature added to all other delays to closing the contract.
+  - set `cet_locktime` to no later than the earliest expected oracle signature time.
+  - set `refund_locktime` sufficiently long after the latest possible release of oracle signatures added to all other delays to closing the contract.
   - set `payout_spk` to a previously unused script public key.
   - set `change_spk` to a previously unused script public key.
 
@@ -148,7 +148,7 @@ The receiving node MAY reject the contract if:
   - it does not agree to the terms in `contract_info`.
   - the `contract_info` is missing relevant events.
   - it does not want to use the oracle(s) specified in `contract_info`.
-  - `total_collateral_satoshis` is too small.
+  - `offer_collateral_satoshis` is too small.
   - `feerate_per_vb` is too small.
   - `feerate_per_vb` is too large.
 
@@ -175,7 +175,7 @@ and closing transactions.
 1. type: 42780 (`accept_dlc_v0`)
 2. data:
    * [`32*byte`:`temporary_contract_id`]
-   * [`u64`:`total_collateral_satoshis`]
+   * [`u64`:`accept_collateral_satoshis`]
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
    * [`u64`:`payout_serial_id`]
@@ -193,7 +193,7 @@ The `temporary_contract_id` MUST be the SHA256 hash of the `offer_dlc` message.
 
 The sender MUST:
 
-  - set `total_collateral_satoshis` sufficiently large so that the sum of both parties' total collaterals is at least as large as the largest payout in the `offer_dlc`'s `contract_info`.
+  - set `accept_collateral_satoshis` to equal the `offer_dlc`'s `contract_info` `total_collateral` minus the `offer_collateral_satoshis`.
   - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition)
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
@@ -210,7 +210,7 @@ The sender SHOULD:
 
 The receiver:
 
-  - if `total_collateral_satoshis` is not large enough:
+  - if `accept_collateral_satoshis` is not `total_collateral - offer_collateral_satoshis`:
     - MAY reject the contract.
   - if `payout_spk` or `change_spk` are not a [standard script pubkey](#script-pubkey-standardness-definition)
     - MUST reject the contract.
@@ -218,7 +218,7 @@ The receiver:
     - MUST reject the contract.
   - if `cet_adaptor_signatures` or `refund_signature` fail validation:
     - MUST reject the contract.
-  - if `funding_inputs` do not contribute at least `total_collateral_satoshis` plus [fee payment](Transactions.md#fee-payment)
+  - if `funding_inputs` do not contribute at least `accept_collateral_satoshis` plus [fee payment](Transactions.md#fee-payment)
     - MUST reject the contract.
   - if any `input_serial_id` is duplicated
     - MUST reject the contract.

@@ -64,14 +64,14 @@ The funding transaction's change outputs should pay to the address specified in 
 Also known as a CET.
 
 * version: 2
-* locktime: `contract_maturity_bound`
+* locktime: `cet_locktime`
 * txin count: 1
   * `txin[0]` outpoint: `txid` of funding transaction and `output_index` 0
   * `txin[0]` sequence: 0xFFFFFFFE
   * `txin[0]` script bytes: 0
   * `txin[0]` witness: `0 <signature_for_pubkey1> <signature_for_pubkey2>`
 
-The output script public keys and `contract_maturity_bound` are negotiated in the offer and accept messages.
+The output script public keys and `cet_locktime` are negotiated in the offer and accept messages.
 
 In the witness `pubkey1` is the lexicographically lesser of `offer_funding_pubkey` and `accept_funding_pubkey`, and where `pubkey2` is the lexicographically greater of the two.
 
@@ -93,7 +93,7 @@ This output sends funds won by the accepter corresponding to this CET's outcome 
 
 # Refund Transaction
 
-The refund transaction is exactly the same as a [Contract Execution Transaction](#contract-execution-transaction) except that its locktime is `contract_timeout` (as negotiated in the offer message) instead of `contract_maturity_bound` and the output values for the offerer and the accepter are their respective total collateral values from their offer/accept messages.
+The refund transaction is exactly the same as a [Contract Execution Transaction](#contract-execution-transaction) except that its locktime is `refund_locktime` (as negotiated in the offer message) instead of `cet_locktime` and the output values for the offerer and the accepter are their respective total collateral values from their offer/accept messages.
 
 # Fees
 

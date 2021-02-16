@@ -43,8 +43,8 @@ when interacting with lowest-level core DLC logic.
 
 ## Rounding Intervals
 
-As detailed in the [CET compression](CETCompression.md#cet-compression), any time some continuous interval of the domain results in the same payout value, we can
-compress the CETs required by that interval to be logarithmic in size compared to using one CET per outcome on that interval.
+As detailed in the [CET compression document](CETCompression.md#cet-compression), any time some continuous interval of the domain results in the same payout value,
+we can compress the CETs required for that interval to be logarithmic in size compared to using one CET per outcome on the interval.
 As such, it can be beneficial to round the outputs of the payout function to allow for bounded approximation of pieces of the payout
 curve by constant-payout intervals.
 For example, if two parties are both willing to round payout values to the nearest 100 satoshis, they can have significant savings
@@ -91,11 +91,11 @@ If `begin_interval_1` is strictly greater than `0`, then the interval between `0
 ## Contract Execution Transaction Calculation
 
 Given the offerrer's [payout function](PayoutCurve.md), a `total_collateral` amount and [rounding intervals](#rounding-intervals), we wish to compute a list of pairs
-of digits (i.e. arrays of integers) and Satoshi values.
-Each of these pairs will then be turned into a CET whose adaptor point is [computed from the list of integers](CETCompression.md#adaptor-points-with-multiple-signatures) and whose
+of digit prefixes (i.e. arrays of integers) and Satoshi values.
+Each of these pairs will then be turned into a CET whose adaptor point is [computed from the digit prefix](CETCompression.md#adaptor-points-with-multiple-signatures) and whose
 output values will be equal to the Satoshi payout and `total_collateral` minus that payout.
 
-We must first modify the pure function given to us (e.g. by interpolating points) by applying rounding, as well as setting all
+We must first modify the pure function given to us (e.g. by interpolating points) by applying rounding, and then setting all
 negative payouts to `0` and all computed payouts above `total_collateral` to equal `total_collateral`.
 
 Next, we split the function's domain into two kinds of intervals:
@@ -109,10 +109,10 @@ There are countless ways to go about making this process more efficient such as 
 at the unmodified function's derivatives.
 
 Regardless of how these intervals are computed, it is required that the constant-valued intervals be as large as possible.
-For example if you have two constant-valued intervals in a row with the same value, these must be merged.
+For example, if you have two constant-valued intervals in a row with the same value, these must be merged.
 
 Finally, once these intervals have been computed, the [CET compression](CETCompression.md#cet-compression) algorithm is run on each constant-valued interval which generates
-a list of integers to be paired with the (constant) payout for that interval.
+a digit prefix (list of integers) to be paired with the (constant) payout for that interval.
 For variable-payout intervals, a unique CET is constructed for every `event_outcome` where all digits of that `event_outcome` are included
 in the array of integers and the Satoshi payout is equal to the output of the modified function for that `event_outcome`.
 
