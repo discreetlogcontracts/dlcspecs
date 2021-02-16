@@ -11,8 +11,6 @@ This necessary information is committed to in a so-called [_event descriptor_](#
 - [Event descriptor](#event-descriptor)
    - [Simple enumeration](#simple-enumeration)
       - [Example: Weather tomorrow](#example-weather-tomorrow)
-   - [Range](#range)
-      - [Example: tomorrow's temperature](#example-tomorrows-temperature)
    - [Digit decomposition](#digit-decomposition)
       - [Example: BTC/USD rate](#example-btcusd-rate)
    - [Serialization and signing of outcome values](#serialization-and-signing-of-outcome-values)
@@ -33,7 +31,7 @@ An event descriptor provides information to clients about an event for which an 
 The provided information should be sufficient for a client to create a set of adaptors signatures for some CETs that will cover all possible outcomes of the event.
 
 Here we assume that an event outcome can be represented either as a set of strings or numbers.
-Three kinds of event outcomes are defined (note that a single event can be composed of several types).
+Two kinds of event outcomes are defined (note that a single event can be composed of several types).
 
 ### Simple enumeration
 
