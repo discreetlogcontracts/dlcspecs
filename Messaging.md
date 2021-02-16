@@ -113,7 +113,8 @@ This type contains information about a contract's outcomes, their corresponding 
 
 This type contains information about a contract's outcomes and their corresponding payouts.
 
-To save space, only the offerer's POV is included in this message as the other can be derived using `accept_payout = total_collateral - offer_payout`.
+To save space, only the offerer's payouts are included in this message as the accepter's can be derived using
+`accept_payout = total_collateral - offer_payout`.
 
 #### Version 0 `contract_descriptor`
 
@@ -138,6 +139,7 @@ This type represents an enumerated outcome contract.
 
 This type represents a numeric outcome contract.
 
+The type `payout_function` is defined [here](PayoutCurve.md#curve-serialization).
 The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-interval-serialization).
 
 ### The `oracle_info` Type
@@ -162,9 +164,9 @@ This type of oracle info is for single-oracle events.
    * ...
    * [`oracle_announcment`:`oracle_announcement_num_oracles`]
 
-This type of oracle info is for multi-oracle events where all oracles are signing messages
-that exactly correspond to the messages being signed by the other oracles, and `threshold`
-oracles must be in agreement for execution to happen.
+This type of oracle info is for multi-oracle events where all oracles are signing messages chosen
+from a set of messages that exactly corresponds to the set of messages being signed by the other oracles,
+and any `threshold` oracles must sign (exactly) corresponding messages for execution to happen.
 
 #### Version 2 `oracle_info`
 
@@ -184,9 +186,9 @@ signed by oracles is specified in `oracle_params`.
 
 ### The `oracle_params` Type
 
-contains information about how oracle information is used in a given contract.
+Contains information about how oracle information is used in a given contract.
 
-#### Version 0 `oracle_params` Type
+#### Version 0 `oracle_params`
 
 1. type: 55338 (`oracle_params_v0`)
 2. data
@@ -217,6 +219,8 @@ This type signifies that the accepter has no negotiation fields.
 
 `rounding_intervals` represents the maximum amount of allowed rounding at any possible oracle outcome
 in a numeric outcome DLC.
+
+The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-interval-serialization).
 
 ### The `funding_input` Type
 
