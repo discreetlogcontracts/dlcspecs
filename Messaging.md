@@ -15,6 +15,7 @@ All data fields are unsigned big-endian unless otherwise specified.
   * [DLC Specific Types](#dlc-specific-types)
     * [The `contract_info` Type](#the-contract_info-type)
       * [Version 0 `contract_info`](#version-0-contract_info)
+      * [Version 1 `contract_info`](#version-1-contract_info)
     * [The `contract_descriptor` Type](#the-contract_descriptor-type)
       * [Version 0 `contract_descriptor`](#version-0-contract_descriptor)
       * [Version 1 `contract_descriptor`](#version-1-contract_descriptor)
@@ -108,6 +109,25 @@ This type contains information about a contract's outcomes, their corresponding 
    * [`oracle_info`:`oracle_info`]
 
 `total_collateral` is the Satoshi-denominated value of the sum of all party's collateral.
+
+#### Version 1 `contract_info`
+
+1. type: 55344 (`contract_info_v1`)
+2. data:
+   * [`u64`:`total_collateral`]
+   * [`bigsize`:`num_disjoint_events`]
+   * [`contract_descriptor`:`contract_descriptor_1`]
+   * [`oracle_info`:`oracle_info_1`]
+   * ...
+   * [`contract_descriptor`:`contract_descriptor_num_disjoint_events`]
+   * [`oracle_info`:`oracle_info_num_disjoint_events`]
+
+`total_collateral` is the Satoshi-denominated value of the sum of all party's collateral.
+
+Each `contract_descriptor` and `oracle_info` pair determines a set of CETs so that this
+`contract_info` determines the union of these CET sets.
+The order of [CET adaptor signatures](#the-cet_adaptor_signatures-type) for a disjoint union DLC is simply the ordered (by index above)
+concatenation of the CET set order as it would be computed for `contract_info_v0`.
 
 ### The `contract_descriptor` Type
 
