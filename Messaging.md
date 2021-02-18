@@ -28,6 +28,7 @@ All data fields are unsigned big-endian unless otherwise specified.
     * [The `negotiation_fields` Type](#the-negotiation_fields-type)
       * [Version 0 `negotiation_fields`](#version-0-negotiation_fields)
       * [Version 1 `negotiation_fields`](#version-1-negotiation_fields)
+      * [Version 2 `negotiation_fields`](#version-2-negotiation_fields)
     * [The `funding_input` Type](#the-funding_input-type)
       * [Version 0 `funding_input`](#version-0-funding_input)
     * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
@@ -234,13 +235,26 @@ This type signifies that the accepter has no negotiation fields.
 #### Version 1 `negotiation_fields`
 
 1. type: 55336 (`negotiation_fields_v1`)
-2. data
+2. data:
    * [`rounding_intervals`: `rounding_intervals`]
 
 `rounding_intervals` represents the maximum amount of allowed rounding at any possible oracle outcome
 in a numeric outcome DLC.
 
 The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-interval-serialization).
+
+#### Version 2 `negotiation_fields`
+
+1. type: 55346 (`negotiation_fields_v2`)
+2. data:
+   * [`bigsize`:`num_disjoint_events`]
+   * [`negotiation_fields`:`negotiation_fields_1`]
+   * ...
+   * [`negotiation_fields`:`negotiation_fields_num_disjoint_events`]
+
+This type is used within `dlc_accept` messages that respond to `dlc_offer`s containing a `contract_info_v1`.
+The `num_disjoint_events` here must be equal to the `num_disjoint_events` in that `contract_info_v1` and
+all of the `negotiation_fields` nested here must be version 0 or 1.
 
 ### The `funding_input` Type
 
