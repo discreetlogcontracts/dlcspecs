@@ -15,28 +15,28 @@ If you wish to propose a change for this document, feel free to reach out to the
 ## Table of Contents
 
 * [Phase 1](#phase-1)
-  * [Enumerated outcome DLCs](#enumerated-outcome-dlcs)
-  * [Unsigned Numeric Outcome DLCs](#unsigned-numeric-outcome-dlcs)
-  * [Updated Phase 1 Test Vectors](#updated-phase-1-test-vectors)
-  * [Generalized Contract Info](#generalized-contract-info)
-  * [Remove Range Outcome DLCs](#remove-range-outcome-dlcs)
-* [Phase 1.5 - Multi-Oracle Support](#phase-15---multi-oracle-support)
+  * [Enumerated outcome DLCs [DONE]](#enumerated-outcome-dlcs-done)
+  * [Unsigned Numeric Outcome DLCs [DONE]](#unsigned-numeric-outcome-dlcs-done)
+  * [Updated Phase 1 Test Vectors [IN PROGRESS]](#updated-phase-1-test-vectors-in-progress)
+  * [Generalized Contract Info [DONE]](#generalized-contract-info-done)
+  * [Remove Range Outcome DLCs [DONE]](#remove-range-outcome-dlcs-done)
+* [Phase 1.5 - Multi-Oracle Support [IN PROGRESS]](#phase-15---multi-oracle-support-in-progress)
 * [Phase 2](#phase-2)
-  * [Updated ECDSA Adaptor Signatures](#updated-ecdsa-adaptor-signatures)
-  * [Oracle Interface Stability](#oracle-interface-stability)
+  * [Updated ECDSA Adaptor Signatures [IN PROGRESS]](#updated-ecdsa-adaptor-signatures-in-progress)
+  * [Oracle Interface Stability [IN PROGRESS]](#oracle-interface-stability-in-progress)
     * [Announcements](#announcements)
     * [Attestations](#attestations)
     * [Numeric Base Requirements](#numeric-base-requirements)
   * [Signed Numeric Outcome DLCs](#signed-numeric-outcome-dlcs)
   * [Multi-Oracle Support for Non-Corresponding Outcome Sets](#multi-oracle-support-for-non-corresponding-outcome-sets)
-  * [Disjoint Union DLCs](#disjoint-union-dlcs)
-  * [Simple Fraud Proofs](#simple-fraud-proofs)
+  * [Disjoint Union DLCs [IN PROGRESS]](#disjoint-union-dlcs-in-progress)
+  * [Simple Fraud Proofs [IN PROGRESS]](#simple-fraud-proofs-in-progress)
   * [Minor Changes](#minor-changes)
     * [Make prev_tx Optional](#make-prev_tx-optional)
     * [Links Between Specification Documents](#links-between-specification-documents)
-    * [Ordering of Inputs and Outputs](#ordering-of-inputs-and-outputs)
-    * [Requirements on Change SPKs](#requirements-on-change-spks)
-    * [Support for 1/x Shaped Curves](#support-for-1x-shaped-curves)
+    * [Ordering of Inputs and Outputs [IN PROGRESS]](#ordering-of-inputs-and-outputs-in-progress)
+    * [Requirements on Change SPKs [IN PROGRESS]](#requirements-on-change-spks-in-progress)
+    * [Support for 1/x Shaped Curves [IN PROGRESS]](#support-for-1x-shaped-curves-in-progress)
 * [Not Included in v0 (Future Features)](#not-included-in-v0-future-features)
   * [DLC Transfers](#dlc-transfers)
   * [Option-Style DLCs](#option-style-dlcs)
@@ -54,14 +54,14 @@ At the time of this document's initial publishing, completion of phase 1 roughly
 
 Phase 1 is split into two parts, roughly corresponding to single and multiple oracle DLC support.
 
-### Enumerated Outcome DLCs
+### Enumerated Outcome DLCs [DONE]
 
 An enumerated outcome DLC is essentially a DLC which executes in the way described by [the whitepaper](https://adiabat.github.io/dlc.pdf) without the need for any further optimizations.
 
 The specification of single-oracle enumerated outcome DLCs is complete and all existing implementations fully support these kinds of DLCs.
 For new implementations, this is a good first step as it requires implementing almost exclusively data structures and functions which are universally useful in all types of DLCs.
 
-### Unsigned Numeric Outcome DLCs
+### Unsigned Numeric Outcome DLCs [DONE]
 
 An unsigned numeric outcome DLC is a DLC which is contingent on an oracle signing each digit of some number individually, where execution is specified using a payout curve.
 
@@ -72,21 +72,21 @@ Implementing this can be split into three parts:
 2. Implementing the payout curve interpolation logic.
 3. Putting everything together with code written for [Enumerated Outcome DLCs](#enumerated-outcome-dlcs) to execute unsigned numeric outcome DLCs.
 
-### Updated Phase 1 Test Vectors
+### Updated Phase 1 Test Vectors [IN PROGRESS]
 
 The current [test vectors](https://github.com/discreetlogcontracts/dlcspecs/tree/master/test) are out-of-date, with new test vectors PR'd [here](https://github.com/discreetlogcontracts/dlcspecs/pull/125) and even newer test vectors ready to be PR'd once the even newer [Generalized Contract Info](#generalized-contract-info) PR is merged.
 
-### Generalized Contract Info
+### Generalized Contract Info [DONE]
 
 Contract Info representations that were previously being used in DLC development are insufficient as they lack enough generality to support [multi-oracle](#phase-15---multi-oracle-support) and [disjoint union](#disjoint-union-dlcs) DLCs.
 [PR 130](https://github.com/discreetlogcontracts/dlcspecs/pull/130) specifies a new `contract_info` TLV which replaces all older versions and is sufficiently general to support all of these use cases as well as future ones.
 
-### Remove Range Outcome DLCs
+### Remove Range Outcome DLCs [DONE]
 
 [Range event outcomes](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Oracle.md#version-0-range_event_descriptor) are deprecated and must be removed before v0 is released.
 If you were using range outcomes DLCs, use numeric outcome DLCs (via [digit decomposition](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Oracle.md#version-0-digit_decomposition_event_descriptor)) or [enumerated](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Oracle.md#version-0-enum_event_descriptor) outcome DLCs instead.
 
-## Phase 1.5 - Multi-Oracle Support
+## Phase 1.5 - Multi-Oracle Support [IN PROGRESS]
 
 Multi-oracle support for enumerated and unsigned numeric outcomes is specified [here](https://github.com/discreetlogcontracts/dlcspecs/pull/128) and some existing implementations support various parts of this specification.
 Note that in this phase (as opposed to [in phase 2](#multi-oracle-support-for-non-corresponding-outcome-sets)) it is assumed that all oracles being used sign corresponding outcome sets meaning that in the enumerated case there is some one-to-one correspondence between the outcomes any two oracles could be signing, and in the numeric case `num_digits` is equal for all oracles.
@@ -100,14 +100,14 @@ This phase of development includes many breaking changes that have been split up
 
 The goal of phase 2 is to get the functional specification and implementations from phase 1 tidied up and ready for release into the wild.
 
-### Updated ECDSA Adaptor Signatures
+### Updated ECDSA Adaptor Signatures [IN PROGRESS]
 
 Up until recently, all DLC implementations have been working off of a [temporary branch](https://github.com/nkohen/secp256k1/tree/new-temp-everything) of the library secp256k1 which includes a preliminary implementation of ECDSA adaptor signatures which Jonas Nick [implemented](https://github.com/jonasnick/secp256k1/pull/14) during a lightning hackday in April 2020.
 
 Since then, Lloyd Fournier has written a [specification for ECDSA Adpator Signatures](https://github.com/discreetlogcontracts/dlcspecs/pull/114) which has breaking changes when compared to the previous temporary version.
 Jesse Posner has [implemented this new version](https://github.com/ElementsProject/secp256k1-zkp/pull/117) on the library secp256k1-zkp which will serve as a more stable and permanent branch until it is merged into the master branch at which point DLC implementations will use secp256k1-zkp for ECDSA adaptor signing functionality.
 
-### Oracle Interface Stability
+### Oracle Interface Stability [IN PROGRESS]
 
 It is crucial that we get a stable oracle interface for the v0 release because unlike DLC clients, which operate privately and can utilize versions (such as those in TLV messages) to upgrade and add new features, oracles act publicly and may announce commitments to attest to events in the distant future (long after v1).
 As such, we want oracles to have a resilient and forward-compatible interface to avoid the need for breaking changes in all cases where this is possible.
@@ -172,7 +172,7 @@ There likely needs to be some kind of scheme to specify the correspondence betwe
 Possibly this means there will be some kind of map for each oracle's enumeration element to a list of elements from a primary oracle (or some list of the outcomes on which the actual DLC is built) with which that element agrees.
 This is not yet fully developed or specified so further work is needed here. 
 
-### Disjoint Union DLCs
+### Disjoint Union DLCs [IN PROGRESS]
 
 There are situations when a contract can be executed in one of two or more disjoint modes.
 For example one could imagine a contract which pays out funds with respect to some index unless that index breaches a certain lower bound, in which case a "liquidation" event occurs and all funds go to one party immediately.
@@ -182,7 +182,7 @@ To enable such contracts, the only technical changes that must be made is that m
 At face value this is very simple and only requires the introduction of a new [Contract Info](#generalized-contract-info) version which contained a list of the non-union version.
 Other than this piece of work, the only other point left for discussion is how to properly handle race conditions where two or more different CETs become unlocked, a decision on this topic is pending further discussion.
 
-### Simple Fraud Proofs
+### Simple Fraud Proofs [IN PROGRESS]
 
 One of the foundational pieces to the foundation of the DLC oracle trust model is that there can be no untraceable oracle cheating/lying possible.
 
@@ -219,7 +219,7 @@ This should be remedied for all specification documents before the release.
 
 Issue open [here](https://github.com/discreetlogcontracts/dlcspecs/issues/60). 
 
-#### Ordering of Inputs and Outputs
+#### Ordering of Inputs and Outputs [IN PROGRESS]
 
 The current specification dictates that the offerer's inputs and outputs precede the accepter's inputs and outputs and that the inputs and outputs for a given party are included in the order they are communicated during contract negotiation.
 
@@ -227,14 +227,14 @@ Before the v0 release, we wish to move to a system which uses a `serial_id` fiel
 
 Discussion of this change [here](https://github.com/discreetlogcontracts/dlcspecs/issues/18). 
 
-#### Requirements on Change SPKs
+#### Requirements on Change SPKs [IN PROGRESS]
 
 In the current specification, each party is allowed to specify their own change script public key and it can be any value.
 Before the release some extra restrictions and validation must be put into place to ensure the standardness of these outputs so that the funding transaction is properly propagated through the network's mempools.
 
 Discussion of this topic [here](https://github.com/discreetlogcontracts/dlcspecs/issues/53).
 
-#### Support for 1/x Shaped Curves
+#### Support for 1/x Shaped Curves [IN PROGRESS]
 
 The current specification/proposal for payout curve interpolation supports piecewise polynomial interpolation which is sufficient for the accurate (enough) approximation of arbitrary curves.
 
