@@ -14,6 +14,10 @@ This document begins by specifying serialization and deserialization (aka evalua
 composed of some combination of lines, as well as for custom payout curves which do not
 warrant their own types to be created.
 
+This document also specifies serialization and deserialization of hyperbola-shaped payout curves
+which are useful for many inverse contracts such as contracts for difference (CFDs) where the payout
+curve has the form `constant/outcome`.
+
 ## Table of Contents
 
 * [General Payout Curves](#general-payout-curves)
@@ -22,6 +26,9 @@ warrant their own types to be created.
   * [General Function Evaluation](#general-function-evaluation)
   * [Reference Implementations](#reference-implementations)
   * [Optimized Evaluation During CET Calculation](#optimized-evaluation-during-cet-calculation)
+* [Hyperobola Payout Curves](#hyperbola-payout-curves)
+  * [Design and Evaluation](#design-and-evaluation)
+  * [Hyperbola Serialization](#hyperbola-serialization)
 * [Authors](#authors)
 
 ## General Payout Curves
@@ -155,6 +162,73 @@ when repeatedly and sequentially evaluating an interpolation as is done during C
 * When precision ranges are introduced, derivatives of the polynomial can be used to reduce the number of calculations needed.
   For example, when dealing with a cubic piece, if you are going left to right and enter a new value modulo precision while the first derivative (slope) is positive and the second derivative (concavity) is negative then you can take the tangent line to the curve at this point and find it's intersection with the next value boundary modulo precision.
   If the derivatives' signs are the same, then the interval from the current x-coordinate to the x-coordinate of the intersection is guaranteed to all be the same value modulo precision.
+
+## Hyperbola Payout Curves
+
+### Design and Evaluation
+
+The goal of this specification is to enable general hyperbola shapes efficiently and compactly while also ensuring that simpler and more common payout curves (such as `constant/outcome`) do not become complex while conforming to the generalized structure.
+
+This is accomplished by using a total of 7 parameters which can (almost) uniquely express every affine transformation of the curve `1/x`.
+Specifically we have `(f_1, f_2) + ((a, b), (c, d))*(x, 1/x)` which is some translation by the point `(f_1, f_2)` added to the curve `(x, 1/x)` transformed by the matrix `((a, b), (c, d))` where `a*d =/= b*c`.
+The last parameter is a boolean used to specify which curve piece to use when there is ambiguity.
+
+This scheme keeps simple curves simple as to represent any curve of the form `constant/x + constant'` we simply
+set `f_1 = b = c = 0, a = 1, d = constant, f_2 = constant'`.
+
+The two curve pieces from which one is chosen by a boolean flag, are just the parameterization of the `y-coordinate`
+in the above expression by `x` when the expression is expanded:
+
+```
+y_1 = c * (x - f_1 + sqrt((x - f_1)^2 - 4*a*b))/(2*a) + 2*a*d/(x - f_1 + sqrt((x - f_1)^2 - 4*a*b)) + f_2
+
+y_2 = c * (x - f_1 - sqrt((x - f_1)^2 - 4*a*b))/(2*a) + 2*a*d/(x - f_1 - sqrt((x - f_1)^2 - 4*a*b)) + f_2
+```
+
+We will refer to `y_1` as the positive piece and `y_2` as the negative piece, only because they use positive
+and negative square roots respectively.
+
+### Hyperbola Serialization
+
+In this section we detail the TLV serialization for a hyperbolic `payout_function`.
+
+#### Version 1 payout_function
+
+1. type: ??? (`payout_function_v1`)
+2. data:
+   * [`bool`:`use_positive_piece`]
+   * [`bool`:`translate_outcome_sign`]
+   * [`bigsize`:`translate_outcome`]
+   * [`u16`:`translate_outcome_extra_precision`]
+   * [`bool`:`translate_payout_sign`]
+   * [`bigsize`:`translate_payout`]
+   * [`u16`:`translate_payout_extra_precision`]
+   * [`bool`:`a_sign`]
+   * [`bigsize`:`a`]
+   * [`u16`:`a_extra_precision`]
+   * [`bool`:`b_sign`]
+   * [`bigsize`:`b`]
+   * [`u16`:`b_extra_precision`]
+   * [`bool`:`c_sign`]
+   * [`bigsize`:`c`]
+   * [`u16`:`c_extra_precision`]
+   * [`bool`:`d_sign`]
+   * [`bigsize`:`d`]
+   * [`u16`:`d_extra_precision`]
+
+If `use_positive_piece` is set to true, then `y_1` is used, otherwise `y_2` is used.
+
+Then there are six numeric values represented as a `bool` sign, a `bigsize` integer, and a `u16` extra precision.
+To be precise, the numbers used should be: (`num_sign`)( `num + double(num_extra_precision) >> 16`).
+
+Note that this `payout_function` is from the offerer's point of view.
+To evaluate the accepter's `payout_function`, you must evaluate the offerer's `payout_function` at a given
+`event_outcome` and subtract the resulting payout from `total_collateral`.
+
+#### Requirements
+
+* `a*d` MUST be not equal `b*c`.
+* The resulting curve MUST be defined for every `event_outcome` (without division by zero).
 
 ## Authors
 
