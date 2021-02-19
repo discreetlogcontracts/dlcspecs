@@ -15,6 +15,7 @@ All data fields are unsigned big-endian unless otherwise specified.
   * [DLC Specific Types](#dlc-specific-types)
     * [The `contract_info` Type](#the-contract_info-type)
       * [Version 0 `contract_info`](#version-0-contract_info)
+      * [Version 1 `contract_info`](#version-1-contract_info)
     * [The `contract_descriptor` Type](#the-contract_descriptor-type)
       * [Version 0 `contract_descriptor`](#version-0-contract_descriptor)
       * [Version 1 `contract_descriptor`](#version-1-contract_descriptor)
@@ -27,6 +28,7 @@ All data fields are unsigned big-endian unless otherwise specified.
     * [The `negotiation_fields` Type](#the-negotiation_fields-type)
       * [Version 0 `negotiation_fields`](#version-0-negotiation_fields)
       * [Version 1 `negotiation_fields`](#version-1-negotiation_fields)
+      * [Version 2 `negotiation_fields`](#version-2-negotiation_fields)
     * [The `funding_input` Type](#the-funding_input-type)
       * [Version 0 `funding_input`](#version-0-funding_input)
     * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
@@ -108,6 +110,25 @@ This type contains information about a contract's outcomes, their corresponding 
    * [`oracle_info`:`oracle_info`]
 
 `total_collateral` is the Satoshi-denominated value of the sum of all party's collateral.
+
+#### Version 1 `contract_info`
+
+1. type: 55344 (`contract_info_v1`)
+2. data:
+   * [`u64`:`total_collateral`]
+   * [`bigsize`:`num_disjoint_events`]
+   * [`contract_descriptor`:`contract_descriptor_1`]
+   * [`oracle_info`:`oracle_info_1`]
+   * ...
+   * [`contract_descriptor`:`contract_descriptor_num_disjoint_events`]
+   * [`oracle_info`:`oracle_info_num_disjoint_events`]
+
+`total_collateral` is the Satoshi-denominated value of the sum of all party's collateral.
+
+Each `contract_descriptor` and `oracle_info` pair determines a set of CETs so that this
+`contract_info` determines the union of these CET sets.
+The order of [CET adaptor signatures](#the-cet_adaptor_signatures-type) for a disjoint union DLC is simply the ordered (by index above)
+concatenation of the CET set order as it would be computed for `contract_info_v0`.
 
 ### The `contract_descriptor` Type
 
@@ -214,13 +235,26 @@ This type signifies that the accepter has no negotiation fields.
 #### Version 1 `negotiation_fields`
 
 1. type: 55336 (`negotiation_fields_v1`)
-2. data
+2. data:
    * [`rounding_intervals`: `rounding_intervals`]
 
 `rounding_intervals` represents the maximum amount of allowed rounding at any possible oracle outcome
 in a numeric outcome DLC.
 
 The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-interval-serialization).
+
+#### Version 2 `negotiation_fields`
+
+1. type: 55346 (`negotiation_fields_v2`)
+2. data:
+   * [`bigsize`:`num_disjoint_events`]
+   * [`negotiation_fields`:`negotiation_fields_1`]
+   * ...
+   * [`negotiation_fields`:`negotiation_fields_num_disjoint_events`]
+
+This type is used within `dlc_accept` messages that respond to `dlc_offer`s containing a `contract_info_v1`.
+The `num_disjoint_events` here must be equal to the `num_disjoint_events` in that `contract_info_v1` and
+all of the `negotiation_fields` nested here must be version 0 or 1.
 
 ### The `funding_input` Type
 
