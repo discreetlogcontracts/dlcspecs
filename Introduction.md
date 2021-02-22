@@ -13,8 +13,8 @@ The goal of DLC is to enable setting up contracts between two parties directly o
 
 An oracle is an entity signing messages in reaction to real-world events.
 Before event occurrence the oracle advertises a public nonce that will be used to later produce a signature.
-The public key used for signing must also be known in advance, but need to be unique for each event.
-Once the event has occurred they release a signed message over the event outcome using the previously advertised nonce.
+The public key used for signing must also be known in advance, but does not need to be unique for each event.
+Once the event has occurred an oracle releases a signed message over the event outcome using the previously advertised nonce (and public key).
 
 An important feature of DLC is that oracle signatures can be used without an explicit request from the contract participants.
 This characteristic is the reason for the "discreet log" part of the name, as the protocol, depending on its implementation and instantiation, enables parties to hide traces of their contracts to the oracle.
@@ -23,57 +23,37 @@ This characteristic is the reason for the "discreet log" part of the name, as th
 
 A second characteristic of DLCs is that both parties involved in the contract do not need to trust each other.
 The setup and execution of the contract is such that they are guaranteed to always be able to unilaterally close the contract.
-In case of a misbehaving counter-party, trying to close a contract on an outcome for which an oracle signature is not known, the honest protocol participant can claim all the funds locked in the contract.
-Parties are also protected against faulty oracles that would not produce a signature at event occurrence through a refund mechanism
-
-While able to unilaterally close the contracts, parties are expected to generally close the contract cooperatively, as it requires one less transaction to be broadcast.
+With the use of [adaptor signatures](#adaptor-signature), it is impossible for a party to misbehave, and interaction between parties is only required during the setup phase.
+Parties are also protected against faulty oracles that would not produce a signature at event occurrence through a refund mechanism.
 
 The current version of the specification does not offer protection against a party colluding with an oracle.
 Mitigation such as using a federation of oracles might be considered in future versions.
 
 Note that oracle cannot equivocate (create two different signatures on two different outcomes of a single event) without revealing their private key.
-This makes it possible to create a staking mechanism for oracles to penalize such behavior.
 
 ## Glossary
 
-### Closing Transaction
+### Adaptor Signature
 
-A transaction spending from the output of a [CET](#contract-execution-transaction-cet) requiring an oracle signature to be unlocked.
-This transaction thus unlocks the funds using the appropriate [oracle](#oracle) signature and sending them to an address fully controlled by the broadcasting party.
-It should usually be broadcast together with the corresponding CET.
+An adaptor signature `s'` is an encryption of a signature `s` over a message `m`, for which one can prove that decrypting `s'` leads to a valid signature `s`.
+In the context of DLC, the signature `s` is for a given [CET](#Contract-Execution-Transaction-(CET)), which is encrypted using a [signature point](#signature-point) of an oracle.
+Once an oracle releases a signature, the adaptor signature `s'` can be decrypted to `s` which can be used to create a validly signed CET.
+
 
 ### Contract Execution Transaction (CET)
 
-A transaction spending from the [funding transaction](#funding-transaction) whose outputs represent a possible outcome of a DLC contract.
-The first output can be spent either by one of the contracting party with knowledge of an oracle signature over the outcome, or by their counter-party after a given timeout.
-The second output can be spent directly.
+A transaction spending from the [funding transaction](#funding-transaction) whose outputs represent a possible payout of a DLC contract.
 
 ### Funding transaction
 
 An on-chain transaction locking the contract collateral in an output that can only be spent by mutual consent.
 It can also contain change outputs in the case where the amount input by a party is greater than the desired collateral.
 
-### Mutual Close
-
-A cooperative closing of a DLC using a [mutual closing transaction](#mutual-closing-transaction).
-A mutual close does not require the broadcast of any [CET](#contract-execution-transaction-cet).
-
-### Mutual Closing Transaction
-
-A transaction spending from the [funding transaction](#funding-transaction) paying to each party the amount that was agreed based on the published event outcome.
-
 ### Oracle
 
 Entity providing information to setup and decide the outcome of a DLC.
-Ahead of an event, an oracle publishes a one time [R-value](#r-value) (in addition to a public key reused across events) that potential contracting parties can use to establish a DLC.
-At event occurrence, it published a signature on the event outcome, created using the R-value previously published.
-
-The current version of these specifications does not cover composition of events from multiple oracles.
-
-### Penalty transaction
-
-Transaction spending the first output of a [CET](#contract-execution-transaction-cet) after the timeout has expired.
-Used by a party when their counter-party broadcast an incorrect CET for which a valid oracle signature does not exist.
+Ahead of an event, an oracle publishes a one time [R-value](#r-value) (in addition to a public key reused across events) that potential contracting parties can use to compute [signature points](#signature-point) and associated [adaptor signatures](#adaptor-signature) to establish a DLC.
+At event occurrence, it publishes a signature on the event outcome, created using the [R-value](#r-value) previously published.
 
 ### Refund transaction
 
@@ -85,6 +65,11 @@ It is time-locked to some time after the expected event occurrence and is only i
 An R-value (or `R` or R-point) is an elliptic curve point corresponding to the projection of a random value (often referred as `k` or k-value), used in the construction and verification of Schnorr signatures.
 While the R-value is usually one of the component of a Schnorr signature, in DLC it is being re-classified as a public component released ahead of signature time.
 
-### Unilateral Close
+### Signature Point
 
-A unilateral closing of a DLC using a [CET](#contract-execution-transaction-cet) and a [closing transaction](#closing-transaction).
+A signature point `S` is the image of a signature `s`, such that `S = s * G` where `G` is the base point of generator of an elliptic curve (or more generally a cyclic group).
+A signature point can be computed with only public information and prior to the creation of `s` if the [R-value](#r-value) `R` that will be used to create `s` is known.
+In practice, with Schnorr signatures, given `x` a secret key and `P = x * G` its associated public key, `k` a random value such that `R = k * G` and a message `m`, a signature `s` is defined as:
+`s = k + H(P || R || m) * x`
+A signature point `S` for `s` can be computed as:
+`S = R + H(P || R || m) * P`
