@@ -30,9 +30,8 @@ The funding inputs and change output script public keys are negotiated in the of
 
 ## Funding Transaction Input and Output Ordering
 
-The Offerer/Initiator's inputs come first and in the order that they were listed in the Offer message, the Accepter's inputs come after this in the order they are listed in the Accept message. The funding output comes first, followed by the Offerer's change output if applicable, and then the Accepter's change output if applicable.
-
-Note that this will likely change in the future.
+The inputs are sorted by each `funding_input`'s `input_serial_id` in ascending order.
+The outputs are sorted in ascending order based on their respective `change_serial_id` or `fund_output_serial_id`.
 
 ## Funding Inputs
 
@@ -80,9 +79,7 @@ There will be one CET for every possible outcome, the output values correspond t
 
 ## CET Outputs
 
-The Offerer/Initiator's output comes first, the Accepter's output comes second.
-
-Note that this will likely change in the future.
+The outputs are sorted by each user's `payout_serial_id` in ascending order.
 
 If either party receives less than the dust limit of `1000 satoshis` for this outcome, then their output is not produced.
 
