@@ -28,7 +28,7 @@ This necessary information is committed to in a so-called [_event descriptor_](#
 ## Event descriptor
 
 An event descriptor provides information to clients about an event for which an oracle plans on releasing a signature over its outcome.
-The provided information should be sufficient for a client to create a set of adaptors signatures for some CETs that will cover all possible outcomes of the event.
+The provided information should be sufficient for a client to create a set of adaptor signatures for some CETs that will cover all possible outcomes of the event.
 
 Here we assume that an event outcome can be represented either as a set of strings or numbers.
 Two kinds of event outcomes are defined (note that a single event can be composed of several types).

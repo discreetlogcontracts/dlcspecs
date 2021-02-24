@@ -137,7 +137,7 @@ Given a potential `event_outcome` compute the `outcome_payout` as follows:
 
 #### Reference Implementations
 
-* [bitcoin-s](https://github.com/bitcoin-s/bitcoin-s/blob/adaptor-dlc/core/src/main/scala/org/bitcoins/core/protocol/dlc/DLCPayoutCurve.scala#L324)
+* [bitcoin-s](https://github.com/bitcoin-s/bitcoin-s/blob/adaptor-dlc/core/src/main/scala/org/bitcoins/core/protocol/dlc/DLCPayoutCurve.scala#L365)
 
 ### Optimized Evaluation During CET Calculation
 

@@ -71,33 +71,35 @@ announcement and `s(1..m)` is sufficient information to generate a fraud proof i
 
 ## CET Compression
 
-Anytime there is a range of numeric outcomes `[start, end]` which result in the same payouts for all parties,
+Anytime there is an interval of numeric outcomes `[start, end]` (inclusive) which result in the same payouts for all parties,
 then a compression function described in this section can be run to reduce the number of CETs from `O(L)` to `O(log(L))`
-where  `L = end - start + 1` is the length of the interval being compressed.
+where  `L = end - start + 1` is the length of the interval of outcomes being compressed.
 
-Because this compression of CETs only works for intervals which result in the same payout, the [CET calculation algorithm](NumericOutcome.md#contract-execution-transaction-calculation)
-first splits the domain into buckets of equal payout, and then applies the compression algorithm from this
-document to individual intervals, `[start, end]` where all values in this interval have some fixed payout.
+Because this compression of CETs only works for intervals with constant payouts, the [CET calculation algorithm](NumericOutcome.md#contract-execution-transaction-calculation)
+first splits the domain into intervals of equal payout, and then applies the compression algorithm from this
+document to the individual intervals, `[start, end]` where all values in each interval have some fixed payout.
 
 Most contracts are expected to be concerned with some subset of the total possible domain and every
-outcome before or after that range will result in some constant maximal or minimal payout.
+outcome before or after that likely subset will result in some constant maximal or minimal payout.
 This means that compression will drastically reduce the number of CETs to be of the order of the size
 of the probable domain, with further optimizations available when parties are willing to do some [rounding](NumericOutcome.md#rounding-intervals).
 
-The compression algorithm takes as input a range `[start, end]`, a base `B`, and the number of digits
-`n` (being signed by the oracle) and returns an array of arrays of integers (which will all be in the range `[0, B-1]`).
-An array of integers corresponds to a single event equal to the concatenation of these integers (interpreted in base `B`).
+The compression algorithm takes as input an interval `[start, end]`, a base `B`, and the number of digits
+`n` (being signed by the oracle) and returns a list of digit prefixes serialized as an array of arrays of integers
+(which will all be in the range `[0, B-1]`).
+An array of integers represents a digit prefix corresponding to a single event equal to the concatenation of
+these integers (interpreted in base `B`) where all digits not used may be any value.
 
 ### Concrete Example
 
 Before generalizing or specifying the algorithm, let us run through a concrete example.
 
-We will consider the range `[135677, 138621]`, in base `10`.
-Note that they both begin with the prefix `13` which must be included in every CET, for this purpose I omit these digits for
-the remainder of this example as we can simply examine the range `[5677, 8621]` and prepend a `13` to all results.
+We will consider the interval `[135677, 138621]`, in base `10`.
+Note that the `start` and `end` both begin with the prefix `13` which must be included in every digit prefix, for this purpose we will omit these digits for
+the remainder of this example as we can simply examine the interval `[5677, 8621]` and prepend a `13` to all results to get a result for our original interval.
 
-To cover all cases while looking at as few digits as possible in this range we need only consider
-`5677`, `8621` and the following cases:
+To cover all cases while looking at as few digits as possible in this interval we need only consider
+`5677`, `8621` individually in addition to the following cases:
 
 ```
 5678, 5679,
@@ -111,12 +113,13 @@ To cover all cases while looking at as few digits as possible in this range we n
 8620
 ```
 
-where `_` refers to an ignored digit (an omission from the array of integers).
+where `_` refers to an ignored digit (an omission from the array of integers representing the digit prefix).
 (Recall that all of these are prefixed by `13`).
+Each of these digit prefixes can be used to construct a single CET.
 Thus, we are able to cover the entire interval of `2944` outcomes using only `20` CETs!
 
-Here it is again in binary (specifically the range `[5677, 8621]`, not the original range with the `13` prefix in base 10):
-Outliers are `5677 = 01011000101101` and `8621 = 10000110101101` with cases:
+Let us reconsider this example in binary (specifically the interval `[5677, 8621]`, not the original interval with the `13` prefix in base 10):
+The individual outliers are `5677 = 01011000101101` and `8621 = 10000110101101` with cases:
 
 ```
 0101100010111_,
@@ -134,7 +137,7 @@ Outliers are `5677 = 01011000101101` and `8621 = 10000110101101` with cases:
 10000110101100
 ```
 
-And so again we are able to cover the entire interval of `2944` outcomes using only `14` CETs this time.
+And so again we are able to cover the entire interval (of `2944` outcomes) using only `14` CETs this time.
 
 ### Abstract Example
 
@@ -145,7 +148,7 @@ Consider the range `[(prefix)wxyz, (prefix)WXYZ]` where `prefix` is some string 
 are the unique digits of `end` in base `B`.
 
 To cover all cases while looking at as few digits as possible in this (general) range we need only consider
-`(prefix)wxyz`, `(prefix)WXYZ` and the following cases:
+`(prefix)wxyz`, `(prefix)WXYZ` independently along with the following cases:
 
 ```
 wxy(z+1), wxy(z+2), ..., wxy(B-1),
@@ -175,11 +178,11 @@ That is to say, `B-1` minus the last digit is the number of elements in the firs
 Likewise the number of elements in each row of the back groupings is equal to the corresponding digit.
 That is to say, the last digit corresponds to the last row, second to last digit is the second to last row and so on.
 This covers all but the first digit of both `start` and `end` (as well as the two outliers `wxyz` and `WXYZ`).
-Thus the total number of CETs required to cover the range will be equal to the sum of the unique digits of `end` except the first, 
+Thus the total number of CETs required to cover the interval will be equal to the sum of the unique digits of `end` except the first, 
 plus the sum of the unique digits of `start` except for the first subtracted from `B-1` plus the difference of the first digits plus one.
 
-A corollary of this is that the number of CETs required to cover a range of length `L` will be `O(B*log_B(L))` because `log_B(L)`
-corresponds to the number of unique digits between the start and end of the range and for each unique digit a row is
+A corollary of this is that the number of CETs required to cover an interval of length `L` will be `O(B*log_B(L))` because `log_B(L)`
+corresponds to the number of unique digits between the start and end of the interval and for each unique digit a row is
 generated in both the front and back groupings of length at most `B-1 ` which corresponds to the coefficient in the order bound.
 
 This counting also shows us that base 2 is the optimal base to be using in general cases as it will, in general, outperform all larger bases
@@ -187,8 +190,8 @@ in both large and small intervals.
 Note that the concrete example above was chosen to be easy to write down in base 10 (large digits in `start`, small digits in `end`) and so it should not
 be thought of as a general candidate for this particular consideration.
 
-To help with intuition on this matter, consider an arbitrary range of three digit numbers in base 10.
-To capture the same range in base 2 we need 10 digit binary numbers.
+To help with intuition on this matter, consider an arbitrary interval of three digit numbers in base 10.
+To capture the same interval in base 2 we need 10 digit binary numbers.
 However, a random three digit number in base 10 is expected to have a digit sum of 15, while a random ten digit binary number expects a digit sum of only 5!
 Thus we should expect base 2 to outperform base 10 by around 3x on average.
 This is because using binary results in a compression where each row in the diagram above has only a single element, which corresponds
@@ -208,7 +211,7 @@ resulting in some number near 3.3 times fewer CETs on average.
 
 Because `start` and `end` are outliers to the general grouping pattern, there are optimizations that could potentially be made when they are added.
 
-Consider the example in base 10 of the range `[2200, 4999]` which has the endpoints `2200` and `4999` along with the groupings
+Consider the example in base 10 of the interval `[2200, 4999]` which has the endpoints `2200` and `4999` along with the groupings
 
 ```
 2201, 2202, 2203, 2204, 2205, 2206, 2207, 2208, 2209,
@@ -222,7 +225,7 @@ Consider the example in base 10 of the range `[2200, 4999]` which has the endpoi
 4990, 4991, 4992, 4993, 4994, 4995, 4996, 4997, 4998
 ```
 
-This grouping pattern captures the exclusive range `(2200, 4999)` and then adds the endpoints in ad-hoc to get the inclusive range `[2200, 4999]`.
+This grouping pattern captures the exclusive interval `(2200, 4999)` and then adds the endpoints in ad-hoc to get the inclusive range `[2200, 4999]`.
 But this method misses out on a good amount of compression as re-introducing the endpoints allows us to replace the first two rows with
 a single `22__` and the last 3 rows with just `4___`.
 
@@ -334,7 +337,7 @@ def middleGrouping(
 }
 ```
 
-Finally we are able to use all of these pieces to compress a range to an approximately minimal number of outcomes (by ignoring digits).
+Finally we are able to use all of these pieces to compress an interval to an approximately minimal number of outcomes (by ignoring digits).
 
 ```scala
 def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Vector[Vector[Int]] = {
