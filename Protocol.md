@@ -8,6 +8,7 @@
           * [The `offer_dlc` Message](#the-offer_dlc-message)
           * [The `accept_dlc` Message](#the-accept_dlc-message)
           * [The `sign_dlc` Message](#the-sign_dlc-message)
+          * [Script Pubkey Standardness Definition](#script-pubkey-standardness-definition)
 * [Authors](#authors)
 
 # Contract
@@ -122,6 +123,7 @@ The sending node MUST:
 
   - set undefined bits in `contract_flags` to 0.
   - ensure the `chain_hash` value identifies the chain it wishes to open the contract within.
+  - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition)
   - set `funding_pubkey` to a valid secp256k1 pubkey in compressed format.
   - set `total_collateral_satoshis` to a value greater than or equal to 1000.
   - set `contract_maturity_bound` and `contract_timeout` to either both be UNIX timestamps, or both be block heights as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
@@ -155,11 +157,13 @@ The receiving node MUST reject the contract if:
   - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
   - the `contract_info` refers to events unknown to the receiver.
   - the `contract_info` refers to an oracle unknown or inaccessible to the receiver.
+  - `payout_spk` or `change_spk` are not a [standard script pubkey](#script-pubkey-standardness-definition).
   - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
   - `funding_inputs` do not contribute at least `total_collateral_satoshis` plus full [fee payment](Transactions.md#fee-payment).
   - Any `input_serial_id` is duplicated
   - The `fund_output_serial_id` and `change_serial_id` are not set to different value
+  - Any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
 
 ### The `accept_dlc` Message
 
@@ -190,6 +194,7 @@ The `temporary_contract_id` MUST be the SHA256 hash of the `offer_dlc` message.
 The sender MUST:
 
   - set `total_collateral_satoshis` sufficiently large so that the sum of both parties' total collaterals is at least as large as the largest payout in the `offer_dlc`'s `contract_info`.
+  - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition)
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
@@ -207,6 +212,10 @@ The receiver:
 
   - if `total_collateral_satoshis` is not large enough:
     - MAY reject the contract.
+  - if `payout_spk` or `change_spk` are not a [standard script pubkey](#script-pubkey-standardness-definition)
+    - MUST reject the contract.
+  - if any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
+    - MUST reject the contract.
   - if `cet_adaptor_signatures` or `refund_signature` fail validation:
     - MUST reject the contract.
   - if `funding_inputs` do not contribute at least `total_collateral_satoshis` plus [fee payment](Transactions.md#fee-payment)
@@ -257,11 +266,24 @@ The recipient:
   - on receipt of a valid `sign_dlc`:
     - SHOULD broadcast the funding transaction.
 
+### Script Pubkey Standardness Definition
+
+ For a script pub key to be valid it must be in one of the following forms:
+
+    1. `OP_DUP` `OP_HASH160` `20` 20-bytes `OP_EQUALVERIFY` `OP_CHECKSIG` (pay to pubkey hash), OR
+    2. `OP_HASH160` `20` 20-bytes `OP_EQUAL` (pay to script hash), OR
+    3. `OP_0` `20` 20-bytes (version 0 pay to witness pubkey hash), OR
+    4. `OP_0` `32` 32-bytes (version 0 pay to witness script hash), OR
+    5. `OP_1` through `OP_16` inclusive, followed by a single push of 2 to 40 bytes
+       (witness program versions 1 through 16)
+
+  These script pub key forms include only standard forms accepted by the wider set of deployed Bitcoin clients in the network, which increase the chances of successful propagation to miners.
+
 # Authors
 
 Nadav Kohen <nadavk25@gmail.com>
 
-[ FIXME: Add Authors ]
+Ben Carman <benthecarman@live.com>
 
 ![Creative Commons License](https://i.creativecommons.org/l/by/4.0/88x31.png "License CC-BY")
 <br>
