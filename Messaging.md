@@ -264,12 +264,16 @@ This type contains information about a specific input to be used in a funding tr
 
 1. type: 42772 (`funding_input_v0`)
 2. data:
+   * [`u64`:`input_serial_id`]
    * [`u16`:`prevtx_len`]
    * [`prevtx_len*byte`:`prevtx`]
    * [`u32`:`prevtx_vout`]
    * [`u32`:`sequence`]
    * [`u16`:`max_witness_len`]
    * [`spk`:`redeemscript`]
+
+`input_serial_id` is a randomly chosen number which uniquely identifies this input.
+Inputs in the funding transaction will be sorted by `input_serial_id`.
 
 `prevtx_tx` is the serialized transaction whose `prevtx_vout` output is being spent.
 The transaction is used to validate this spent output's value and to validate that it is a SegWit output.
@@ -322,6 +326,8 @@ This type contains signatures of the funding transaction and any necessary infor
 
 `witness` is the data for a witness element in a witness stack. An empty `witness_stack` is an error,
 as every input must be Segwit. Witness elements should *not* include their length as part of the witness data.
+
+Witnesses should be sorted by the `input_serial_id` sent in `funding_input` defining these inputs.
 
 ## Authors
 

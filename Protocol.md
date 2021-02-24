@@ -70,10 +70,13 @@ the funding transaction and CETs.
    * [`contract_info`:`contract_info`]
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
+   * [`u64`:`payout_serial_id`]
    * [`u64`:`total_collateral_satoshis`]
    * [`u16`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
    * [`spk`:`change_spk`]
+   * [`u64`:`change_serial_id`]
+   * [`u64`:`fund_output_serial_id`]
    * [`u64`:`feerate_per_vb`]
    * [`u32`:`contract_maturity_bound`]
    * [`u32`:`contract_timeout`]
@@ -98,6 +101,15 @@ the sender and `funding_inputs` contains outputs, outpoints, and expected weight
 of the sender's funding inputs. `change_spk` specifies the script pubkey that funding
 change should be sent to.
 
+`payout_serial_id` is a randomly chosen number which uniquely identifies the payout output of the offering party.
+Outputs in the contract execution transaction will be sorted by `payout_serial_id`.
+
+`change_serial_id` is a randomly chosen number which uniquely identifies the change output.
+Outputs in the funding transaction will be sorted by `change_serial_id` and `fund_output_serial_id`.
+
+`fund_output_serial_id` is a randomly chosen number which uniquely identifies the funding output.
+Outputs in the funding transaction will be sorted by `change_serial_id` and `fund_output_serial_id`.
+
 `feerate_per_vb` indicates the fee rate in satoshi per virtual byte that both
 sides will use to compute fees in the funding transaction, as described in the
 [transaction specification](Transactions.md).
@@ -114,6 +126,8 @@ The sending node MUST:
   - set `total_collateral_satoshis` to a value greater than or equal to 1000.
   - set `contract_maturity_bound` and `contract_timeout` to either both be UNIX timestamps, or both be block heights as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
   - set `contract_maturity_bound` to be less than `contract_timeout`.
+  - use a unique `input_serial_id` for each input
+  - set `change_serial_id` and `fund_output_serial_id` to different values
 
 The sending node SHOULD:
 
@@ -144,6 +158,8 @@ The receiving node MUST reject the contract if:
   - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
   - `funding_inputs` do not contribute at least `total_collateral_satoshis` plus full [fee payment](Transactions.md#fee-payment).
+  - Any `input_serial_id` is duplicated
+  - The `fund_output_serial_id` and `change_serial_id` are not set to different value
 
 ### The `accept_dlc` Message
 
@@ -158,9 +174,11 @@ and closing transactions.
    * [`u64`:`total_collateral_satoshis`]
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
+   * [`u64`:`payout_serial_id`]
    * [`u16`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
    * [`spk`:`change_spk`]
+   * [`u64`:`change_serial_id`]
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
    * [`negotiation_fields`:`negotiation_fields`]
@@ -175,6 +193,10 @@ The sender MUST:
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
+  - use a unique `input_serial_id` for each input
+  - use a unique `change_serial_id`
+  - set `change_serial_id` so that it is not equal to the `fund_output_serial_id`
+  - use a unique `payout_serial_id`
 
 The sender SHOULD:
 
@@ -187,8 +209,16 @@ The receiver:
     - MAY reject the contract.
   - if `cet_adaptor_signatures` or `refund_signature` fail validation:
     - MUST reject the contract.
-- if `funding_inputs` do not contribute at least `total_collateral_satoshis` plus [fee payment](Transactions.md#fee-payment)
-  - MUST reject the contract.
+  - if `funding_inputs` do not contribute at least `total_collateral_satoshis` plus [fee payment](Transactions.md#fee-payment)
+    - MUST reject the contract.
+  - if any `input_serial_id` is duplicated
+    - MUST reject the contract.
+  - if any `change_serial_id` is duplicated
+    - MUST reject the contract.
+  - if any `change_serial_id` is equal to the `fund_output_serial_id`
+    - MUST reject the contract.
+  - if any `payout_serial_id` is duplicated
+    - MUST reject the contract.
 
 Other fields have the same requirements as their counterparts in `offer_dlc`.
 
