@@ -28,14 +28,14 @@ If you wish to propose a change for this document, feel free to reach out to the
     * [Attestations](#attestations)
     * [Numeric Base Requirements](#numeric-base-requirements)
   * [Signed Numeric Outcome DLCs](#signed-numeric-outcome-dlcs)
-  * [Multi-Oracle Support for Non-Corresponding Outcome Sets](#multi-oracle-support-for-non-corresponding-outcome-sets)
-  * [Disjoint Union DLCs [IN PROGRESS]](#disjoint-union-dlcs-in-progress)
+  * [Multi-Oracle Support for Non-Corresponding Outcome Sets [IN PROGRESS]](#multi-oracle-support-for-non-corresponding-outcome-sets-in-progress)
+  * [Disjoint Union DLCs [DONE]](#disjoint-union-dlcs-done)
   * [Simple Fraud Proofs [IN PROGRESS]](#simple-fraud-proofs-in-progress)
   * [Minor Changes](#minor-changes)
     * [Make prev_tx Optional](#make-prev_tx-optional)
     * [Links Between Specification Documents](#links-between-specification-documents)
-    * [Ordering of Inputs and Outputs [IN PROGRESS]](#ordering-of-inputs-and-outputs-in-progress)
-    * [Requirements on Change SPKs [IN PROGRESS]](#requirements-on-change-spks-in-progress)
+    * [Ordering of Inputs and Outputs [DONE]](#ordering-of-inputs-and-outputs-done)
+    * [Requirements on Change SPKs [DONE]](#requirements-on-change-spks-done)
     * [Support for 1/x Shaped Curves [IN PROGRESS]](#support-for-1x-shaped-curves-in-progress)
 * [Not Included in v0 (Future Features)](#not-included-in-v0-future-features)
   * [DLC Transfers](#dlc-transfers)
@@ -156,7 +156,7 @@ The two proposals for generating CETs for signed outcome DLCs are:
 
 Although a final decision has not yet been made pending further discussion and experimentation, it is recommended that implementations follow the first approach while the decision is being made because the second approach can be implemented on top of the first one.
 
-### Multi-Oracle Support for Non-Corresponding Outcome Sets
+### Multi-Oracle Support for Non-Corresponding Outcome Sets [IN PROGRESS]
 
 It is currently assumed that all oracles being used in a multi-oracle DLC sign corresponding outcome sets.
 This means that in the enumerated case there is some one-to-one correspondence between the outcomes any two oracles could be signing, and in the numeric case `num_digits` is equal for all oracles.
@@ -172,7 +172,7 @@ There likely needs to be some kind of scheme to specify the correspondence betwe
 Possibly this means there will be some kind of map for each oracle's enumeration element to a list of elements from a primary oracle (or some list of the outcomes on which the actual DLC is built) with which that element agrees.
 This is not yet fully developed or specified so further work is needed here. 
 
-### Disjoint Union DLCs [IN PROGRESS]
+### Disjoint Union DLCs [DONE]
 
 There are situations when a contract can be executed in one of two or more disjoint modes.
 For example one could imagine a contract which pays out funds with respect to some index unless that index breaches a certain lower bound, in which case a "liquidation" event occurs and all funds go to one party immediately.
@@ -219,7 +219,7 @@ This should be remedied for all specification documents before the release.
 
 Issue open [here](https://github.com/discreetlogcontracts/dlcspecs/issues/60). 
 
-#### Ordering of Inputs and Outputs [IN PROGRESS]
+#### Ordering of Inputs and Outputs [DONE]
 
 The current specification dictates that the offerer's inputs and outputs precede the accepter's inputs and outputs and that the inputs and outputs for a given party are included in the order they are communicated during contract negotiation.
 
@@ -227,7 +227,7 @@ Before the v0 release, we wish to move to a system which uses a `serial_id` fiel
 
 Discussion of this change [here](https://github.com/discreetlogcontracts/dlcspecs/issues/18). 
 
-#### Requirements on Change SPKs [IN PROGRESS]
+#### Requirements on Change SPKs [DONE]
 
 In the current specification, each party is allowed to specify their own change script public key and it can be any value.
 Before the release some extra restrictions and validation must be put into place to ensure the standardness of these outputs so that the funding transaction is properly propagated through the network's mempools.
