@@ -15,7 +15,7 @@ This document provides a list of resources to learn about DLC.
 * [Discreet Log Contracts: invisible smart contracts on the Bitcoin blockchain](https://medium.com/@gertjaap/discreet-log-contracts-invisible-smart-contracts-on-the-bitcoin-blockchain-cc8afbdbf0db)
 * [P2P Protocol Based Crypto Asset Derivative Settled in Bitcoin on Discreet Log Contracts](https://medium.com/crypto-garage/p2p-protocol-based-crypto-asset-derivative-settled-in-bitcoin-on-discreet-log-contracts-13c823448ae8)
 * [Discreet Log Contracts Part 1: What is a Discreet Log Contract?](https://suredbits.com/discreet-log-contracts-part-1-what-is-a-discreet-log-contract/)
-* [Discreet Log Contracts Part 2: How They Work](https://suredbits.com/discreet-log-contracts-part-2-how-they-work/)
+* [Discreet Log Contracts Part 2: How They Work](https://suredbits.com/discreet-log-contracts-part-2-how-they-work-adaptor-version/)
 * [Discreet Log Contracts Part 3: Why They Are Great](https://suredbits.com/discreet-log-contracts-part-3-why-they-are-great/)
 * [Discreet Log Contracts Part 4: Security and Trust Model](https://suredbits.com/discreet-log-contracts-part-4-security-and-trust-model/)
 * [skew. & Crypto Garage trade peer-to-peer Bitcoin-settled S&P500 derivatives](https://medium.com/crypto-garage/skew-crypto-garage-trade-peer-to-peer-bitcoin-settled-s-p500-derivatives-f9958db011dd)
