@@ -15,7 +15,7 @@
 
 **#Query(Jesse, Lloyd)**
 
-* TODO
+* ECDSA Adaptor Signature PR under final review
   * https://github.com/ElementsProject/secp256k1-zkp/pull/117
 
 ## Good Newcomer Issues
@@ -52,25 +52,33 @@ Same as last time, only cover if there's interest.
   * https://github.com/discreetlogcontracts/dlcspecs/pull/143
 * Opened PR proposing `1/x` payout curve shape support
   * https://github.com/discreetlogcontracts/dlcspecs/pull/144
+  * Do we want support for curve pieces of this shape or only the whole curve?
 * Fraud proof discussion on mailing list
   * https://mailmanlists.org/pipermail/dlc-dev/2021-February/000020.html
 * Support for non-corresponding multi-oracle DLCs discussion on mailing list
   * https://mailmanlists.org/pipermail/dlc-dev/2021-February/000024.html
+* Documenting DLC implementation bugs that can cause loss of funds
+  * https://github.com/discreetlogcontracts/dlcspecs/issues/132
+* Where should TLVs be defined?
+  * https://github.com/discreetlogcontracts/dlcspecs/issues/141
 
 ## Security Proofs Update
 
 **#Query(Lloyd)**
 
-* TODO
+* Oracle attestation unforgeability
+* Multi-oracle security 
 
 ## Oracle Specifications
 
 **#Status_Update**
 
+* [Oracle JSON format proposal](https://github.com/discreetlogcontracts/dlcspecs/pull/150)
+* [Client-Side Oracle Validation](https://github.com/discreetlogcontracts/dlcspecs/pull/120)
+  * Should we recommend an encrypted & authenticated channel for receiving `oracle_pub_key`s?
 * [Oracle Event Timestamps Discussion](https://mailmanlists.org/pipermail/dlc-dev/2021-February/000015.html)
   * Current proposal is to replace u32 timestamp on `oracle_event` with a TLV which can either be `u32 : expected_time` or `u32 : earliest_expected_time, u32 : latest_expected_time`.
   * Does anyone think it is ever useful for oracles to give any timestamps other than expected times?
-
 * [Oracle Attestation Computation Change Proposal](https://mailmanlists.org/pipermail/dlc-dev/2020-December/000002.html)
   * **#Query(Tibo, Lloyd)**
   * **#Discussion**
