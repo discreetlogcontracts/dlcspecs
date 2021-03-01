@@ -204,6 +204,89 @@ The algorithm `Sign(sk, message, tag)` is defined as:
 * Let `m` = H(`message`)
 * Return `BIP340_sign(sk, m)`
 
+## JSON Serialization
+
+In addition to the previously define TLVs, we also provide recommendation on JSON serialization of oracle messages, in order to facilitate interoperability between oracle and clients using this format.
+
+### Announcements
+
+The following example describe JSON serialization of oracle announcements:
+
+```json
+{
+   "announcementSignature": "464410ffd8be04249a6ea6a646fd07a05d8afbd8f6a96a6a6339ed66f799383b464410ffd8be04249a6ea6a646fd07a05d8afbd8f6a96a6a6339ed66f799383b",
+   "publicKey": "ce4b7ad2b45de01f0897aa716f67b4c2f596e54506431e693f898712fe7e9bf3",
+   "event":{
+      "nonces":[
+         "5ebf5cdbcafe17b7b419b728e68cde1d7035618bab4e4732971149b4a1c7ecd8",
+      ],
+      "maturity":"2021-01-14T07:20:00Z",
+      "descriptor":{
+         ...
+      },
+      "eventId": "btcusd1610608800"
+   }
+}
+```
+
+where:
+`anouncementSignature` is a hex string of length 128 representing a BIP340 Schnorr signature,
+`publicKey` is a hex string of length 64 representing an x-only public key,
+`nonces` is an array of string of length 64 representing x-only public keys,
+`maturity` is a string representing a date formatted following ISO-8601,
+`descriptor` is one of the descriptor type defined below,
+`eventId` is a string.
+
+#### Simple Enumeration decomposition descriptor
+
+For simple enumeration events, the JSON format is as shown in the following example:
+
+```json
+{
+   "outcomes": [
+      "sunny", "rainy", "cloudy",
+   ]
+}
+```
+
+#### Digit decomposition descriptor
+
+For digit decomposition events, the JSON format is as shown in the following example:
+
+```json
+{
+   "base": 2,
+   "isSigned": false,
+   "unit": "btc/usd",
+   "precision": 0
+}
+```
+
+where:
+`base` is a number,
+`isSigned` is a boolean,
+`unit` is a string,
+`precision` is a number,
+
+### Attestations
+
+```json
+{
+   "eventId":"btcusd1610608800",
+   "signatures":[
+      "5ebf5cdbcafe17b7b419b728e68cde1d7035618bab4e4732971149b4a1c7ecd859dfe812973cda8c71e977e8efed97f381de4db3c7223b4fcf89be5e34d07d9a",
+   ],
+   "values":[
+      "0",
+   ]
+}
+```
+
+where:
+`eventId` is a string,
+`signatures` is an array of hex strings,
+`values` is an array of strings representing the event outcomes.
+
 ## Footnotes
 
 <b id="f1">1</b>: More complex constructions where considered to handle these.
