@@ -3,12 +3,32 @@
 ## Individual Updates (Sync)
 
 * **#Query(Nadav)**
+  * Getting a bunch of threads started on v0 things
+  * Getting numeric outcomes spec merged
+  * Some general clean-up
+  * Disjoint Union DLCs
+  * 1/x shaped payout curves
 * **#Query(Ben)**
+  * Input output ordering
+    * Implemented in code too
+  * SPK restrictions (Standardness)
 * **#Query(Tibo)**
+  * Optimization of signature point computation and benchmarking
+  * Json format for oracle messages
 * **#Query(Lloyd)**
+  * More security analysis
 * **#Query(Chris)**
+  * Oracle explorer and other DLC tooling
+* **#Query(Antoine)**
+  * Catching up on mailing list and review
+  * Client side verification of oracles
 * **#Query(Jesse)**
+  * Finishing up adaptor signature PR
+    * Basically done!
+  * Looking at Lloyd's papers and ideas
 * **#Query(Matt)**
+  * Some initial diagrams PR'd
+  * node-dlc layer for TLVs
 * **#Query(all)**
 
 ## Secp256k1 Progress
