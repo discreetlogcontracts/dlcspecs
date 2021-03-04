@@ -6,8 +6,7 @@ In the Discreet Log Contract oracle model, oracles act as oblivious public entit
 their users act privately.
 
 Due to DLC oracles' public nature, should they ever commit fraudulent acts such as spreading
-false, invalid, or conflicting attestations, their fraud should be easily and compactly provable
-and verifiable from public information.
+false, invalid, or conflicting attestations, their fraud should be provable and verifiable from public information.
 After all, oracle fraud comes in the form of an unforgeable attestation of false or invalid events,
 or else in the form of multiple conflicting unforgeable attestations.
 
@@ -57,7 +56,8 @@ always generate proofs which show that a fraudulent oracle attestation must exis
 
 The most important piece of this proof is the `aggregate_oracle_attestation` which is recoverable from
 on-chain information as the difference between the broadcast CET's signature and its corresponding adaptor signature.
-In the case that one has access directly to an oracle's attestation, then this can be used as the aggregate.
+If `num_oracles = 1`, then the `aggregate_oracle_attestation` is directly equal to the attestation released by the one oracle. 
+As such, if one has access directly to an oracle's attestation, then this proof should use `num_oracles = 1`.
 
 The `oracle_announcements` and `oracle_outcomes` are used to compute a signature point `S` corresponding to an anticipation of
 these oracles attesting to these outcomes.
@@ -141,13 +141,9 @@ for the same `oracle_announcement` but for different `oracle_outcome`s.
    * [`32*bytes`:`oracle_attestation_1`]
    * [`nb_signatures*string`:`outcomes_2`]
    * [`32*bytes`:`oracle_attestation_2`]
-   * [`32*bytes`:`oracle_private_key`]
 
 This second kind of oracle equivocation proof is specialized and compressed (when compared to the other version)
 to be optimized for equivocation proofs where the prover has direct access to non-aggregate `oracle_attestation`s.
-
-This proof has the added feature of containing the `oracle_private_key` (which is computed from the announcement
-and the two attestations).
 
 ## Authors
 
