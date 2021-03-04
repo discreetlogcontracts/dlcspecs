@@ -7,7 +7,7 @@ their users act privately.
 
 Due to DLC oracles' public nature, should they ever commit fraudulent acts such as spreading
 false, invalid, or conflicting attestations, their fraud should be easily and compactly provable
-and publicly verifiable.
+and verifiable from public information.
 After all, oracle fraud comes in the form of an unforgeable attestation of false or invalid events,
 or else in the form of multiple conflicting unforgeable attestations.
 
@@ -57,7 +57,7 @@ always generate proofs which show that a fraudulent oracle attestation must exis
 
 The most important piece of this proof is the `aggregate_oracle_attestation` which is recoverable from
 on-chain information as the difference between the broadcast CET's signature and its corresponding adaptor signature.
-In the case that one has access directly to the `oracle_attestation` in question, then this can be used in place of an aggregate.
+In the case that one has access directly to an oracle's attestation, then this can be used as the aggregate.
 
 The `oracle_announcements` and `oracle_outcomes` are used to compute a signature point `S` corresponding to an anticipation of
 these oracles attesting to these outcomes.
