@@ -90,7 +90,7 @@ The following convenience types are also defined:
 * `spk`: A bitcoin script public key encoded as ASM prefixed with a `u16` value indicating its length.
 * `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
 * `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#appendix-a-bigsize-test-vectors).
-* `string`: a UTF-8 encoded string using [NFC for normalization](https://github.com/discreetlogcontracts/dlcspecs/issues/89), prefixed by a `bigsize` value indicating its length in bytes.
+* `string`: a UTF-8 encoded string, prefixed by a `bigsize` value indicating its length in bytes.
 
 
 ## DLC Specific Types

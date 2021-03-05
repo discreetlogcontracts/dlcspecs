@@ -69,7 +69,7 @@ While the R-value is usually one of the component of a Schnorr signature, in DLC
 
 A signature point `S` is the image of a signature `s`, such that `S = s * G` where `G` is the base point of generator of an elliptic curve (or more generally a cyclic group).
 A signature point can be computed with only public information and prior to the creation of `s` if the [R-value](#r-value) `R` that will be used to create `s` is known.
-In practice, with Schnorr signatures, given `x` a secret key and `P = x * G` its associated public key, `k` a random value such that `R = k * G` and a message `m`, a signature `s` is defined as:
-`s = k + H(P || R || m) * x`
+In practice, with the currently adopted attestation scheme, given `x` a secret key and `P = x * G` its associated public key, `k` a random value such that `R = k * G` and a scalar `c` corresponding to an outcome index, a signature `s` is defined as:
+`s = k + c * x`
 A signature point `S` for `s` can be computed as:
-`S = R + H(P || R || m) * P`
+`S = R + c * P`
