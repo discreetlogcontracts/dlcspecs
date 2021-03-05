@@ -35,19 +35,23 @@ digits where signatures were ignored.
     * [Counting CETs](#counting-cets)
     * [Optimizations](#optimizations)
   * [Algorithms](#algorithms)
+  * [Adaptor Point Computation Optimizations](#adaptor-point-computation-optimizations)
+    * [Pre-computing](#pre-computing)
+    * [Memoization](#memoization)
   * [Reference Implementations](#reference-implementations)
 * [Authors](#authors)
 
 ## Adaptor Points with Multiple Signatures
 
 Given public key `P` and nonces `R1, ..., Rn` we can compute `n` individual signature points for
-a given event `(d1, ..., dn)` in the usual way: `si * G = Ri + H(P, Ri, di)*P`.
-To compute a composite adaptor point for all events which agree on the first `m` digits, where
-`m` is any positive number less than or equal to `n`, the sum of the corresponding signature
+a given event `(d1, ..., dn)` as follow: `si * G = Ri + di * P`.
+To compute a composite adaptor point for all events which agree on the first `m` digits, where `m` is any positive number less than or equal to `n`, the sum of the corresponding signature
 points is used: `s(1..m) * G = (s1 + s2 + ... + sm) * G = s1 * G + s2 * G + ... + sm * G`.
 
 When the oracle broadcasts its `n` signatures `s1, ..., sn`, the corresponding adaptor secret can be
 computed as `s(1..m) = s1 + s2 + ... + sm` which can be used to broadcast the CET.
+
+Note that [optimizations](#Adaptor-Point-Computation-Optimizations) can be applied when computing signature points.
 
 #### Rationale
 
@@ -367,6 +371,76 @@ def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Ve
       }
     }
 }
+```
+
+## Adaptor Point Computation Optimizations
+
+Computing a large number of adaptor points for events with outcome composed of many digits is a computationally intensive process which accounts for a significant portion of DLC setup time.
+To reduce the time and resources required, some optimizations can be applied.
+
+### Pre-computing
+
+The first optimization is to first compute the signature points for the possible value of each digit.
+For example, for an event with outcomes decomposed in base 2 with 10 digits, first compute:
+```
+S0_0 = R0 + 0 * P
+S0_1 = R0 + 1 * P
+S1_0 = R1 + 0 * P
+S1_1 = R1 + 1 * P
+...
+S9_0 = R9 + 0 * P
+S9_1 = R9 + 1 * P
+```
+
+Then compute the aggregate signature points by combining the Si_j.
+For example, to compute the signature point for the value `0 0 0 0 0 0 0 0 0 0`, compute:
+```
+S = S0_0 + S1_0 + ... + S9_0
+```
+
+To compute another signature point, for example for the value `1 0 0 0 0 0 0 0 0 1`, compute:
+```
+S' = S0_1 + S1_0 + ... + S9_1
+```
+
+### Memoization
+
+In addition to the above pre-computation, [memoization](https://en.wikipedia.org/wiki/Memoization) can be used to further improve performance.
+
+Taking as example an event with outcomes decomposed in base 2 with 10 digits, the algorithm would proceed as follow:
+1. Compute `S0_0` for the value `0`
+2. Compute `S = S0_0 + S1_0` for the value `0 0`
+3. Compute `S' = S0_0 + S1_0 + S2_0` for the value `0 0 0`
+...
+10. Compute `S'' = S0_0 + S1_0 + ... + S8_0` for the value `0 0 0 0 0 0 0 0 0`
+11. Compute `S''' = S0_0 + S1_0 + ... + S9_0` for the value `0 0 0 0 0 0 0 0 0 0`
+12. Compute `S'''' = S'' + S9_1` for the value `0 0 0 0 0 0 0 0 0 1`
+
+A recursive implementation of this algorithm is given below:
+```typescript
+function computeSigPoints(
+  index: number,
+  prev: PublicKey | undefined,
+  noncesSigPoints: PublicKey[][],
+  result: PublicKey[]
+): void {
+  for (let i = 0; i < noncesSigPoints.length; i++) {
+    let next = undefined
+    if (prev === undefined) {
+      next = noncesSigPoints[0][index]
+    } else {
+      next = prev.combine(noncesSigPoints[index][i])
+    }
+    if (index < noncesSigPoints.length - 1) {
+      computeSigPoints(index + 1, next, noncesSigPoints, result)
+    } else {
+      result.push(next)
+    }
+  }
+}
+
+const result: PublicKey[] = []
+computeSigPoints(0, undefined, noncesSigPoints, result)
 ```
 
 ## Reference Implementations
