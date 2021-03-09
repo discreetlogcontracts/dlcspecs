@@ -230,7 +230,7 @@ This discarding is the primary opinion decidedly made from the design space by t
 leads to better guarantees at the expense of more adaptor signatures.
 The resulting digit prefix(es) can then either be used (in the case of maximize coverage) or shrunk until they cover as little as possible
 while still containing `[start - minSupport, end + minSupport]` by repeatedly cutting the interval(s) in half on either side.
-This process results in 1 or 2 secondary oracle digit prefixes for ever single CET of the primary oracle (see [algorithm below](#algorithm)). 
+This process results in 1 or 2 secondary oracle digit prefixes for every digit prefix of the primary oracle (see [algorithm below](#algorithm)). 
 
 ### 2-of-2 Oracles with Bounded Error
 
@@ -263,7 +263,7 @@ digit prefixes given those of the first.
 
 First, let us define some subprocedures.
 
-* `computeCETIntervalBinary` takes as input a digit prefix corresponding to an outcome interval, and the
+* `computePrefixIntervalBinary` takes as input a digit prefix corresponding to an outcome interval, and the
   total number of binary digits to be signed by an oracle, and returns an interval `[start, end]`
   which that digit prefix covers.
 * `numToVec` takes as input an integer representing the left endpoint of a digit prefix's range, the number
@@ -275,13 +275,11 @@ oracle's digit prefix which we wish to cover with the secondary oracle, `primary
 and a boolean flag `maximizeCoverage` which signals whether to maximize the probability of success for
 outcomes differing by less than `maxError` and more than `minSupport` or not (in which case failure is maximized).
 
-Let `[start, end] = computeCETIntervalBinary(primaryDigits, numDigits)`,
+Let `[start, end] = computePrefixIntervalBinary(primaryDigits, numDigits)`,
 let `halfMaxError = 2^(maxErrorExp - 1)`,
 and let `maxNum = (2^numDigits) - 1`.
 
 We then split into cases:
-
-TODO: Pictures here
 
 ![Small Primary Interval](images/SmallPrimaryInterval.png)
 
@@ -289,7 +287,7 @@ TODO: Pictures here
 
 * **Case** Small Primary Interval (`end - start + 1 < maxError`)
   * In this case we consider the primary oracle's digit prefix's range as it relates to the `maxError`-sized
-    interval, beginning at some multiple of `maxError`, which contains the CET in question.
+    interval, beginning at some multiple of `maxError`, which contains the primary interval in question.
     * Note that the primary interval cannot be part of two such `maxError`-sized intervals as this would
       imply that there are fewer `primaryDigits` than `numDigits - maxErrorExp` which would
       result in a large primary interval, but we are in the small primary interval case.
@@ -297,8 +295,8 @@ TODO: Pictures here
     * Let `leftMaxErrorMult` be the first multiple of `maxError` to the left of `start`.
     * Let `rightMaxErrorMult` be the first multiple of `maxError` to the right of `end`.
     * Let `maxCoverPrefix = numToVec(leftMaxErrorMult, numDigits, maxErrorExp)`.
-  * We now split into cases again depending on whether or not the small CET is near either boundary
-    of its containing interval `[leftErrorCET, rightErrorCET - 1]`.
+  * We now split into cases again depending on whether or not the small primary interval is near either boundary
+    of its containing interval `[leftMaxErrorMult, rightMaxErrorMult - 1]`.
   * **Case** Middle Primary Interval (`start >= leftMaxErrorMult + minSupport` and `end < rightMaxErrorMult - minSupport`)
     * In this case, only a single secondary digit prefix is needed to cover all cases in which it agrees with
       the input primary interval!
