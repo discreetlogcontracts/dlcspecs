@@ -206,6 +206,11 @@ may still succeed even if `maximizeCoverage` is set to `false` in the worst case
 Yet in the average case this maximizing coverage will make it much more likely that cases in the `maxError`-`minSupport` gap
 will succeed and minimizing coverage will make it much more likely that these cases fail (are not supported).
 
+Here is a diagram which illustrates how the error bounds `minSupport` and `maxError` are used to constrain the selection
+of secondary oracle intervals:
+
+![image](images/SecondaryDLCOracle.png)
+
 There exist many versions of this proposal which allow more exact guarantees, such as ones that lift either or both of the
 constraints on the variance parameters, but they all require significantly more adaptor signatures.
 This proposal can be thought of as defining the maximally coarse coverage algorithm which results in the fewest
