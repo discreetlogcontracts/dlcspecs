@@ -283,6 +283,10 @@ We then split into cases:
 
 TODO: Pictures here
 
+![Small Primary Interval](images/SmallPrimaryInterval.png)
+
+![Large Primary Interval](images/LargePrimaryInterval.png)
+
 * **Case** Small Primary Interval (`end - start + 1 < maxError`)
   * In this case we consider the primary oracle's digit prefix's range as it relates to the `maxError`-sized
     interval, beginning at some multiple of `maxError`, which contains the CET in question.
