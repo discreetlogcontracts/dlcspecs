@@ -221,9 +221,10 @@ Designate one oracle in every t-of-t grouping to be the primary oracle and gener
 adaptor points required for the DLC in question as would be done for a single oracle.
 This primary oracle functionally determines the execution price, meaning that the UX should be the same as if this
 primary oracle was used on its own.
-Then, for each of these digit prefixes representing the primary oracle's attested result, label the first and last outcome covered
-by this digit prefix as `[start, end]`  and compute the largest allowed range `[end - maxError, start + maxError]` for
-secondary oracles.
+Then, for each of these digit prefixes representing the primary oracle's attested result, label the first and last outcome covered by
+this digit prefix as `[start, end]`  and compute the largest allowed range `(end - maxError, start + maxError)` for secondary
+oracles where this is the largest allowed range because `end - maxError` is the smallest outcome within `maxError` of **all** outcomes
+in `[start, end]` and `start + maxError` is the greatest outcome within `maxError` of **all** outcomes (see diagram above).
 Compute the set of digit prefixes required to cover this range (using the [CET compression algorithm](CETCompression.md#cet-compression)) and discard all but the
 shortest prefixes (corresponding to the largest intervals) in this set, which by definition cover the vast majority of the range.
 This discarding is the primary opinion decidedly made from the design space by this proposal, and discarding any less
