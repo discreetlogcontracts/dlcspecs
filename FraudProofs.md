@@ -31,15 +31,16 @@ The fundamental building block of DLC oracle fraud proofs is a proof that a spec
 attested to a specific outcome, which can then be used with other information to prove fraud.
 
 In theory, it would be best if DLC oracles could deliver their announcements and attestations
-using some form of broadcast channel, but in practice it is expected that oracle messages will
-often times be received by users via APIs and other more private and P2P means.
+using some form of public broadcast channel, but in practice it is expected that oracle messages
+will oftentimes be received by users via APIs and other more private and certain P2P means.
 
 If DLC oracle broadcast channels did exist in such a way that oracles could not commit fraud privately,
 then oracle attestation proofs would be as simple as wrapping the publicly broadcast oracle messages,
 but practically speaking oracles have the ability to cheat without broadcasting fraudulent attestations publicly.
 
-Luckily, enough information is leaked to cheated DLC participants on-chain that they can still
-always generate proofs which show that a fraudulent oracle attestation must exist.
+Luckily in the case that anyone loses funds due to a fraudulently unlocked CET, enough information is leaked
+to the cheated DLC participants on-chain that they can still always generate proofs which show that a fraudulent
+oracle attestation must exist.
 
 #### Version 0 `oracle_attestation_proof`
 
@@ -59,8 +60,14 @@ on-chain information as the difference between the broadcast CET's signature and
 If `num_oracles = 1`, then the `aggregate_oracle_attestation` is directly equal to the attestation released by the one oracle. 
 As such, if one has access directly to an oracle's attestation, then this proof should use `num_oracles = 1`.
 
-The `oracle_announcements` and `oracle_outcomes` are used to compute a signature point `S` corresponding to an anticipation of
-these oracles attesting to these outcomes.
+The `oracle_outcomes`, which are the strings signed by the oracles, are either known directly from an `oracle_attestation`
+message (in the `outcome` field(s)), or they can be computed from an on-chain CET by using one's (decrypted) signature along
+with their adaptor signature to compute the `aggregate_oracle_attestation` which can be used to search the space of all
+possible `oracle_outcomes` by comparing `aggregate_oracle_attestation*G` to the adaptor point corresponding to any
+given `oracle_outcomes`. 
+
+The `oracle_announcements` and `oracle_outcomes` are used by a verifier to compute a signature point `S` corresponding to an
+anticipation of these oracles attesting to these outcomes.
 This signature point is used to validate that `aggregate_oracle_attestation*G = S` which proves that there must exist an attestation
 from each of the oracles in `oracle_announcements` of their corresponding outcome in `oracle_outcomes`.
 
