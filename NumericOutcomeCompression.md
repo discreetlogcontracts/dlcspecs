@@ -52,7 +52,7 @@ can be computed as `s(1..m) = s1 + s2 + ... + sm` which can be used to broadcast
 #### Rationale
 
 This design allows implementations to re-use all [transaction construction](Transactions.md) and signing code without modification
-as every CET adaptor signature needs as input exactly one adaptor point just like in the single-nonce setting.
+as every adaptor signature needs as input exactly one adaptor point just like in the single-nonce setting.
 
 Another design that was considered was adding keys to the funding output so that parties could collaboratively
 construct `m` adaptor signatures and where `n` signatures are put on-chain in every CET which would reveal

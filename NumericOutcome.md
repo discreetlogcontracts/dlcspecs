@@ -14,8 +14,7 @@ is only feasible if the number of possible outcomes is of manageable size.
 If an outcome can be any of a large range of numbers, then using a simple enumeration of
 all possible numbers in this range is unwieldy.
 We optimize for this case by using numeric decomposition in which the oracle signs each digit of the outcome
-individually so that many possible outcomes can be [compressed](NumericOutcomeCompression.md) into a single CET adaptor signature by
-ignoring certain digits.
+individually so that many possible outcomes can be [compressed](NumericOutcomeCompression.md) into a single adaptor signature by ignoring certain digits.
 
 We also compress the information needed to communicate all outcomes, as this can usually be viewed as a
 [payout curve](PayoutCurve.md) parameterized by only a few numbers which determine payouts for the entire possible domain.
@@ -94,7 +93,7 @@ If `begin_interval_1` is strictly greater than `0`, then the interval between `0
 
 Given the offerrer's [payout function](PayoutCurve.md), a `total_collateral` amount and [rounding intervals](#rounding-intervals), we wish to compute a list of pairs
 of digit prefixes (i.e. arrays of integers) and Satoshi values.
-Each of these pairs will then be turned into a CET whose adaptor point used for signing is [computed from the digit prefix](CETCompression.md#adaptor-points-with-multiple-signatures) and
+Each of these pairs will then be turned into a CET whose adaptor point used for signing is [computed from the digit prefix](NumericOutcomeCompression.md#adaptor-points-with-multiple-signatures) and
 whose output values will be equal to the Satoshi payout and `total_collateral` minus that payout.
 
 We must first modify the pure function given to us (e.g. by interpolating points) by applying rounding, and then setting all
@@ -115,7 +114,7 @@ For example, if you have two constant-valued intervals in a row with the same va
 
 Finally, once these intervals have been computed, the [numeric outcome compression](NumericOutcomeCompression.md#numeric-outcome-compression) algorithm is run on each constant-valued interval
 which generates a digit prefix (list of integers) to be paired with the (constant) payout for that interval.
-Only a single CET is required for each interval (as these intervals have constant payouts) where each CET receives multiple adaptor signatures.
+Only a single CET is required for each interval (as these intervals have constant payouts) where each of them receives multiple adaptor signatures.
 
 For variable-payout intervals, a unique CET and adaptor signature is constructed for every `event_outcome` where all digits of that `event_outcome`
 are included in the digit prefix (array of integers) and the Satoshi payout is equal to the output of the modified function for that `event_outcome`.
