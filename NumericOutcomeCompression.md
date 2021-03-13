@@ -1,87 +1,88 @@
-# Contract Execution Transaction Compression
+# Numeric Outcome Compression
 
 ## Introduction
 
 When constructing a DLC for a [numeric outcome](NumericOutcome.md), there are often an unreasonably large number of
-possible outcomes to construct a unique CET for every outcome.
-We remedy this fact with a CET compression mechanism specified in this document which allows
-any flat portions of the DLC's [payout curve](PayoutCurve.md) to be covered with only a logarithmic number of CETs.
+possible outcomes to construct a unique adaptor signature for every outcome.
+We remedy this fact with a numeric outcome compression mechanism specified in this document which allows
+any flat portions of the DLC's [payout curve](PayoutCurve.md) to be covered with only a logarithmic number of adaptor signatures.
 
 It is common for payout curves to have constant extremal payouts for a large number of cases
 representing all outcomes considered sufficiently unlikely.
 These intervals with constant extremal payouts are often called "collars" and these collars
-can be compressed to negligible size making the remaining number of CETs proportional
+can be compressed to negligible size making the remaining number of adaptor signatures proportional
 to the number of sufficiently likely outcomes.
 Furthermore, through the use of [rounding intervals](NumericOutcome.md#rounding-intervals), even portions of the payout curve which are not
-completely flat can be compressed to some extent, normally causing the total number of CETs to be
-divided by some power of two.
+completely flat can be compressed to some extent, normally causing the total number of adaptor
+signatures to be divided by some power of two.
 
 This is accomplished through the use of digit decomposition where oracles attesting to
 numeric outcomes sign each digit of the outcome individually.
-There are as many nonces as there are possible digits required and CETs are claimed using
-only some of these signatures, not necessarily all of them.
+There are as many nonces as there are possible digits required and adaptor points are constructed using
+only some of the corresponding attestations, not necessarily all of them.
 
-When not all of the signatures are used, then that corresponding CET represents all events
-which agree on the digits for which signatures were used and may have any value at all other
-digits where signatures were ignored.
+When not all of the attestations are used, then that corresponding adaptor point represents all events
+which agree on the digits for which attestations are used and may have any value at all other digits
+where attestations are ignored.
 
 ## Table of Contents
 
-* [Adaptor Points with Multiple Signatures](#adaptor-points-with-multiple-signatures)
-* [CET Compression](#cet-compression)
+* [Adaptor Points with Multiple Attestations](#adaptor-points-with-multiple-attestations)
+* [Numeric Outcome Compression](#numeric-outcome-compression)
   * [Concrete Example](#concrete-example)
   * [Abstract Example](#abstract-example)
-  * [Analysis of CET Compression](#analysis-of-cet-compression)
-    * [Counting CETs](#counting-cets)
+  * [Analysis of Numeric Outcome Compression](#analysis-of-numeric-outcome-compression)
+    * [Counting Adaptor Points](#counting-adaptor-points)
     * [Optimizations](#optimizations)
   * [Algorithms](#algorithms)
   * [Reference Implementations](#reference-implementations)
 * [Authors](#authors)
 
-## Adaptor Points with Multiple Signatures
+## Adaptor Points with Multiple Attestations
 
-Given public key `P` and nonces `R1, ..., Rn` we can compute `n` individual signature points for
+Given public key `P` and nonces `R1, ..., Rn` we can compute `n` individual adaptor points for
 a given event `(d1, ..., dn)` in the usual way: `si * G = Ri + H(P, Ri, di)*P`.
-To compute a composite adaptor point for all events which agree on the first `m` digits, where
-`m` is any positive number less than or equal to `n`, the sum of the corresponding signature
+To compute an aggregate adaptor point for all events which agree on the first `m` digits, where
+`m` is any positive number less than or equal to `n`, the sum of the corresponding adaptor points
 points is used: `s(1..m) * G = (s1 + s2 + ... + sm) * G = s1 * G + s2 * G + ... + sm * G`.
 
-When the oracle broadcasts its `n` signatures `s1, ..., sn`, the corresponding adaptor secret can be
-computed as `s(1..m) = s1 + s2 + ... + sm` which can be used to broadcast the CET.
+When the oracle broadcasts its `n` attestations `s1, ..., sn`, the corresponding aggreate adaptor secret
+can be computed as `s(1..m) = s1 + s2 + ... + sm` which can be used to broadcast a corresponding CET.
 
 #### Rationale
 
-This design allows implementations to re-use all [transaction construction code](Transactions.md) without modification
-because every CET needs as input exactly one adaptor point just like in the single-nonce setting.
+This design allows implementations to re-use all [transaction construction](Transactions.md) and signing code without modification
+as every adaptor signature needs as input exactly one adaptor point just like in the single-nonce setting.
 
 Another design that was considered was adding keys to the funding output so that parties could collaboratively
 construct `m` adaptor signatures and where `n` signatures are put on-chain in every CET which would reveal
-all oracle signatures to both parties when a CET is published.
-This design's major drawbacks is that it creates a very distinct fingerprint and makes CET fees significantly worse.
+all oracle attestations to both parties when a CET is published.
+This design's major drawbacks are that it creates a very distinct fingerprint and makes CET fees significantly worse.
 Additionally it leads to extra complexity in contract construction.
 This design's only benefit is that it results in simpler and slightly more informative (although larger) fraud proofs.
 
 The large multi-signature design was abandoned because the above proposal is sufficient to generate fraud proofs.
-If an oracle incorrectly signs for an event, then only the sum of the digit signatures `s(1..m)`
+If an oracle incorrectly attests for an event, then only the sum of the digit signatures `s(1..m)`
 is recoverable on-chain using the adaptor signature which was given to one's counter-party.
 This sum is sufficient information to determine what was signed however as one can iterate through
 all possible composite adaptor points until they find one whose pre-image is the signature sum found on-chain.
 This will determine what digits `(d1, ..., dm)` were signed and these values along with the oracle
 announcement and `s(1..m)` is sufficient information to generate a fraud proof in the multi-nonce setting. 
 
-## CET Compression
+## Numeric Outcome Compression
 
-Anytime there is an interval of numeric outcomes `[start, end]` (inclusive) which result in the same payouts for all parties,
-then a compression function described in this section can be run to reduce the number of CETs from `O(L)` to `O(log(L))`
-where  `L = end - start + 1` is the length of the interval of outcomes being compressed.
+Anytime there is an interval of numeric outcomes `[start, end]` (inclusive) where all outcomes result in the same
+payouts for all parties, then a compression function described in this section can be run to reduce the number of
+adaptor signatures needed from `O(L)` to `O(log(L))` where  `L = end - start + 1` is the length of the interval
+of outcomes being compressed.
 
-Because this compression of CETs only works for intervals with constant payouts, the [CET calculation algorithm](NumericOutcome.md#contract-execution-transaction-calculation)
+Because this compression of numeric outcomes only works for intervals with constant payouts, the [CET calculation algorithm](NumericOutcome.md#contract-execution-transaction-calculation-and-signing)
 first splits the domain into intervals of equal payout, and then applies the compression algorithm from this
-document to the individual intervals, `[start, end]` where all values in each interval have some fixed payout.
+document to the individual intervals, `[start, end]` where all values in each interval have some constant payout.
 
-Most contracts are expected to be concerned with some subset of the total possible domain and every
+Most contracts are expected to be primarily concerned with some subset of the total possible domain and every
 outcome before or after that likely subset will result in some constant maximal or minimal payout.
-This means that compression will drastically reduce the number of CETs to be of the order of the size
+This means that compression will drastically reduce the number of adaptor signatures to be of the order of the size
 of the probable domain, with further optimizations available when parties are willing to do some [rounding](NumericOutcome.md#rounding-intervals).
 
 The compression algorithm takes as input an interval `[start, end]`, a base `B`, and the number of digits
@@ -115,8 +116,8 @@ To cover all cases while looking at as few digits as possible in this interval w
 
 where `_` refers to an ignored digit (an omission from the array of integers representing the digit prefix).
 (Recall that all of these are prefixed by `13`).
-Each of these digit prefixes can be used to construct a single CET.
-Thus, we are able to cover the entire interval of `2944` outcomes using only `20` CETs!
+Each of these digit prefixes can be used to construct a single adaptor signature.
+Thus, we are able to cover the entire interval of `2944` outcomes using only `20` adaptor signatures!
 
 Let us reconsider this example in binary (specifically the interval `[5677, 8621]`, not the original interval with the `13` prefix in base 10):
 The individual outliers are `5677 = 01011000101101` and `8621 = 10000110101101` with cases:
@@ -137,7 +138,7 @@ The individual outliers are `5677 = 01011000101101` and `8621 = 10000110101101` 
 10000110101100
 ```
 
-And so again we are able to cover the entire interval (of `2944` outcomes) using only `14` CETs this time.
+And so again we are able to cover the entire interval (of `2944` outcomes) using only `14` adaptor signatures this time.
 
 ### Abstract Example
 
@@ -164,24 +165,24 @@ WXY0, WXY1, ..., WXY(Z-1)
 
 where `_` refers to an ignored digit (an omission from the array of integers) and all of these cases have the `prefix`.
 
-### Analysis of CET Compression
+### Analysis of Numeric Outcome Compression
 
 This specification refers to the first three rows of the abstract example above as the **front groupings** the fourth row
 in the example as the **middle grouping** and the last three rows in the example as the **back groupings**.
 
 Notice that the patterns for the front and back groupings are nearly identical.
 
-#### Counting CETs
+#### Counting Adaptor Signatures
 
 Also note that in total the number of elements in each row of the front groupings is equal to `B-1` minus the corresponding digit.
 That is to say, `B-1` minus the last digit is the number of elements in the first row and then the second to last digit and so on.
 Likewise the number of elements in each row of the back groupings is equal to the corresponding digit.
 That is to say, the last digit corresponds to the last row, second to last digit is the second to last row and so on.
 This covers all but the first digit of both `start` and `end` (as well as the two outliers `wxyz` and `WXYZ`).
-Thus the total number of CETs required to cover the interval will be equal to the sum of the unique digits of `end` except the first, 
-plus the sum of the unique digits of `start` except for the first subtracted from `B-1` plus the difference of the first digits plus one.
+Thus the total number of adaptor signatures required to cover the interval will be equal to the sum of the unique digits of `end` except the
+first, plus the sum of the unique digits of `start` except for the first subtracted from `B-1` plus the difference of the first digits plus one.
 
-A corollary of this is that the number of CETs required to cover an interval of length `L` will be `O(B*log_B(L))` because `log_B(L)`
+A corollary of this is that the number of adaptor signatures required to cover an interval of length `L` will be `O(B*log_B(L))` because `log_B(L)`
 corresponds to the number of unique digits between the start and end of the interval and for each unique digit a row is
 generated in both the front and back groupings of length at most `B-1 ` which corresponds to the coefficient in the order bound.
 
@@ -196,16 +197,16 @@ However, a random three digit number in base 10 is expected to have a digit sum 
 Thus we should expect base 2 to outperform base 10 by around 3x on average.
 This is because using binary results in a compression where each row in the diagram above has only a single element, which corresponds
 to binary compression's ability to efficiently reach the largest possible number of digits ignored which itself covers the largest number of cases.
-Meanwhile in a base like 10, each row can take up to 9 CETs before moving to a larger number of digits ignored (and cases covered).
+Meanwhile in a base like 10, each row can take up to 9 adaptor signatures before moving to a larger number of digits ignored (and cases covered).
 Another way to put this is that the inefficiency of base 10 which seems intuitive at small scales is actually equally present at *all scales*!
 
 One final abstract way of intuiting that base 2 is optimal is the following:
-We wish to maximize the amount of information that we may ignore when constructing CETs, because abstractly every bit of information ignored
-in a CET doubles the number of cases covered with a single transaction and signature.
+We wish to maximize the amount of information that we may ignore when constructing adaptor signatures, because abstractly every bit of information
+ignored in an adaptor signature computation doubles the number of cases covered with a single signature.
 Thus, if we use any base other than 2, say 10, then we will almost always run into situations where redundant information is needed because we can
 only ignore a decimal digit at a time where a decimal digit has 3.3 bits of information.
 Meanwhile in binary where every digit encodes exactly a single bit of information, we are able to perfectly ignore all redundant bits of information
-resulting in some number near 3.3 times fewer CETs on average.
+resulting in some number near 3.3 times fewer adaptor signatures on average.
 
 #### Optimizations
 
@@ -241,7 +242,7 @@ In the example above, `end` ends with three nines so that the last three rows ca
 
 There is one more optimization that can potentially be made.
 If the unique digits of `start` are all `0` and the unique digits of `end` are all `B-1` then we will have no need for a middle grouping as we can cover
-this whole interval with just a single CET of `(prefix)_..._`.
+this whole interval with just a single adaptor signature of `(prefix)_..._`.
 This optimization is called the **total optimization**.
 
 ### Algorithms
@@ -297,7 +298,7 @@ def frontGroupings(
     val fromFront = nonZeroDigits.init.flatMap { // Note the flatMap collapses the rows of the grouping 
       case (lastImportantDigit, unimportantDigits) =>
         val fixedDigits = digits.dropRight(unimportantDigits + 1)
-        (lastImportantDigit + 1).until(base).map { lastDigit => // Note that this range excludes lastImportantDigit and base
+        (lastImportantDigit + 1).until(base).map { lastDigit => // Note that this loop excludes lastImportantDigit and base
           fixedDigits :+ lastDigit
         }
     }
@@ -307,7 +308,7 @@ def frontGroupings(
 }
 
 def backGroupings(
-    digits: Vector[Int], // The unique digits of the range's end
+    digits: Vector[Int], // The unique digits of the interval's end
     base: Int): Vector[Vector[Int]] = {
   val nonMaxDigits = digits.reverse.zipWithIndex.dropWhile(_._1 == base - 1) // Endpoint Optimization
 
@@ -318,7 +319,7 @@ def backGroupings(
     val fromBack = nonMaxDigits.init.flatMap { // Note the flatMap collapses the rows of the grouping 
       case (lastImportantDigit, unimportantDigits) =>
         val fixedDigits = digits.dropRight(unimportantDigits + 1)
-        0.until(lastImportantDigit).reverse.toVector.map { // Note that this range excludes lastImportantDigit
+        0.until(lastImportantDigit).reverse.toVector.map { // Note that this loop excludes lastImportantDigit
           lastDigit =>
             fixedDigits :+ lastDigit
         }
@@ -329,9 +330,9 @@ def backGroupings(
 }
 
 def middleGrouping(
-    firstDigitStart: Int, // The first unique digit of the range's start
-    firstDigitEnd: Int): Vector[Vector[Int]] = { // The first unique digit of the range's end
-  (firstDigitStart + 1).until(firstDigitEnd).toVector.map { firstDigit => // Note that this range excludes firstDigitEnd
+    firstDigitStart: Int, // The first unique digit of the interval's start
+    firstDigitEnd: Int): Vector[Vector[Int]] = { // The first unique digit of the interval's end
+  (firstDigitStart + 1).until(firstDigitEnd).toVector.map { firstDigit => // Note that this loop excludes firstDigitEnd
     Vector(firstDigit)
   }
 }
@@ -343,7 +344,7 @@ Finally we are able to use all of these pieces to compress an interval to an app
 def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Vector[Vector[Int]] = {
     val (prefixDigits, startDigits, endDigits) = separatePrefix(start, end, base, numDigits)
     
-    if (start == end) { // Special Case: Range Length 1
+    if (start == end) { // Special Case: Interval Length 1
         Vector(prefixDigits)
     } else if (startDigits.forall(_ == 0) && endDigits.forall(_ == base - 1)) {
         if (prefixDigits.nonEmpty) {
