@@ -57,7 +57,8 @@ oracle attestation must exist.
 
 The most important piece of this proof is the `aggregate_oracle_attestation` which is recoverable from
 on-chain information as the difference between the broadcast CET's signature and its corresponding adaptor signature.
-If `num_oracles = 1`, then the `aggregate_oracle_attestation` is directly equal to the attestation released by the one oracle. 
+If `num_oracles = 1`, then the `aggregate_oracle_attestation` is directly equal to the aggregate of the attestations released
+by the one oracle, so that if it is an enumerated outcome this is directly equal to the attestation released by the enum oracle. 
 As such, if one has access directly to an oracle's attestation, then this proof should use `num_oracles = 1`.
 
 The `oracle_outcomes`, which are the strings signed by the oracles, are either known directly from an `oracle_attestation`
