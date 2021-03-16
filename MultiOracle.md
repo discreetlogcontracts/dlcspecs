@@ -209,7 +209,7 @@ will succeed and minimizing coverage will make it much more likely that these ca
 Here is a diagram which illustrates how the error bounds `minSupport` and `maxError` are used to constrain the selection
 of secondary oracle intervals:
 
-![image](images/SecondaryDLCOracle.png)
+![image](images/SecondaryDLCOracleWhiteBack.png)
 
 There exist many versions of this proposal which allow more exact guarantees, such as ones that lift either or both of the
 constraints on the variance parameters, but they all require significantly more adaptor signatures.
@@ -282,9 +282,9 @@ and let `maxNum = (2^numDigits) - 1`.
 
 We then split into cases:
 
-![Small Primary Interval](images/SmallPrimaryInterval.png)
+![Small Primary Interval](images/SmallPrimaryIntervalWhiteBack.png)
 
-![Large Primary Interval](images/LargePrimaryInterval.png)
+![Large Primary Interval](images/LargePrimaryIntervalWhiteBack.png)
 
 * **Case** Small Primary Interval (`end - start + 1 < maxError`)
   * In this case we consider the primary oracle's digit prefix's range as it relates to the `maxError`-sized
