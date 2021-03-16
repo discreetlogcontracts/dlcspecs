@@ -123,7 +123,7 @@ The following diagram illustrates the entire process starting with the domain of
 partitioning by payout into intervals of constant value (in red), running numeric outcome compression to get digit prefixes, turning these prefixes
 into adaptor points for their interval's CET and finally using those adaptor points to create adaptor signatures on their corresponding CETs.
 
-![CET and Adaptor Signature Construction](images/DLCCompression.png)
+![CET and Adaptor Signature Construction](images/DLCCompressionWhiteBack.png)
 
 ## Contract Execution Transaction Signature Validation
 
