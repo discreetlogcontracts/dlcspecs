@@ -32,6 +32,8 @@ There are three scenarios to consider:
 3. The funding transaction confirms, and the oracle doesn't release an outcome signature
     before the `refund_locktime`, so a party must broadcast the refund transaction.
 
+![DLC Overview RBF](images/dlc_overview_rbf.png)
+
 # General Requirements
 
 A DLC client should have censorship-resistant access to the blockchain, use a

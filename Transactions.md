@@ -21,6 +21,10 @@ This details the exact format of all on-chain transactions, which both sides nee
 * [References](#references)
 * [Authors](#authors)
 
+# Transactions Diagram
+
+![DLC Overview](images/dlc_overview.png)
+
 # Funding Transaction
 
 * version: 2

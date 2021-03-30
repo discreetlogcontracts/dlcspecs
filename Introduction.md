@@ -9,6 +9,8 @@ by every party involved.
 DLC [were originally proposed by Thaddeus Dryja](https://adiabat.github.io/dlc.pdf).
 The goal of DLC is to enable setting up contracts between two parties directly on the Bitcoin blockchain using an oracle to determine the contract outcome.
 
+![DLC Overview](images/dlc_overview.png)
+
 ### Oracle
 
 An oracle is an entity signing messages in reaction to real-world events.
@@ -18,6 +20,10 @@ Once the event has occurred an oracle releases a signed message over the event o
 
 An important feature of DLC is that oracle signatures can be used without an explicit request from the contract participants.
 This characteristic is the reason for the "discreet log" part of the name, as the protocol, depending on its implementation and instantiation, enables parties to hide traces of their contracts to the oracle.
+
+![DLC Overview](images/dlc_participant_view.png)
+
+![DLC Overview](images/dlc_outsider_view.png)
 
 ### Trust-minimized execution
 
