@@ -2,30 +2,30 @@
 
 ## Introduction
 
-This document combines the [CET Compression](CETCompression.md) and [Payout Curve](PayoutCurve.md) specifications, along with
+This document combines the [Numeric Outcome Compression](NumericOutcomeCompression.md) and [Payout Curve](PayoutCurve.md) specifications, along with
 independently introduced [Rounding Intervals](#rounding-intervals) to specify the complete procedure for CET
 construction, adaptor signing, and signature verification for DLCs over numeric outcomes.
 
-When dealing with enumerated outcomes, DLCs require a single nonce and Contract Execution
-Transactions (CETs) are claimed using a single oracle signature.
-This scheme results in DLCs which contain a unique CET for every possible outcome, which is
-only feasible if the number of possible outcomes is of manageable size. 
+When dealing with enumerated outcomes, DLCs require only a single nonce and Contract Execution
+Transactions (CETs) are claimed using a single oracle attestation.
+This scheme results in DLCs which contain a unique adaptor signature for every possible outcome, which
+is only feasible if the number of possible outcomes is of manageable size. 
 
 If an outcome can be any of a large range of numbers, then using a simple enumeration of
 all possible numbers in this range is unwieldy.
 We optimize for this case by using numeric decomposition in which the oracle signs each digit of the outcome
-individually so that many possible outcomes can be [compressed](CETCompression.md) into a single CET by ignoring certain digits.
+individually so that many possible outcomes can be [compressed](NumericOutcomeCompression.md) into a single adaptor signature by ignoring certain digits.
 
 We also compress the information needed to communicate all outcomes, as this can usually be viewed as a
-[payout curve](PayoutCurve.md) parameterized by only a few numbers which determine payouts for the entire possible range.
+[payout curve](PayoutCurve.md) parameterized by only a few numbers which determine payouts for the entire possible domain.
 
-Lastly, we introduce a method of deterministic rounding which allows DLC participants to increase CET
-compression where they are willing to allow some additional rounding error in their payouts.
+Lastly, we introduce a method of deterministic rounding which allows DLC participants to increase Numeric
+outcome compression in places where they are willing to allow some additional rounding error in their payouts.
 
-We put all of these pieces together to specify CET calculation and signature validation procedures
+We put all of these pieces together to specify CET calculation, adaptor signing, and signature validation procedures
 for Numeric Outcome DLCs.
 
-This specification, as well as the [payout curve](PayoutCurve.md) and [CET compression](CETCompression.md) specifications are primarily concerned
+This specification, as well as the [payout curve](PayoutCurve.md) and [Numeric Outcome compression](NumericOutcomeCompression.md) specifications are primarily concerned
 with the protocol-level deterministic reproduction and concise communication of generic higher-level information.
 These documents are not likely to concern application-level and UI/UX developers, who should operate at
 their own levels of abstraction, only to compile application-level information into the formats specified here
@@ -37,18 +37,19 @@ when interacting with lowest-level core DLC logic.
   * [Reference Implementations](#reference-implementations)
   * [Rounding Interval Serialization](#rounding-interval-serialization)
 
-* [Contract Execution Transaction Calculation](#contract-execution-transaction-calculation)
+* [Contract Execution Transaction Calculation and Signing](#contract-execution-transaction-calculation-and-signing)
 * [Contract Execution Transaction Signature Validation](#contract-execution-transaction-signature-validation)
 * [Authors](#authors)
 
 ## Rounding Intervals
 
-As detailed in the [CET compression document](CETCompression.md#cet-compression), any time some continuous interval of the domain results in the same payout value,
-we can compress the CETs required for that interval to be logarithmic in size compared to using one CET per outcome on the interval.
+As detailed in the [numeric outcome compression document](NumericOutcomeCompression.md#numeric-outcome-compression), any time some continuous interval of the domain results in a constant
+payout value, we can compress the adaptor signatures required for that interval to be logarithmic in size compared to using one adaptor
+signature per outcome on the interval.
 As such, it can be beneficial to round the outputs of the payout function to allow for bounded approximation of pieces of the payout
 curve by constant-payout intervals.
 For example, if two parties are both willing to round payout values to the nearest 100 satoshis, they can have significant savings
-on the number of CETs required to enforce their contract.
+on the number of adaptor signatures required to enforce their contract.
 To this end, we allow parties to negotiate rounding intervals which may vary along the curve, allowing for less rounding near more
 probable outcomes and allowing for more rounding to occur near extremes.
 
@@ -88,12 +89,12 @@ If `begin_interval_1` is strictly greater than `0`, then the interval between `0
 * `begin_interval_1`, if it exists, MUST be non-negative.
 * `begin_interval` MUST strictly increase.
 
-## Contract Execution Transaction Calculation
+## Contract Execution Transaction Calculation and Signing
 
 Given the offerrer's [payout function](PayoutCurve.md), a `total_collateral` amount and [rounding intervals](#rounding-intervals), we wish to compute a list of pairs
 of digit prefixes (i.e. arrays of integers) and Satoshi values.
-Each of these pairs will then be turned into a CET whose adaptor point is [computed from the digit prefix](CETCompression.md#adaptor-points-with-multiple-signatures) and whose
-output values will be equal to the Satoshi payout and `total_collateral` minus that payout.
+Each of these pairs will then be turned into a CET whose adaptor point used for signing is [computed from the digit prefix](NumericOutcomeCompression.md#adaptor-points-with-multiple-signatures) and
+whose output values will be equal to the Satoshi payout and `total_collateral` minus that payout.
 
 We must first modify the pure function given to us (e.g. by interpolating points) by applying rounding, and then setting all
 negative payouts to `0` and all computed payouts above `total_collateral` to equal `total_collateral`.
@@ -111,21 +112,31 @@ at the unmodified function's derivatives.
 Regardless of how these intervals are computed, it is required that the constant-valued intervals be as large as possible.
 For example, if you have two constant-valued intervals in a row with the same value, these must be merged.
 
-Finally, once these intervals have been computed, the [CET compression](CETCompression.md#cet-compression) algorithm is run on each constant-valued interval which generates
-a digit prefix (list of integers) to be paired with the (constant) payout for that interval.
-For variable-payout intervals, a unique CET is constructed for every `event_outcome` where all digits of that `event_outcome` are included
-in the array of integers and the Satoshi payout is equal to the output of the modified function for that `event_outcome`.
+Finally, once these intervals have been computed, the [numeric outcome compression](NumericOutcomeCompression.md#numeric-outcome-compression) algorithm is run on each constant-valued interval
+which generates a digit prefix (list of integers) to be paired with the (constant) payout for that interval.
+Only a single CET is required for each interval (as these intervals have constant payouts) where each of them receives multiple adaptor signatures.
+
+For variable-payout intervals, a unique CET and adaptor signature is constructed for every `event_outcome` where all digits of that `event_outcome`
+are included in the digit prefix (array of integers) and the Satoshi payout is equal to the output of the modified function for that `event_outcome`.
+
+The following diagram illustrates the entire process starting with the domain of all possible outcomes and the modified payout curve, then
+partitioning by payout into intervals of constant value (in red), running numeric outcome compression to get digit prefixes, turning these prefixes
+into adaptor points for their interval's CET and finally using those adaptor points to create adaptor signatures on their corresponding CETs.
+
+![CET and Adaptor Signature Construction](images/DLCCompressionWhiteBack.png)
 
 ## Contract Execution Transaction Signature Validation
 
-To validate the adaptor signatures for CETs given in a `dlc_accept` or `dlc_sign` message, do the [process above](#contract-execution-transaction-calculation[) of computing the list of pairs of
+To validate the adaptor signatures for CETs given in a `dlc_accept` or `dlc_sign` message, do the [process above](#contract-execution-transaction-calculation-and-signing) of computing the list of pairs of
 arrays of digits and payout values to construct the CETs and their adaptor points and then run the `adaptor_verify` function.
 
-However, if `adaptor_verify` results in a failed validation, do not terminate the CET signing process.
+However, if `adaptor_verify` results in a failed validation, do not terminate the CET signature validation process.
 Instead, you must look at whether you rounded up (to `value - (value % rounding_mod) + rounding_mod`)
 or down (to `value - (value % rounding_mod)`).
-If you rounded up, compute the CET resulting from rounding down or if you rounded down, compute the CET resulting from rounding up.
-Call the `adaptor_verify` function against this new CET and if it passes verification, consider that adaptor signature valid and continue.
+If you rounded up, compute the CET and adaptor point resulting from rounding down or if you rounded down, compute the CET and adaptor point
+ resulting from rounding up.
+Call the `adaptor_verify` function against this new CET with the new adaptor point and if it passes verification, consider that adaptor signature
+valid and continue.
 
 This extra step is necessary because there is no way to introduce deterministic floating point computations into this specification without also
 introducing complexity of magnitude much larger than that of this entire specification.
