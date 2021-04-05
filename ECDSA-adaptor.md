@@ -22,6 +22,9 @@ An appropriate ECDSA adaptor signature scheme that can be used in Bitcoin prior 
 The algorithms presented here resemble the scheme from [[Fou]] but the security proof of the scheme in [[Aum]] can be applied to it which requires a proof of knowledge of the discrete logarithm to be attached to each encryption key.
 Although we do not explicitly attach proofs of knowledge, in the DLC application the encryption key is the anticipated signature of an oracle which by definition the oracle must "know" and therefore we can safely omit the proof of knowledge.
 
+**WARNING:** This scheme is applicable to DLCs only and should not be applied in another context without careful analysis.
+This is because each adaptor signature leaks the Diffie-Hellman key for the signing key `X` and the encryption key `Y`[[Fou]].
+
 ## Notation and Conventions
 
 - secp256k1 operations: We refer to *points* and *scalars* of the secp256k1 group and the operations between them.
