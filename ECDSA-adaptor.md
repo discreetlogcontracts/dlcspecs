@@ -201,6 +201,19 @@ The test vectors for this specification are in [./test/ecdsa_adaptor.json] and c
 
 Tests should fail only when `error` is set in the test vector.
 
+
+## References
+
+- [Dry]: https://adiabat.github.io/dlc.pdf
+- [Mor]: https://lists.linuxfoundation.org/pipermail/lightning-dev/attachments/20180426/fe978423/attachment-0001.pdf
+- [Fou]: https://github.com/LLFourn/one-time-VES/blob/master/main.pdf
+- [Aum]: https://eprint.iacr.org/2020/476.pdf
+- [SEC1]: https://www.secg.org/sec1-v2.pdf
+- [Bel]: https://eprint.iacr.org/2015/1157.pdf
+- [Sch]: https://www.win.tue.nl/~berry/CryptographicProtocols/LectureNotes.pdf
+- [BIP62]: https://github.com/bitcoin/bips/blob/master/bip-0062.mediawiki#low-s-values-in-signatures
+- [BIP340]: https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki
+
 [Dry]: https://adiabat.github.io/dlc.pdf
 [Mor]: https://lists.linuxfoundation.org/pipermail/lightning-dev/attachments/20180426/fe978423/attachment-0001.pdf
 [Fou]: https://github.com/LLFourn/one-time-VES/blob/master/main.pdf
