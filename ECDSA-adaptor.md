@@ -55,10 +55,9 @@ This can be done by hashing 32 random bytes along side the input string or apply
 
 ## Proof of Discrete Logarithm Equality
 
-As part of the ECDSA adaptor signature a proof of discrete logarithm equality must be provided.
-In our case this is a proof that the discrete logarithm of some `X` to the standard base `G` is the same as the discrete logarithm of some `Z` to the base `Y`.
+ECDSA adaptor signatures contain a proof of discrete logarithm equality which shows that the discrete logarithm of some point `X` to the standard base `G` is the same as the discrete logarithm of some `Z` to the base `Y`.
 This proof can be constructed by using *equality composition* on two Sigma protocols proving knowledge of the discrete logarithm between both pairs of points.
-In other words the prover proves knowledge of `a` such that `X = a * G` and `b` such that `Z = b * Y` and that `a = b`.
+In other words, the prover proves knowledge of `a` such that `X = a * G` and `b` such that `Z = b * Y` and that `a = b`.
 We make the resulting Sigma protocol non-interactive by applying the Fiat-Shamir transformation with SHA256 as the challenge hash.
 For background on Sigma protocols and making them non-interactive see [[Sch]].
 
