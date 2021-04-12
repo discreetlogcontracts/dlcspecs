@@ -12,11 +12,11 @@
     {
         "kind" : "verification",
         "adaptor_sig" : "036035c89860ec62ad153f69b5b3077bcd08fbb0d28dc7f7f6df4a05cca35455be037043b63c56f6317d9928e8f91007335748c49824220db14ad10d80a5d00a9654af0996c1824c64c90b951bb2734aaecf78d4b36131a47238c3fa2ba25e2ced54255b06df696de1483c3767242a3728826e05f79e3981e12553355bba8a0131cd370e63e3da73106f638576a5aab0ea6d45c042574c0c8d0b14b8c7c01cfe9072",
+        "message_hash": "8131e6f4b45754f2c90bd06688ceeabc0c45055460729928b4eecf11026a9e2d",
         "public_signing_key" : "035be5e9478209674a96e60f1f037f6176540fd001fa1d64694770c56a7709c42c",
         "encryption_key" : "024eee18be9a5a5224000f916c80b393447989e7194bc0b0f1ad7a03369702bb51",
         "decryption_key" : "db2debddb002473a001dd70b06f6c97bdcd1c46ba1001237fe0ee1aeffb2b6c4",
         "signature" : "6035c89860ec62ad153f69b5b3077bcd08fbb0d28dc7f7f6df4a05cca35455be4ceacf921546c03dd1be596723ad1e7691bdac73d88cc36c421c5e7f08384305",
-        "message_hash": "8131e6f4b45754f2c90bd06688ceeabc0c45055460729928b4eecf11026a9e2d",
         "comment": "the decrypted signature is high so it must be negated first AND the extracted decryption key must be negated"
     },
     {
