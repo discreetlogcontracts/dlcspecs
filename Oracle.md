@@ -15,15 +15,11 @@ This necessary information is committed to in a so-called [_event descriptor_](#
       - [Example: BTC/USD rate](#example-btcusd-rate)
    - [Serialization and signing of outcome values](#serialization-and-signing-of-outcome-values)
    - [Serialization of event descriptors](#serialization-of-event-descriptors)
-      - [Version 0 `enum_event_descriptor`](#version-0-enum_event_descriptor)
-      - [Version 0 `digit_decomposition_event_descriptor`](#version-0-digit_decomposition_event_descriptor)
    - [Oracle events](#oracle-events)
-      - [Version 0 `oracle_event`](#version-0-oracle_event)
 - [Oracle announcements](#oracle-announcements)
-  - [Version 0 `oracle_announcement`](#version-0-oracle_announcement)
 - [Oracle Attestations](#oracle-attestations)
-  - [Version 0 `oracle_attestation`](#version-0-oracle_attestation)
 - [Signing Algorithm](#signing-algorithm)
+- [Footnotes](#footnotes)
 
 ## Event descriptor
 
@@ -102,30 +98,7 @@ Signing should be done using the [signing algorithm](#Signing-Algorithm) using t
 
 ### Serialization of event descriptors
 
-Event descriptors should be serialized using [TLV format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format) as described bellow.
-
-#### Version 0 `enum_event_descriptor`
-
-1. type: 55302 (`enum_event_descriptor_v0`)
-2. data:
-   * [`u16`:`num_outcomes`]
-   * [`string`:`outcome_1`]
-   * ...
-   * [`string`:`outcome_n`]
-
-This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
-
-Note that `outcome_i` is the outcome value itself and not its hash that will be signed by the oracle.
-
-#### Version 0 `digit_decomposition_event_descriptor`
-
-1. type: 55306 (`digit_decomposition_event_descriptor_v0`)
-2. data:
-   * [`bigsize`:`base`]
-   * [`bool`:`is_signed`]
-   * [`string`:`unit`]
-   * [`int32`:`precision`]
-   * [`u16`:`nb_digits`]
+Event descriptors should be serialized using [TLV format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format) as described in [the Messaging specifications](./Messaging.md##the-event_descriptor-type).
 
 ### Oracle events
 
@@ -136,17 +109,7 @@ Oracle events contain such information, which includes:
 * the event descriptor,
 * the event ID which can be a name or categorization associated with the event by the oracle.
 
-The TLV serialization for oracle events is as follow:
-
-#### Version 0 `oracle_event`
-
-1. type: 55330 (`oracle_event_v0`)
-2. data:
-   * [`u16`:`nb_nonces`]
-   * [`nb_nonces*x_point`:`oracle_nonces`]
-   * [`u32`:`event_maturity_epoch`]
-   * [`event_descriptor`:`event_descriptor`]
-   * [`string`:`event_id`]
+The TLV serialization for oracle events is given in [the Messaging specifications](./Messaging.md#the-oracle_event-type).
 
 ## Oracle announcements
 
@@ -155,41 +118,14 @@ This proof is given in a so-called oracle announcement, which contains an oracle
 
 This also makes it possible for users to obtain oracle event information from an un-trusted peer while being guaranteed that it originates from a given oracle.
 
-The TLV serialization of oracle announcements is as follow.
-
-#### Version 0 `oracle_announcement`
-
-1. type: 55332 (`oracle_announcement`)
-2. data:
-   * [`signature`:`annoucement_signature`]
-   * [`x_point`:`oracle_public_key`]
-   * [`oracle_event`:`oracle_event`]
-
-where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+The TLV serialization of oracle announcements is given in [the Messaging specifications](./Messaging.md#the-oracle_announcement-type).
 
 ## Oracle Attestations
 
 After an event occurs, and the oracle creates signatures to attest the outcome, it needs to give them to users.
 An oracle can use an attestation tlv to give users this information.
 
-The TLV serialization of oracle attestations is as follows.
-
-#### Version 0 `oracle_attestation`
-
-1. type: 55400 (`oracle_attestation_v0`)
-2. data:
-    * [`string`:`event_id`]
-    * [`x_point`:`oracle_public_key`]
-    * [`u16`: `nb_signatures`]
-    * [`signature`:`signature_1`]
-    * ...
-    * [`signature`:`signature_n`]
-    * [`string`:`outcome_1`]
-    * ...
-    * [`string`:`outcome_n`]
-
-Where the signatures are ordered the same as the nonces in their original `oracle_event`.
-The outcomes should be the message signed, ordered the same as the signatures.
+The TLV serialization of oracle attestations is given in [the Messaging specifications](./Messaging.md#the-oracle_attestation-type).
 
 ## Signing Algorithm
 

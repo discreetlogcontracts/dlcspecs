@@ -9,41 +9,43 @@ All data fields are unsigned big-endian unless otherwise specified.
 
 ## Table of Contents
 
-* [Connection Handling and Multiplexing](#connection-handling-and-multiplexing)
-  * [Message Format](#message-format)
-  * [Fundamental Types](#fundamental-types)
-  * [DLC Specific Types](#dlc-specific-types)
-    * [The `contract_info` Type](#the-contract_info-type)
-      * [Version 0 `contract_info`](#version-0-contract_info)
-      * [Version 1 `contract_info`](#version-1-contract_info)
-    * [The `contract_descriptor` Type](#the-contract_descriptor-type)
-      * [Version 0 `contract_descriptor`](#version-0-contract_descriptor)
-      * [Version 1 `contract_descriptor`](#version-1-contract_descriptor)
-    * [The `oracle_info` Type](#the-oracle_info-type)
-      * [Version 0 `oracle_info`](#version-0-oracle_info)
-      * [Version 1 `oracle_info`](#version-1-oracle_info)
-      * [Version 2 `oracle_info`](#version-2-oracle_info)
-    * [The `oracle_params` Type](#the-oracle_params-type)
-      * [Version 0 `oracle_params`](#version-0-oracle_params)
-    * [The `negotiation_fields` Type](#the-negotiation_fields-type)
-      * [Version 0 `negotiation_fields`](#version-0-negotiation_fields)
-      * [Version 1 `negotiation_fields`](#version-1-negotiation_fields)
-      * [Version 2 `negotiation_fields`](#version-2-negotiation_fields)
-    * [The `funding_input` Type](#the-funding_input-type)
-      * [Version 0 `funding_input`](#version-0-funding_input)
-    * [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
-      * [Version 0 `cet_adaptor_signatures`](#version-0-cet_adaptor_signatures)
-    * [The `funding_signatures` Type](#the-funding_signatures-type)
-      * [Version 0 `funding_signatures`](#version-0-funding_signatures)
-    * [The `event_descriptor` Type](#the-event_descriptor-type)
-      * [Version 0 `external_event_descriptor`](#version-0-external_event_descriptor)
-      * [Version 0 `enum_event_descriptor`](#version-0-enum_event_descriptor)
-      * [Version 0 `range_event_descriptor`](#version-0-range_event_descriptor)
-    * [The `oracle_event` Type](#the-oracle_event-type)
-      * [Version 0 `oracle_event`](#version-0-oracle_event)
-    * [The `oracle_announcement` Type](#the-oracle_announcement-type)
-      * [Version 0 `oracle_announcement`](#version-0-oracle_announcement)
-* [Authors](#authors)
+- [Connection Handling and Multiplexing](#connection-handling-and-multiplexing)
+- [Message Format](#message-format)
+- [Fundamental Types](#fundamental-types)
+- [DLC Specific Types](#dlc-specific-types)
+   - [The `contract_info` Type](#the-contract_info-type)
+      - [Version 0 `contract_info`](#version-0-contract_info)
+      - [Version 1 `contract_info`](#version-1-contract_info)
+   - [The `contract_descriptor` Type](#the-contract_descriptor-type)
+      - [Version 0 `contract_descriptor`](#version-0-contract_descriptor)
+      - [Version 1 `contract_descriptor`](#version-1-contract_descriptor)
+   - [The `oracle_info` Type](#the-oracle_info-type)
+      - [Version 0 `oracle_info`](#version-0-oracle_info)
+      - [Version 1 `oracle_info`](#version-1-oracle_info)
+      - [Version 2 `oracle_info`](#version-2-oracle_info)
+   - [The `oracle_params` Type](#the-oracle_params-type)
+      - [Version 0 `oracle_params`](#version-0-oracle_params)
+   - [The `negotiation_fields` Type](#the-negotiation_fields-type)
+      - [Version 0 `negotiation_fields`](#version-0-negotiation_fields)
+      - [Version 1 `negotiation_fields`](#version-1-negotiation_fields)
+      - [Version 2 `negotiation_fields`](#version-2-negotiation_fields)
+   - [The `funding_input` Type](#the-funding_input-type)
+      - [Version 0 `funding_input`](#version-0-funding_input)
+   - [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
+      - [Version 0 `cet_adaptor_signatures`](#version-0-cet_adaptor_signatures)
+   - [The `funding_signatures` Type](#the-funding_signatures-type)
+      - [Version 0 `funding_signatures`](#version-0-funding_signatures)
+   - [The `event_descriptor` Type](#the-event_descriptor-type)
+      - [Version 0 `enum_event_descriptor`](#version-0-enum_event_descriptor)
+      - [Version 0 `digit_decomposition_event_descriptor`](#version-0-digit_decomposition_event_descriptor)
+   - [The `oracle_event` Type](#the-oracle_event-type)
+      - [Version 0 `oracle_event`](#version-0-oracle_event)
+   - [The `oracle_announcement` Type](#the-oracle_announcement-type)
+      - [Version 0 `oracle_announcement`](#version-0-oracle_announcement)
+   - [The `oracle_attestation` Type](#the-oracle_attestation-type)
+      - [Version 0 `oracle_attestation`](#version-0-oracle_attestation)
+- [Authors](#authors)
+
 
 ## Connection Handling and Multiplexing
 
@@ -183,7 +185,7 @@ This type of oracle info is for single-oracle events.
    * [`u16`:`num_oracles`]
    * [`oracle_announcement`:`oracle_announcement_1`]
    * ...
-   * [`oracle_announcment`:`oracle_announcement_num_oracles`]
+   * [`oracle_announcement`:`oracle_announcement_num_oracles`]
 
 This type of oracle info is for multi-oracle events where all oracles are signing messages chosen
 from a set of messages that exactly corresponds to the set of messages being signed by the other oracles,
@@ -328,6 +330,86 @@ This type contains signatures of the funding transaction and any necessary infor
 as every input must be Segwit. Witness elements should *not* include their length as part of the witness data.
 
 Witnesses should be sorted by the `input_serial_id` sent in `funding_input` defining these inputs.
+
+### The `event_descriptor` Type
+
+This type contains information about an event on which a contract is based.
+Two types of events are described, see [the oracle specification](./Oracle.md#event-descriptor) for more details.
+
+#### Version 0 `enum_event_descriptor`
+
+1. type: 55302 (`enum_event_descriptor_v0`)
+2. data:
+   * [`u16`:`num_outcomes`]
+   * [`string`:`outcome_1`]
+   * ...
+   * [`string`:`outcome_n`]
+
+This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
+
+Note that `outcome_i` is the outcome value itself and not its hash that will be signed by the oracle.
+
+#### Version 0 `digit_decomposition_event_descriptor`
+
+1. type: 55306 (`digit_decomposition_event_descriptor_v0`)
+2. data:
+   * [`bigsize`:`base`]
+   * [`bool`:`is_signed`]
+   * [`string`:`unit`]
+   * [`int32`:`precision`]
+   * [`u16`:`nb_digits`]
+
+### The `oracle_event` Type
+
+This type contains information provided by an oracle on an event that it will attest to.
+See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
+
+#### Version 0 `oracle_event`
+
+1. type: 55330 (`oracle_event_v0`)
+2. data:
+   * [`u16`:`nb_nonces`]
+   * [`nb_nonces*x_point`:`oracle_nonces`]
+   * [`u32`:`event_maturity_epoch`]
+   * [`event_descriptor`:`event_descriptor`]
+   * [`string`:`event_id`]
+
+### The `oracle_announcement` Type
+
+This type contains an `oracle_event` and a signature certifying its origination.
+See [the Oracle specifications](./Oracle.md#oracle-announcements) for more details.
+
+#### Version 0 `oracle_announcement`
+
+1. type: 55332 (`oracle_announcement`)
+2. data:
+   * [`signature`:`annoucement_signature`]
+   * [`x_point`:`oracle_public_key`]
+   * [`oracle_event`:`oracle_event`]
+
+where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+
+### The `oracle_attestation` Type
+
+This type contains information about the outcome of an event and the signature(s) over its outcome value(s).
+See [the Oracle specifications](./Oracle.md#oracle-attestations) for more details.
+
+#### Version 0 `oracle_attestation`
+
+1. type: 55400 (`oracle_attestation_v0`)
+2. data:
+    * [`string`:`event_id`]
+    * [`x_point`:`oracle_public_key`]
+    * [`u16`: `nb_signatures`]
+    * [`signature`:`signature_1`]
+    * ...
+    * [`signature`:`signature_n`]
+    * [`string`:`outcome_1`]
+    * ...
+    * [`string`:`outcome_n`]
+
+Where the signatures are ordered the same as the nonces in their original `oracle_event`.
+The outcomes should be the message signed, ordered the same as the signatures.
 
 ## Authors
 
