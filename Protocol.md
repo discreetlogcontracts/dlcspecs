@@ -66,6 +66,7 @@ the funding transaction and CETs.
 
 1. type: 42778 (`offer_dlc_v0`)
 2. data:
+   * [`u32`: `protocol_version`]
    * [`byte`:`contract_flags`]
    * [`chain_hash`:`chain_hash`]
    * [`contract_info`:`contract_info`]
@@ -81,6 +82,12 @@ the funding transaction and CETs.
    * [`u64`:`feerate_per_vb`]
    * [`u32`:`cet_locktime`]
    * [`u32`:`refund_locktime`]
+   * [`offer_tlvs`: `tlvs`]
+
+[//]: # (TODO: `protocol_version` should be advertised by DLC nodes in the future)
+The `protocol_version` value denotes the version of the protocol that the offering node is proposing.
+If the receiving node does not support the requested version, it should ignore the message.
+The current protocol version is `1`.
 
 No bits of `contract_flags` are currently defined, this field should be ignored.
 
@@ -187,7 +194,8 @@ and closing transactions.
    * [`u64`:`change_serial_id`]
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
-   * [`negotiation_fields`:`negotiation_fields`]
+   * [`negotiation_fields`:`negotiation_fields`] (Optional: 1)
+   * [`accept_tlvs`: `tlvs`]
 
 #### Requirements
 
@@ -247,6 +255,7 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
    * [`funding_signatures`:`funding_signatures`]
+   * [`sign_tlvs`: `tlvs`]
 
 #### Requirements
 

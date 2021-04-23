@@ -11,41 +11,44 @@ All data fields are unsigned big-endian unless otherwise specified.
 
 - [Connection Handling and Multiplexing](#connection-handling-and-multiplexing)
 - [Message Format](#message-format)
+   - [Wire Messages](#wire-messages)
+   - [Type-Length-Value](#type-length-value)
+   - [Sub-types](#sub-types)
+      - [Plain sub-type](#plain-sub-type)
+      - [Sibling sub-type](#sibling-sub-type)
+      - [Optional sub-type](#optional-sub-type)
 - [Fundamental Types](#fundamental-types)
 - [DLC Specific Types](#dlc-specific-types)
    - [The `contract_info` Type](#the-contract_info-type)
-      - [Version 0 `contract_info`](#version-0-contract_info)
-      - [Version 1 `contract_info`](#version-1-contract_info)
+      - [`single_contract_info`](#single_contract_info)
+      - [`disjoint_contract_info`](#disjoint_contract_info)
    - [The `contract_descriptor` Type](#the-contract_descriptor-type)
-      - [Version 0 `contract_descriptor`](#version-0-contract_descriptor)
-      - [Version 1 `contract_descriptor`](#version-1-contract_descriptor)
+      - [`enumerated_contract_descriptor`](#enumerated_contract_descriptor)
+      - [`numeric_outcome_contract_descriptor`](#numeric_outcome_contract_descriptor)
    - [The `oracle_info` Type](#the-oracle_info-type)
-      - [Version 0 `oracle_info`](#version-0-oracle_info)
-      - [Version 1 `oracle_info`](#version-1-oracle_info)
-      - [Version 2 `oracle_info`](#version-2-oracle_info)
+      - [`single_oracle_info`](#single_oracle_info)
+      - [`multi_oracle_info`](#multi_oracle_info)
    - [The `oracle_params` Type](#the-oracle_params-type)
-      - [Version 0 `oracle_params`](#version-0-oracle_params)
+      - [`oracle_params`](#oracle_params)
    - [The `negotiation_fields` Type](#the-negotiation_fields-type)
-      - [Version 0 `negotiation_fields`](#version-0-negotiation_fields)
-      - [Version 1 `negotiation_fields`](#version-1-negotiation_fields)
-      - [Version 2 `negotiation_fields`](#version-2-negotiation_fields)
+      - [`single_negotiation_fields`](#single_negotiation_fields)
+      - [`disjoint_negotiation_fields`](#disjoint_negotiation_fields)
    - [The `funding_input` Type](#the-funding_input-type)
-      - [Version 0 `funding_input`](#version-0-funding_input)
+      - [`funding_input`](#funding_input)
    - [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
-      - [Version 0 `cet_adaptor_signatures`](#version-0-cet_adaptor_signatures)
+      - [`cet_adaptor_signatures`](#cet_adaptor_signatures)
    - [The `funding_signatures` Type](#the-funding_signatures-type)
-      - [Version 0 `funding_signatures`](#version-0-funding_signatures)
+      - [`funding_signatures`](#funding_signatures)
    - [The `event_descriptor` Type](#the-event_descriptor-type)
-      - [Version 0 `enum_event_descriptor`](#version-0-enum_event_descriptor)
-      - [Version 0 `digit_decomposition_event_descriptor`](#version-0-digit_decomposition_event_descriptor)
+      - [`enum_event_descriptor`](#enum_event_descriptor)
+      - [`digit_decomposition_event_descriptor`](#digit_decomposition_event_descriptor)
    - [The `oracle_event` Type](#the-oracle_event-type)
-      - [Version 0 `oracle_event`](#version-0-oracle_event)
+      - [`oracle_event`](#oracle_event)
    - [The `oracle_announcement` Type](#the-oracle_announcement-type)
-      - [Version 0 `oracle_announcement`](#version-0-oracle_announcement)
+      - [`oracle_announcement`](#oracle_announcement)
    - [The `oracle_attestation` Type](#the-oracle_attestation-type)
-      - [Version 0 `oracle_attestation`](#version-0-oracle_attestation)
+      - [`oracle_attestation`](#oracle_attestation)
 - [Authors](#authors)
-
 
 ## Connection Handling and Multiplexing
 
@@ -53,13 +56,45 @@ Implementations MUST use a single connection per peer; contract messages (which 
 
 ## Message Format
 
-We reuse the [Lightning Message Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#lightning-message-format) and the [Type-Length-Value Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format) (TLV).
-To be clear, any encoded binary blob that can be sent over the wire will follow the Lightning Message Format
-while all sub-types internal to these messages will follow the Type-Length-Value Format.
-This means that types on outer-messages will be represented with `u16` integers (defined below) and their length
-is omitted from their encoding because the transport layer has the length in a separate unencrypted field.
-Meanwhile all typed sub-messages (which follow TLV format) will have their types represented using `bigsize` integers
-(defined below) and their lengths (also `bigsize`) are included in their encodings.
+We reuse the [Lightning Message Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#lightning-message-format) for messages sent over the wire, the [Type-Length-Value Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format) (TLV) for message extensibility and extra features support, and a custom format for [sub-types](#sub-types).
+
+### Wire Messages
+
+Any encoded binary blob that can be sent over the wire will follow the Lightning Message Format.
+This means that wire messages are prefixed with a `u16` field (defined below) and their length is omitted from their encoding because the transport layer has the length in a separate un-encrypted field.
+
+### Type-Length-Value
+
+A TLV stream is defined for each wire message, and can be used to extend the protocol and for application specific features.
+See the [Type-Length-Value Format section](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format) in the LN BOLTs for specifications.
+
+### Sub-types
+
+Wire messages (and sub-types themselves) contain embedded data structures.
+These sub-types can have three functions:
+* [Plain sub-types](#plain-sub-type) to factor out a number of fields to make specifications clearer,
+* [Sibling sub-types](#sibling-sub-type) to support multiple variants of a field,
+* [Optional sub-types](#optional-sub-type) to support optional fields.
+
+#### Plain sub-type
+
+Plain sub-types do not have any particular format, and their field can simply be replaced in place where they are used.
+
+For example, the [funding input type](#the-funding_input-type) is a plain sub-type which does not require any particular prefix.
+
+#### Sibling sub-type
+
+Sibling sub-types are prefixed with a `bigsize` type identifier.
+The type identifiers are specific to a set of type variants, and can thus be reused across different sub-types.
+Type identifiers are defined within the type definitions, starting from `0` and increasing by `1`.
+
+#### Optional sub-type
+
+Optional sub-types are prefixed with a single byte where:
+- `0x00` means that the field is absent
+- `0x01` means that the field is present
+
+Optional fields are denoted in this specification using the notation `Optional(field_type)` where `field_type` is the type of the optional field.
 
 ## Fundamental Types
 
@@ -103,20 +138,22 @@ The following DLC-specific types are used throughout the specification. All type
 
 This type contains information about a contract's outcomes, their corresponding payouts, and the oracles to be used.
 
-#### Version 0 `contract_info`
+#### `single_contract_info`
 
-1. type: 55342 (`contract_info_v0`)
-2. data:
+1. implements: `contract_info`
+1. type: 0
+1. data:
    * [`u64`:`total_collateral`]
    * [`contract_descriptor`:`contract_descriptor`]
    * [`oracle_info`:`oracle_info`]
 
 `total_collateral` is the Satoshi-denominated value of the sum of all party's collateral.
 
-#### Version 1 `contract_info`
+#### `disjoint_contract_info`
 
-1. type: 55344 (`contract_info_v1`)
-2. data:
+1. implements: `contract_info`
+1. type: 1
+1. data:
    * [`u64`:`total_collateral`]
    * [`bigsize`:`num_disjoint_events`]
    * [`contract_descriptor`:`contract_descriptor_1`]
@@ -142,10 +179,11 @@ To save space, only the offerer's payouts are included in this message as the ac
 **Validity requirement**
 For a contract descriptor to be valid, it is necessary that *a single* payout is defined for any possible outcome that can be attested by the oracle(s).
 
-#### Version 0 `contract_descriptor`
+#### `enumerated_contract_descriptor`
 
-1. type: 42768 (`contract_descriptor_v0`)
-2. data:
+1. implements: `contract_descriptor`
+1. type: 0
+1. data:
    * [`bigsize`:`num_outcomes`]
    * [`string`:`outcome_1`]
    * [`u64`:`payout_1`]
@@ -155,10 +193,11 @@ For a contract descriptor to be valid, it is necessary that *a single* payout is
 
 This type represents an enumerated outcome contract.
 
-#### Version 1 `contract_descriptor`
+#### `numeric_outcome_contract_descriptor`
 
-1. type: 42784 (`contract_descriptor_v1`)
-2. data:
+1. implements: `contract_descriptor`
+1. type: 1
+1. data:
    * [`u16`:`num_digits`]
    * [`payout_function`:`payout_function`]
    * [`rounding_intervals`:`rounding_intervals`]
@@ -172,52 +211,44 @@ The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-inter
 
 This type contains information about the oracles to be used in executing a DLC.
 
-#### Version 0 `oracle_info`
+#### `single_oracle_info`
 
-1. type: 42770 (`oracle_info_v0`)
-2. data:
+1. implements: `oracle_info`
+1. type: 0
+1. data:
    * [`oracle_announcement`:`oracle_announcement`]
 
 This type of oracle info is for single-oracle events.
 
-#### Version 1 `oracle_info`
+#### `multi_oracle_info`
 
-1. type: 42786 (`oracle_info_v1`)
-2. data:
+1. implements: `oracle_info`
+1. type: 1
+1. data:
    * [`u16`:`threshold`]
    * [`u16`:`num_oracles`]
    * [`oracle_announcement`:`oracle_announcement_1`]
    * ...
    * [`oracle_announcement`:`oracle_announcement_num_oracles`]
+   * [`Optional(oracle_params)`: `oracle_params`]
 
-This type of oracle info is for multi-oracle events where all oracles are signing messages chosen
+This type of oracle info is for multi-oracle events.
+
+If `oracle_params` is not provided, then all oracles are expected to be signing messages chosen
 from a set of messages that exactly corresponds to the set of messages being signed by the other oracles,
 and any `threshold` oracles must sign (exactly) corresponding messages for execution to happen.
 
-#### Version 2 `oracle_info`
-
-1. type: 55340 (`oracle_info_v2`)
-2. data:
-   * [`u16`:`threshold`]
-   * [`u16`:`num_oracles`]
-   * [`oracle_announcement`:`oracle_announcement_1`]
-   * ...
-   * [`oracle_announcment`:`oracle_announcement_num_oracles`]
-   * [`oracle_params`:`oracle_params`]
+If `oracle_params` is provided, allowed differences in the values signed by oracles is specified in `oracle_params`.
 
 The order of the oracle announcements represents a total ordering of preference on the oracles.
-
-This type of oracle info is for multi-oracle numeric events where allowed differences in the values
-signed by oracles is specified in `oracle_params`.
 
 ### The `oracle_params` Type
 
 Contains information about how oracle information is used in a given contract.
 
-#### Version 0 `oracle_params`
+#### `oracle_params`
 
-1. type: 55338 (`oracle_params_v0`)
-2. data
+1. data
    * [`u16`:`maxErrorExp`]
    * [`u16`:`minFailExp`]
    * [`bool`:`maximize_coverage`]
@@ -229,18 +260,11 @@ multi-oracle numeric outcome DLC with allowed error is the same.
 
 This type contains preferences of the accepter of a DLC which are taken into account during DLC construction.
 
-#### Version 0 `negotiation_fields`
+#### `single_negotiation_fields`
 
-1. type: 55334 (`negotiation_fields_v0`)
-2. data:
-   * (empty)
-
-This type signifies that the accepter has no negotiation fields.
-
-#### Version 1 `negotiation_fields`
-
-1. type: 55336 (`negotiation_fields_v1`)
-2. data:
+1. implements: `negotiation_fields`
+1. type: 0
+1. data:
    * [`rounding_intervals`: `rounding_intervals`]
 
 `rounding_intervals` represents the maximum amount of allowed rounding at any possible oracle outcome
@@ -248,10 +272,11 @@ in a numeric outcome DLC.
 
 The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-interval-serialization).
 
-#### Version 2 `negotiation_fields`
+#### `disjoint_negotiation_fields`
 
-1. type: 55346 (`negotiation_fields_v2`)
-2. data:
+1. implements: `negotiation_fields`
+1. type: 1
+1. data:
    * [`bigsize`:`num_disjoint_events`]
    * [`negotiation_fields`:`negotiation_fields_1`]
    * ...
@@ -265,10 +290,9 @@ all of the `negotiation_fields` nested here must be version 0 or 1.
 
 This type contains information about a specific input to be used in a funding transaction, as well as its corresponding on-chain UTXO.
 
-#### Version 0 `funding_input`
+#### `funding_input`
 
-1. type: 42772 (`funding_input_v0`)
-2. data:
+1. data:
    * [`u64`:`input_serial_id`]
    * [`u16`:`prevtx_len`]
    * [`prevtx_len*byte`:`prevtx`]
@@ -297,10 +321,9 @@ byte is for pushing `redeemscript` onto the stack in the script signature.
 
 This type contains CET signatures and any necessary information linking the signatures to their corresponding outcome.
 
-#### Version 0 `cet_adaptor_signatures`
+#### `cet_adaptor_signatures`
 
-1. type: 42774 (`cet_adaptor_signatures_v0`)
-2. data:
+1. data:
    * [`bigsize`:`nb_signatures`]
    * [`ecdsa_adaptor_signature`:`signature_1`]
    * [`dleq_proof`:`dleq_prf_1`]
@@ -308,24 +331,21 @@ This type contains CET signatures and any necessary information linking the sign
    * [`ecdsa_adaptor_signature`:`signature_n`]
    * [`dleq_proof`:`dleq_prf_n`]
 
-This type should be used with [`contract_info_v0`](#version-0-contract_info) where each indexed signature in the data corresponds to the outcome of the same index.
-
 ### The `funding_signatures` Type
 
 This type contains signatures of the funding transaction and any necessary information linking the signatures to their inputs.
 
-#### Version 0 `funding_signatures`
+#### `funding_signatures`
 
-1. type: 42776 (`funding_signatures_v0`)
-2. data:
+1. data:
    * [`u16`:`num_witnesses`]
    * [`u16`:`num_witness_elems_1`]
    * [`num_witness_elems_1*witness_element`:`witness_elements_1`]
    * ...
    * [`u16`:`num_witness_elems_num_witnesses`]
    * [`num_witness_elems_num_witnesses*witness_element`:`witness_elements_num_witnesses`]
-3. subtype: `witness_element`
-4. data:
+1. subtype: `witness_element`
+1. data:
    * [`u16`:`len`]
    * [`len*byte`:`witness`]
 
@@ -339,10 +359,11 @@ Witnesses should be sorted by the `input_serial_id` sent in `funding_input` defi
 This type contains information about an event on which a contract is based.
 Two types of events are described, see [the oracle specification](./Oracle.md#event-descriptor) for more details.
 
-#### Version 0 `enum_event_descriptor`
+#### `enum_event_descriptor`
 
-1. type: 55302 (`enum_event_descriptor_v0`)
-2. data:
+1. implements: `event_descriptor`
+1. type: 0
+1. data:
    * [`u16`:`num_outcomes`]
    * [`string`:`outcome_1`]
    * ...
@@ -352,10 +373,11 @@ This type of event descriptor is a simple enumeration where the value `n` is the
 
 Note that `outcome_i` is the outcome value itself and not its hash that will be signed by the oracle.
 
-#### Version 0 `digit_decomposition_event_descriptor`
+#### `digit_decomposition_event_descriptor`
 
-1. type: 55306 (`digit_decomposition_event_descriptor_v0`)
-2. data:
+1. implements: `event_descriptor`
+1. type: 1
+1. data:
    * [`bigsize`:`base`]
    * [`bool`:`is_signed`]
    * [`string`:`unit`]
@@ -367,10 +389,9 @@ Note that `outcome_i` is the outcome value itself and not its hash that will be 
 This type contains information provided by an oracle on an event that it will attest to.
 See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 
-#### Version 0 `oracle_event`
+#### `oracle_event`
 
-1. type: 55330 (`oracle_event_v0`)
-2. data:
+1. data:
    * [`u16`:`nb_nonces`]
    * [`nb_nonces*x_point`:`oracle_nonces`]
    * [`u32`:`event_maturity_epoch`]
@@ -380,12 +401,13 @@ See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 ### The `oracle_announcement` Type
 
 This type contains an `oracle_event` and a signature certifying its origination.
+As oracle announcements can be broadcast directly, they are encoded as [wire messages](#wire-messages).
 See [the Oracle specifications](./Oracle.md#oracle-announcements) for more details.
 
-#### Version 0 `oracle_announcement`
+#### `oracle_announcement`
 
-1. type: 55332 (`oracle_announcement`)
-2. data:
+1. type: 55332
+1. data:
    * [`signature`:`annoucement_signature`]
    * [`x_point`:`oracle_public_key`]
    * [`oracle_event`:`oracle_event`]
@@ -395,12 +417,13 @@ where `signature` is a Schnorr signature over a sha256 hash of the serialized `o
 ### The `oracle_attestation` Type
 
 This type contains information about the outcome of an event and the signature(s) over its outcome value(s).
+As oracle attestations can be broadcast directly, they are encoded as [wire messages](#wire-messages).
 See [the Oracle specifications](./Oracle.md#oracle-attestations) for more details.
 
-#### Version 0 `oracle_attestation`
+#### `oracle_attestation`
 
-1. type: 55400 (`oracle_attestation_v0`)
-2. data:
+1. type: 55400
+1. data:
     * [`string`:`event_id`]
     * [`x_point`:`oracle_public_key`]
     * [`u16`: `nb_signatures`]
