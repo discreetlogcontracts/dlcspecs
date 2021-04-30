@@ -3,21 +3,36 @@
 ## Individual Updates (Sync)
 
 * **#Query(Nadav)**
+  * Implemented Disjoint Union DLCs
+  * Implemented General Payout curves
+  * Numeric + Mulit-Oracle cleanup and diagrams
 * **#Query(Ben)**
+  * Oracle GUI Stuff
 * **#Query(Tibo)**
+  * Multi-Oracle in rust-dlc
+  * Porting logic from old code to rust
 * **#Query(Lloyd)**
+  * Thinking about collisions and security
 * **#Query(Chris)**
+  * Oracle Explorer stuff
 * **#Query(Antoine)**
+  * Digging into non-interactive protocol and free options
 * **#Query(Jesse)**
+  * ECDSA Adaptor Sigs got merged into secp-zkp!
+  * Beginning work on FROST
 * **#Query(Matt)**
+  * Finished adding TLV code to js codebase
+  * Reviewed general payout curves
+  * Began digging into second-layer stuff, free options
 * **#Query(all)**
 
 ## Secp256k1 Progress
 
 **#Query(Jesse, Lloyd)**
 
-* ECDSA Adaptor Signature PR under final review
+* ECDSA Adaptor Signature PR was merged!
   * https://github.com/ElementsProject/secp256k1-zkp/pull/117
+* Bindings time
 
 ## Good Newcomer Issues
 
