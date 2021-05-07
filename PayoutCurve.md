@@ -86,8 +86,8 @@ Each endpoint consists of a two `bigsize` integers and a `u16`.
 
 The first integer is called `endpoint` and contains the actual `event_outcome` which corresponds to an x-coordinate
 on the payout curve which is a boundary between curve pieces.
-The second integer is called `endpoint_payout` and is set equal to the local party's payout should
-`endpoint` be signed which corresponds to a y-coordinate on the payout curve.
+The second integer is called `endpoint_payout` and is set equal to the local party's payout should the value
+`endpoint` be signed, this payout corresponds to a y-coordinate on the payout curve.
 The third integer, a `u16`, is called `extra_precision` and is set to be the first 16 bits of the payout after
 the binary point which were rounded away.
 This extra precision ensures that interpolation does not contain large errors due to error in the
@@ -136,8 +136,9 @@ when repeatedly and sequentially evaluating an interpolation as is done during C
 * When evaluating polynomial pieces, the value ` points(i).outcome_payout / PROD(j = 0, j < points.length && j != i, points(i).event_outcome - points(j).event_outcome)` can be cached for each `i` in a polynomial piece, call this `coef_i`.
   For a given `event_outcome` let `all_prod = PROD(i = 0, i < points.length, event_outcome - points(i).event_outcome)`.
   
+
 The sum can then be computed as `SUM(i = 0, i < points.length, coef_i * all_prod / (event_outcome - points(i).event_outcome))`.
-  
+
 * When precision ranges are introduced, derivatives of the curve pieces can be used to reduce the number of calculations needed.
   For example, when dealing with a cubic polynomial piece, if you are going left to right and enter a new value modulo precision while the first derivative (slope) is positive and the second derivative (concavity) is negative then you can take the tangent line to the curve at this point and find it's intersection with the next value boundary modulo precision.
   If the derivatives' signs are the same, then the interval from the current x-coordinate to the x-coordinate of the intersection is guaranteed to all be the same value modulo precision.
@@ -157,7 +158,7 @@ where a spline is made up of polynomial pieces so that the resulting interpolati
 
 #### Polynomial Serialization
 
-1. type: ??? (`polynomial_payout_curve_piece`)
+1. type: 42792 (`polynomial_payout_curve_piece`)
 2. data:
    * [`u16`:`num_pts`]
    * [`bigsize`:`event_outcome_1`]
@@ -205,7 +206,7 @@ set `f_1 = b = c = 0, a = 1, d = constant, f_2 = constant'`.
 
 #### Hyperbola Serialization
 
-1. type: ??? (`hyperbola_payout_curve_piece`)
+1. type: 42794 (`hyperbola_payout_curve_piece`)
 2. data:
    * [`bool`:`use_positive_piece`]
    * [`bool`:`translate_outcome_sign`]
