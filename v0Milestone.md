@@ -20,9 +20,9 @@ If you wish to propose a change for this document, feel free to reach out to the
   * [Updated Phase 1 Test Vectors [IN PROGRESS]](#updated-phase-1-test-vectors-in-progress)
   * [Generalized Contract Info [DONE]](#generalized-contract-info-done)
   * [Remove Range Outcome DLCs [DONE]](#remove-range-outcome-dlcs-done)
-* [Phase 1.5 - Multi-Oracle Support [IN PROGRESS]](#phase-15---multi-oracle-support-in-progress)
+* [Phase 1.5 - Multi-Oracle Support [DONE]](#phase-15---multi-oracle-support-done)
 * [Phase 2](#phase-2)
-  * [Updated ECDSA Adaptor Signatures [IN PROGRESS]](#updated-ecdsa-adaptor-signatures-in-progress)
+  * [Updated ECDSA Adaptor Signatures [DONE]](#updated-ecdsa-adaptor-signatures-done)
   * [Oracle Interface Stability [IN PROGRESS]](#oracle-interface-stability-in-progress)
     * [Announcements](#announcements)
     * [Attestations](#attestations)
@@ -36,7 +36,7 @@ If you wish to propose a change for this document, feel free to reach out to the
     * [Links Between Specification Documents](#links-between-specification-documents)
     * [Ordering of Inputs and Outputs [DONE]](#ordering-of-inputs-and-outputs-done)
     * [Requirements on Change SPKs [DONE]](#requirements-on-change-spks-done)
-    * [Support for 1/x Shaped Curves [IN PROGRESS]](#support-for-1x-shaped-curves-in-progress)
+    * [Support for 1/x Shaped Curves [DONE]](#support-for-1x-shaped-curves-done)
 * [Not Included in v0 (Future Features)](#not-included-in-v0-future-features)
   * [DLC Transfers](#dlc-transfers)
   * [Option-Style DLCs](#option-style-dlcs)
@@ -86,7 +86,7 @@ Contract Info representations that were previously being used in DLC development
 [Range event outcomes](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Oracle.md#version-0-range_event_descriptor) are deprecated and must be removed before v0 is released.
 If you were using range outcomes DLCs, use numeric outcome DLCs (via [digit decomposition](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Oracle.md#version-0-digit_decomposition_event_descriptor)) or [enumerated](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Oracle.md#version-0-enum_event_descriptor) outcome DLCs instead.
 
-## Phase 1.5 - Multi-Oracle Support [IN PROGRESS]
+## Phase 1.5 - Multi-Oracle Support [DONE]
 
 Multi-oracle support for enumerated and unsigned numeric outcomes is specified [here](https://github.com/discreetlogcontracts/dlcspecs/pull/128) and some existing implementations support various parts of this specification.
 Note that in this phase (as opposed to [in phase 2](#multi-oracle-support-for-non-corresponding-outcome-sets)) it is assumed that all oracles being used sign corresponding outcome sets meaning that in the enumerated case there is some one-to-one correspondence between the outcomes any two oracles could be signing, and in the numeric case `num_digits` is equal for all oracles.
@@ -94,18 +94,22 @@ Note that in this phase (as opposed to [in phase 2](#multi-oracle-support-for-no
 This work is independent of the rest of [phase 1](#phase-1) in the sense that one could implement a fully functioning single-oracle DLC code-base and be fully inter-operable with implementations which also support multiple oracles.
 This is why it has been segregated into its own sub-phase which can be worked on by some implementations even after [phase 2](#phase-2) work has begun for those implementations.
 
+A specification for multi-oracle support was merged in [this PR](https://github.com/discreetlogcontracts/dlcspecs/pull/128).
+
 ## Phase 2
 
 This phase of development includes many breaking changes that have been split up into smaller pieces of work.
 
 The goal of phase 2 is to get the functional specification and implementations from phase 1 tidied up and ready for release into the wild.
 
-### Updated ECDSA Adaptor Signatures [IN PROGRESS]
+### Updated ECDSA Adaptor Signatures [DONE]
 
 Up until recently, all DLC implementations have been working off of a [temporary branch](https://github.com/nkohen/secp256k1/tree/new-temp-everything) of the library secp256k1 which includes a preliminary implementation of ECDSA adaptor signatures which Jonas Nick [implemented](https://github.com/jonasnick/secp256k1/pull/14) during a lightning hackday in April 2020.
 
 Since then, Lloyd Fournier has written a [specification for ECDSA Adpator Signatures](https://github.com/discreetlogcontracts/dlcspecs/pull/114) which has breaking changes when compared to the previous temporary version.
 Jesse Posner has [implemented this new version](https://github.com/ElementsProject/secp256k1-zkp/pull/117) on the library secp256k1-zkp which will serve as a more stable and permanent branch until it is merged into the master branch at which point DLC implementations will use secp256k1-zkp for ECDSA adaptor signing functionality.
+
+Both Jesse's secp256k1-zkp implementation and Lloyd's specification have been merged.
 
 ### Oracle Interface Stability [IN PROGRESS]
 
@@ -234,13 +238,15 @@ Before the release some extra restrictions and validation must be put into place
 
 Discussion of this topic [here](https://github.com/discreetlogcontracts/dlcspecs/issues/53).
 
-#### Support for 1/x Shaped Curves [IN PROGRESS]
+#### Support for 1/x Shaped Curves [DONE]
 
 The current specification/proposal for payout curve interpolation supports piecewise polynomial interpolation which is sufficient for the accurate (enough) approximation of arbitrary curves.
 
 However there are many use cases, such as Contracts for Difference (CFD), in which a payout curve is specified by an inverse relationship to the (numeric) outcome forming a 1/x shape (also known as a piece of a hyperbola).
 
 Since ensuring accurate approximation by a piecewise polynomial of these kinds of curves requires a fairly large number of points, and because fully specifying these kinds of curves really only requires a small amount of information, a proposal should be made with an accompanying new TLV type to specify this class of curves directly.
+
+Support for 1/x shaped payout curves was merged in [this PR](https://github.com/discreetlogcontracts/dlcspecs/pull/144).
 
 ## Not Included in v0 (Future Features)
 
