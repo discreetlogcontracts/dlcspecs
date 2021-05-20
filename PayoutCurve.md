@@ -230,8 +230,10 @@ set `f_1 = b = c = 0, a = 1, d = constant, f_2 = constant'`.
 
 If `use_positive_piece` is set to true, then `y_1` is used, otherwise `y_2` is used.
 
-Then there are six numeric values represented as a `bool` sign, a `bigsize` integer, and a `u16` extra precision.
+Then there are six numeric values represented as a `bool` sign set to true for positive numbers and false for negative ones, a `bigsize` integer, and a `u16` extra precision.
 To be precise, the numbers used should be: (`num_sign`)( `num + double(num_extra_precision) >> 16`).
+
+The fields `translate_outcome` and `translate_payout` correspond to the values `f_1` and `f_2` respectively.
 
 Note that this `payout_function` is from the offerer's point of view.
 To evaluate the accepter's `payout_function`, you must evaluate the offerer's `payout_function` at a given
