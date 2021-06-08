@@ -437,7 +437,8 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
    * [`nb_nonces*x_point`:`oracle_nonces`]
    * [`oracle_event`:`oracle_event`]
 
-where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+where all `pok_signature`s are Schnorr signatures using the tag `announcement/v0` over a sha256 hash of the serialized `x_point`s concatenated in order and concatenated with `oracle_event`.
+That is to say, the signature hash is of the message `oracle_announcement_public_key||oracle_attestation_public_key||oracle_nonces||oracle_event`.
 
 ### The `oracle_attestation` Type
 
