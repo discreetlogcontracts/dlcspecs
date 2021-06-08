@@ -371,13 +371,11 @@ Two types of events are described, see [the oracle specification](./Oracle.md#ev
 1. type: 55302
 1. data:
    * [`u16`:`num_outcomes`]
-   * [`string`:`outcome_1`]
-   * ...
-   * [`string`:`outcome_n`]
+   * [`num_outcomes*string`:`outcomes`]
 
 This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
 
-Note that `outcome_i` is the outcome value itself and not its hash that will be signed by the oracle.
+Note that `outcomes[i]` is the outcome value itself and not its hash that will be signed by the oracle.
 
 #### `digit_decomposition_event_descriptor`
 
@@ -390,20 +388,33 @@ Note that `outcome_i` is the outcome value itself and not its hash that will be 
    * [`int32`:`precision`]
    * [`u16`:`nb_digits`]
 
+### The `oracle_event_timestamp` Type
+
+This type contains timestamp information about when an `oracle_event` is to happen.
+
+#### Fixed `oracle_event_timestamp`
+
+1. type: 55348 (`oracle_event_timestamp_fixed`)
+2. data:
+   * [`u32`:`expected_time_epoch`]
+
+#### Range `oracle_event_timestamp`
+
+1. type: 55350 (`oracle_event_timestamp_fixed`)
+2. data:
+   * [`u32`:`earliest_expected_time_epoch`]
+   * [`u32`:`latest_expected_time_epoch`]
+
 ### The `oracle_event` Type
 
 This type contains information provided by an oracle on an event that it will attest to.
 See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 
-**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
 
 #### `oracle_event`
 
-1. type: 55330
-1. data:
-   * [`u16`:`nb_nonces`]
-   * [`nb_nonces*x_point`:`oracle_nonces`]
-   * [`u32`:`event_maturity_epoch`]
+1. type: 55352 (`oracle_event`)
+   * [`oracle_event_timestamp`:`timestamp`]
    * [`event_descriptor`:`event_descriptor`]
    * [`string`:`event_id`]
 
@@ -413,14 +424,17 @@ This type contains an `oracle_event` and a signature certifying its origination.
 As oracle announcements can be broadcast directly, they are encoded as [wire messages](#wire-messages).
 See [the Oracle specifications](./Oracle.md#oracle-announcements) for more details.
 
-**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
-
 #### `oracle_announcement`
 
-1. type: 55332
-1. data:
-   * [`signature`:`annoucement_signature`]
-   * [`x_point`:`oracle_public_key`]
+1. type: 55354 (`oracle_announcement`)
+2. data:
+   * [`signature`:`annoucement_pok_signature`]
+   * [`signature`:`attestation_pok_signature`]
+   * [`u16`:`nb_nonces`]
+   * [`nb_nonces*signature`:`nonce_pok_signatures`]
+   * [`x_point`:`oracle_announcement_public_key`]
+   * [`x_point`:`oracle_attestation_public_key`]
+   * [`nb_nonces*x_point`:`oracle_nonces`]
    * [`oracle_event`:`oracle_event`]
 
 where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
@@ -431,21 +445,15 @@ This type contains information about the outcome of an event and the signature(s
 As oracle attestations can be broadcast directly, they are encoded as [wire messages](#wire-messages).
 See [the Oracle specifications](./Oracle.md#oracle-attestations) for more details.
 
-**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
-
 #### `oracle_attestation`
 
 1. type: 55400
 1. data:
     * [`string`:`event_id`]
-    * [`x_point`:`oracle_public_key`]
+    * [`x_point`:`oracle_attestation_public_key`]
     * [`u16`: `nb_signatures`]
-    * [`signature`:`signature_1`]
-    * ...
-    * [`signature`:`signature_n`]
-    * [`string`:`outcome_1`]
-    * ...
-    * [`string`:`outcome_n`]
+    * [`nb_signatures*signature`:`signatures`]
+    * [`nb_signatures*string`:`outcomes`]
 
 Where the signatures are ordered the same as the nonces in their original `oracle_event`.
 The outcomes should be the message signed, ordered the same as the signatures.
