@@ -400,7 +400,7 @@ This type contains timestamp information about when an `oracle_event` is to happ
 
 #### Range `oracle_event_timestamp`
 
-1. type: 55350 (`oracle_event_timestamp_fixed`)
+1. type: 55350 (`oracle_event_timestamp_range`)
 2. data:
    * [`u32`:`earliest_expected_time_epoch`]
    * [`u32`:`latest_expected_time_epoch`]
@@ -414,9 +414,34 @@ See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 #### `oracle_event`
 
 1. type: 55352 (`oracle_event`)
+
+2. data:
+
+   * [`u16`:`nb_nonces`]
+   * [`nb_nonces*x_point`:`oracle_nonces`]
+
    * [`oracle_event_timestamp`:`timestamp`]
    * [`event_descriptor`:`event_descriptor`]
    * [`string`:`event_id`]
+
+### The `oracle_keys` Type
+
+This type contains static oracle information and can be used to import trusted oracles into wallets.
+
+#### `oracle_keys`
+
+1. type: 55356 (`oracle_keys`)
+2. data:
+   * [`x_point`:`announcement_public_key`]
+   * [`x_point`:`attestation_public_key`]
+   * [`string`:`oracle_name`]
+   * [`string`:`oracle_description`]
+   * [`signature`:`announcement_pok_signature`]
+   * [`signature`:`attestation_pok_signature`]
+
+where both proof-of-knowledge signatures are Schnorr signatures of over a sha256 hash of
+`announcement_public_key || attestation_public_key || oracle_name || oracle_description`
+using the tag `oraclekeys/v0`.
 
 ### The `oracle_announcement` Type
 
@@ -428,17 +453,13 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
 
 1. type: 55354 (`oracle_announcement`)
 2. data:
-   * [`signature`:`annoucement_pok_signature`]
-   * [`signature`:`attestation_pok_signature`]
+   * [`signature`:`announcement_signature`]
    * [`u16`:`nb_nonces`]
    * [`nb_nonces*signature`:`nonce_pok_signatures`]
    * [`x_point`:`oracle_announcement_public_key`]
-   * [`x_point`:`oracle_attestation_public_key`]
-   * [`nb_nonces*x_point`:`oracle_nonces`]
    * [`oracle_event`:`oracle_event`]
 
-where all `pok_signature`s are Schnorr signatures using the tag `announcement/v0` over a sha256 hash of the serialized `x_point`s concatenated in order and concatenated with `oracle_event`.
-That is to say, the signature hash is of the message `oracle_announcement_public_key||oracle_attestation_public_key||oracle_nonces||oracle_event`.
+where both the `announcement_signature` and the proof-of-knowledge `signature`s are Schnorr signatures over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`.
 
 ### The `oracle_attestation` Type
 
