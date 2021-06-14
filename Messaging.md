@@ -38,10 +38,15 @@ All data fields are unsigned big-endian unless otherwise specified.
    - [The `event_descriptor` Type](#the-event_descriptor-type)
       - [Version 0 `enum_event_descriptor`](#version-0-enum_event_descriptor)
       - [Version 0 `digit_decomposition_event_descriptor`](#version-0-digit_decomposition_event_descriptor)
+   - [The `oracle_event_timestamp` Type](#the-oracle_event_timestamp-type)
+      - [Fixed `oracle_event_timestamp`](#fixed-oracle_event_timestamp)
+      - [Range `oracle_event_timestamp`](#range-oracle_event_timestamp)
    - [The `oracle_event` Type](#the-oracle_event-type)
-      - [Version 0 `oracle_event`](#version-0-oracle_event)
+      - [Version 1 `oracle_event`](#version-1-oracle_event)
+   - [The `oracle_keys` Type](#the-oracle_keys-type)
+      - [Version 0 `oracle_keys`](#version-0-oracle_keys)
    - [The `oracle_announcement` Type](#the-oracle_announcement-type)
-      - [Version 0 `oracle_announcement`](#version-0-oracle_announcement)
+      - [Version 1 `oracle_announcement`](#version-1-oracle_announcement)
    - [The `oracle_attestation` Type](#the-oracle_attestation-type)
       - [Version 0 `oracle_attestation`](#version-0-oracle_attestation)
 - [Authors](#authors)
@@ -341,13 +346,11 @@ Two types of events are described, see [the oracle specification](./Oracle.md#ev
 1. type: 55302 (`enum_event_descriptor_v0`)
 2. data:
    * [`u16`:`num_outcomes`]
-   * [`string`:`outcome_1`]
-   * ...
-   * [`string`:`outcome_n`]
+   * [`num_outcomes*string`:`outcomes`]
 
 This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
 
-Note that `outcome_i` is the outcome value itself and not its hash that will be signed by the oracle.
+Note that `outcomes[i]` is the outcome value itself and not its hash that will be signed by the oracle.
 
 #### Version 0 `digit_decomposition_event_descriptor`
 
@@ -359,35 +362,77 @@ Note that `outcome_i` is the outcome value itself and not its hash that will be 
    * [`int32`:`precision`]
    * [`u16`:`nb_digits`]
 
+### The `oracle_event_timestamp` Type
+
+This type contains timestamp information about when an `oracle_event` is to happen.
+
+#### Fixed `oracle_event_timestamp`
+
+1. type: 55348 (`oracle_event_timestamp_fixed`)
+2. data:
+   * [`u32`:`expected_time_epoch`]
+
+#### Range `oracle_event_timestamp`
+
+1. type: 55350 (`oracle_event_timestamp_range`)
+2. data:
+   * [`u32`:`earliest_expected_time_epoch`]
+   * [`u32`:`latest_expected_time_epoch`]
+
 ### The `oracle_event` Type
 
 This type contains information provided by an oracle on an event that it will attest to.
 See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 
-#### Version 0 `oracle_event`
+#### Version 1 `oracle_event`
 
-1. type: 55330 (`oracle_event_v0`)
+1. type: 55352 (`oracle_event`)
+
 2. data:
+
    * [`u16`:`nb_nonces`]
    * [`nb_nonces*x_point`:`oracle_nonces`]
-   * [`u32`:`event_maturity_epoch`]
+
+   * [`oracle_event_timestamp`:`timestamp`]
    * [`event_descriptor`:`event_descriptor`]
    * [`string`:`event_id`]
+
+### The `oracle_keys` Type
+
+This type contains static oracle information and can be used to import trusted oracles into wallets.
+
+#### Version 0 `oracle_keys`
+
+1. type: 55356 (`oracle_keys`)
+2. data:
+   * [`x_point`:`announcement_public_key`]
+   * [`x_point`:`attestation_public_key`]
+   * [`string`:`oracle_name`]
+   * [`string`:`oracle_description`]
+   * [`u32`:`timestamp`]
+   * [`signature`:`announcement_pok_signature`]
+   * [`signature`:`attestation_pok_signature`]
+
+where both proof-of-knowledge signatures are Schnorr signatures of over a sha256 hash of
+`announcement_public_key || attestation_public_key || oracle_name || oracle_description`
+using the tag `oraclekeys/v0`.
 
 ### The `oracle_announcement` Type
 
 This type contains an `oracle_event` and a signature certifying its origination.
 See [the Oracle specifications](./Oracle.md#oracle-announcements) for more details.
 
-#### Version 0 `oracle_announcement`
+#### Version 1 `oracle_announcement`
 
-1. type: 55332 (`oracle_announcement`)
+1. type: 55354 (`oracle_announcement`)
 2. data:
    * [`signature`:`annoucement_signature`]
-   * [`x_point`:`oracle_public_key`]
+   * [`u16`:`nb_nonces`]
+   * [`nb_nonces*signature`:`nonce_pok_signatures`]
+   * [`x_point`:`oracle_announcement_public_key`]
    * [`oracle_event`:`oracle_event`]
 
-where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+where both the `announcement_signature` and the proof-of-knowledge `signature`s are Schnorr signatures over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`.
 
 ### The `oracle_attestation` Type
 
@@ -399,14 +444,10 @@ See [the Oracle specifications](./Oracle.md#oracle-attestations) for more detail
 1. type: 55400 (`oracle_attestation_v0`)
 2. data:
     * [`string`:`event_id`]
-    * [`x_point`:`oracle_public_key`]
+    * [`x_point`:`oracle_attestation_public_key`]
     * [`u16`: `nb_signatures`]
-    * [`signature`:`signature_1`]
-    * ...
-    * [`signature`:`signature_n`]
-    * [`string`:`outcome_1`]
-    * ...
-    * [`string`:`outcome_n`]
+    * [`nb_signatures*signature`:`signatures`]
+    * [`nb_signatures*string`:`outcomes`]
 
 Where the signatures are ordered the same as the nonces in their original `oracle_event`.
 The outcomes should be the message signed, ordered the same as the signatures.
