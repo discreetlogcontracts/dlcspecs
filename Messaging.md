@@ -42,8 +42,13 @@ All data fields are unsigned big-endian unless otherwise specified.
    - [The `event_descriptor` Type](#the-event_descriptor-type)
       - [`enum_event_descriptor`](#enum_event_descriptor)
       - [`digit_decomposition_event_descriptor`](#digit_decomposition_event_descriptor)
+   - [The `oracle_event_timestamp` Type](#the-oracle_event_timestamp-type)
+      - [Fixed `oracle_event_timestamp`](#fixed-oracle_event_timestamp)
+      - [Range `oracle_event_timestamp`](#range-oracle_event_timestamp)
    - [The `oracle_event` Type](#the-oracle_event-type)
       - [`oracle_event`](#oracle_event)
+   - [The `oracle_keys` Type](#the-oracle_keys-type)
+      - [`oracle_keys`](#oracle_keys)
    - [The `oracle_announcement` Type](#the-oracle_announcement-type)
       - [`oracle_announcement`](#oracle_announcement)
    - [The `oracle_attestation` Type](#the-oracle_attestation-type)
@@ -436,6 +441,7 @@ This type contains static oracle information and can be used to import trusted o
    * [`x_point`:`attestation_public_key`]
    * [`string`:`oracle_name`]
    * [`string`:`oracle_description`]
+   * [`u32`:`timestamp`]
    * [`signature`:`announcement_pok_signature`]
    * [`signature`:`attestation_pok_signature`]
 
