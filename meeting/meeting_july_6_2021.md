@@ -51,6 +51,10 @@
   * https://github.com/discreetlogcontracts/dlcspecs/issues/168
   * Feedback welcome
   * Implementation coming soon
+* Time to start thinking about Taproot!
+  * **#Discussion**
+* Path to Lightning
+  * **#Discussion**
 
 ## Oracle Specifications
 
