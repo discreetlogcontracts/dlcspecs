@@ -30,6 +30,8 @@
   * https://github.com/discreetlogcontracts/dlcspecs/pull/144
 * If anyone is interested it would be nice to document loss-of-fund vectors
   * https://github.com/discreetlogcontracts/dlcspecs/issues/132
+  * Being robust against random failures?
+    * **#Discussion**
 * ECDSA Adaptor Signature Specification merged!
   * https://github.com/discreetlogcontracts/dlcspecs/pull/114
 * Draft Updating P2P message serialization to include sub-types, optional fields, tlv streams
@@ -51,6 +53,11 @@
   * https://github.com/discreetlogcontracts/dlcspecs/issues/168
   * Feedback welcome
   * Implementation coming soon
+* [bLIPs](https://lists.linuxfoundation.org/pipermail/lightning-dev/2021-June/003086.html)
+  * E.g. `premium_fee` for fee-bumping, TLV extensions, etc.
+  * **#Discussion**
+* P2P discussion (TOR?)
+  * **#Discussion**
 * Time to start thinking about Taproot!
   * **#Discussion**
 * Path to Lightning
