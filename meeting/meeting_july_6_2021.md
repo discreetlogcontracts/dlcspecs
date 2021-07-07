@@ -3,22 +3,70 @@
 ## Individual Updates (Sync)
 
 * **#Query(Nadav)**
+  * Optimization
+  * non-equal num-digits
 * **#Query(Tibo)**
+  * Implementation stuff
+  * Ordering of outcomes
 * **#Query(Lloyd)**
+  * Implementation of oracle stuff
+  * Testing bitcoin-s implementation
 * **#Query(Chris)**
+  * Executing DLCs on bitcoin-s with lots of people
 * **#Query(Antoine)**
+  * Review on ...63
 * **#Query(Jesse)**
+  * Working on FROST
+    * Python done!
+    * Distributed key generation nearly done
 * **#Query(Matt)**
+  * Small improvements to JS impl
+  * Debugging atomic finance product
+  * DLC close soon
 * **#Query(Ben)**
+  * bitcoin-s wallet & GUI implementation
+  * Executing and testing DLCs on bitcoin-s
 * **#Query(Ivan!)**
+  * Learning about DLCs
+  * Bitcoin-s GUI work
+* **#Query(Dillion!)**
+  * Read DLC specs
+  * DLC validation in node-dlc
 * **#Query(all)**
 
 ## Implementation Updates (Sync)
 
 * bitcoin-s
+  * All DLC logic in specs except
+    * Missing Signed outcomes
+    * Off-by-one support not yet there
+    * Open PRs for Disjoint Union and Hyperbola/general payout curves
+  * Optimized
+  * JS stuff nearly there
 * rust-dlc
+  * All DLC logic in specs
+  * Optimizations not finished
+  * Needs to update secp256k1-zkp version
+  * Serialization still up in air
+  * Integration tests with bitcoind
+  * Still needs a persistence layer and network layer
+  * **Development and Reviewers wanted!**
+  * Most development is in PRs
 * atomic finance
+  * node-dlc
+    * Logic for message serialization and structure
+    * Chain monitoring
+  * chainabstractionlayer-finance
+    * For building a wallet
+    * single-oralce support
+    * disjoint union support coming
+  * cfd-dlc is still currently the backend
+    * Added serial id support recently as it was needed
 * others?
+  * Binary outcome DLC implementation from Lloyd
+    * oracle: olivia
+    * wallet: bweet
+      * Binary tweet
 
 ## Specification Writing
 
@@ -32,6 +80,8 @@
   * https://github.com/discreetlogcontracts/dlcspecs/issues/132
   * Being robust against random failures?
     * **#Discussion**
+    * Nothing in specification about what should be backed up when before sending messages
+    * In LN they also have the channel-reestablish message
 * ECDSA Adaptor Signature Specification merged!
   * https://github.com/discreetlogcontracts/dlcspecs/pull/114
 * Draft Updating P2P message serialization to include sub-types, optional fields, tlv streams
@@ -70,6 +120,7 @@
 * Oracle JSON format
   * https://github.com/discreetlogcontracts/dlcspecs/pull/150
   * Thoughts on merging?
+    * Let's leave it a PR for now, its ongoing
 * Client-side oracle validation specification merged!
   * https://github.com/discreetlogcontracts/dlcspecs/pull/120
 * Breaking Oracle Changes for v0
@@ -89,4 +140,7 @@
     * This would fix our aggregation woes
     * May be very inefficient (needs a multiplication for every CET)
     * But actually, we already do at least two multiplications for every CET so maybe this is theoretically viable?
+      * Yes, this is actually viable (same asymptotic behavior)
+      * TODO: Get feature branch from Jonas to tinker with
   * Any other stuff?
+
