@@ -99,6 +99,10 @@ This output sends funds won by the accepter corresponding to this CET's outcome 
 
 The refund transaction is exactly the same as a [Contract Execution Transaction](#contract-execution-transaction) except that its locktime is `refund_locktime` (as negotiated in the offer message) instead of `cet_locktime` and the output values for the offerer and the accepter are their respective total collateral values from their offer/accept messages.
 
+# Close Transaction
+
+The close transaction is exactly the same as a [Contract Execution Transaction](#contract-execution-transaction) except that its locktime is `0` and it has additional funding input(s) that are used to avoid the free option problem.
+
 # Fees
 
 ### Fee Calculation
