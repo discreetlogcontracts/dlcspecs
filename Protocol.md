@@ -279,6 +279,50 @@ The recipient:
 
   These script pub key forms include only standard forms accepted by the wider set of deployed Bitcoin clients in the network, which increase the chances of successful propagation to miners.
 
+## Second Layer Interaction
+
+Second Layer Interaction consist of second layer "features" which parties can opt-in to using. These messages are not needed to facilitate construction of a DLCs.
+
+### The `close_dlc` Message
+
+This message contains information about mutual close, which allows the counterparty
+to broadcast a mutual closing transaction.
+
+1. type: ? (`close_dlc_v0`)
+2. data:
+   * [`32*byte`:`contract_id`]
+   * [`signature`:`close_signature`]
+   * [`u64`:`offerPayoutSatoshis`]
+   * [`u64`:`acceptPayoutSatoshis`]
+   * [`u64`:`fund_input_serial_id`]
+   * [`u16`:`num_funding_inputs`]
+   * [`num_funding_inputs*funding_input`:`funding_inputs`]
+
+
+`payout_spk` and `payout_serial_id` from `offer_dlc` as well as `payout_spk` and `payout_serial_id` from `accept_dlc` should be used for constructing the close transaction
+
+`fund_input_serial_id` is a randomly chosen number which uniquely identifies the funding input of the initiating party.
+Inputs in the closing transaction will be sorted by `fund_input_serial_id` and `input_serial_id` in `funding_inputs`.
+
+`funding_inputs` are extra inputs to mutual close to avoid free option, and in the future revocation mechanism will be introduced
+
+#### Requirements
+
+The sender MUST:
+
+  - set `contract_id` by exclusive-OR of the `funding_txid`, the `funding_output_index` and the `temporary_contract_id` from the `offer_dlc` and `accept_dlc` messages.
+  - set `close_signature` to the valid signature, using its `funding_pubkey` for the close transaction, as defined in the [transaction specification](Transactions.md#close-transaction).
+
+The recipient:
+
+  - if any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
+    - MUST reject the contract.
+  - if the `close_signature` is incorrect:
+    - MUST reject the contract.
+  - MUST NOT broadcast the closing transaction before receipt of a valid `close_dlc`.
+  - on receipt of a valid `close_dlc`:
+    - SHOULD broadcast the closing transaction.
+
 # Authors
 
 Nadav Kohen <nadavk25@gmail.com>
