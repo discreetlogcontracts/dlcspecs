@@ -316,10 +316,9 @@ The sender MUST:
 The recipient:
 
   - if any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
-    - MUST ignore the message.
+    - MAY ignore the message.
   - if the `close_signature` is incorrect:
     - MUST ignore the message.
-  - MUST NOT broadcast the closing transaction before receipt of a valid `close_dlc`.
   - on receipt of a valid `close_dlc`:
     - SHOULD broadcast the closing transaction.
 
