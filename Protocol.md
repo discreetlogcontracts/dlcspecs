@@ -279,6 +279,49 @@ The recipient:
 
   These script pub key forms include only standard forms accepted by the wider set of deployed Bitcoin clients in the network, which increase the chances of successful propagation to miners.
 
+## Optional features
+
+Optional features consist of "features" which parties can opt-in to using. These messages are not needed to facilitate construction of a DLCs.
+
+### The `close_dlc` Message
+
+This message contains information about mutual close, which allows the counterparty
+to broadcast a mutual closing transaction.
+
+1. type: ? (`close_dlc_v0`)
+2. data:
+   * [`32*byte`:`contract_id`]
+   * [`signature`:`close_signature`]
+   * [`u64`:`offerPayoutSatoshis`]
+   * [`u64`:`acceptPayoutSatoshis`]
+   * [`u64`:`fund_input_serial_id`]
+   * [`u16`:`num_funding_inputs`]
+   * [`num_funding_inputs*funding_input`:`funding_inputs`]
+
+
+`payout_spk` and `payout_serial_id` from `offer_dlc` as well as `payout_spk` and `payout_serial_id` from `accept_dlc` should be used for constructing the close transaction
+
+`fund_input_serial_id` is a randomly chosen number which uniquely identifies the funding output to be spent.
+Inputs in the closing transaction will be sorted by `fund_input_serial_id` and `input_serial_id` in `funding_inputs`.
+
+`funding_inputs` are extra inputs to mutual close to enable the sending party to nullify the transaction by double spending the inputs.
+
+#### Requirements
+
+The sender MUST:
+
+  - set `contract_id` from the `sign_dlc` message.
+  - set `close_signature` to a valid signature, using its `funding_pubkey` for the close transaction, as defined in the [transaction specification](Transactions.md#close-transaction).
+
+The recipient:
+
+  - if any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
+    - MAY ignore the message.
+  - if the `close_signature` is incorrect:
+    - MUST ignore the message.
+  - on receipt of a valid `close_dlc`:
+    - SHOULD broadcast the closing transaction.
+
 # Authors
 
 Nadav Kohen <nadavk25@gmail.com>
