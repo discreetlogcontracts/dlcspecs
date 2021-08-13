@@ -297,6 +297,7 @@ to broadcast a mutual closing transaction.
    * [`u64`:`fund_input_serial_id`]
    * [`u16`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
+   * [`funding_signatures`:`funding_signatures`]
 
 
 `payout_spk` and `payout_serial_id` from `offer_dlc` as well as `payout_spk` and `payout_serial_id` from `accept_dlc` should be used for constructing the close transaction
@@ -312,11 +313,14 @@ The sender MUST:
 
   - set `contract_id` from the `sign_dlc` message.
   - set `close_signature` to a valid signature, using its `funding_pubkey` for the close transaction, as defined in the [transaction specification](Transactions.md#close-transaction).
+  - set `funding_signatures` to contain valid witnesses for every funding input specified by `funding_inputs` and in the same order.
 
 The recipient:
 
   - if any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
     - MAY ignore the message.
+  - if any `signature` or `witness` in `funding_signatures` is incorrect:
+    - MUST ignore the message.
   - if the `close_signature` is incorrect:
     - MUST ignore the message.
   - on receipt of a valid `close_dlc`:
