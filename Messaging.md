@@ -397,6 +397,18 @@ Note that `outcomes[i]` is the outcome value itself and not its hash that will b
 
 This type contains timestamp information about when an `oracle_event` is to happen.
 
+There are two kinds of `oracle_event_timestamps`: fixed timestamps for events with a
+known (expected) epoch time at which the event will occur, and range for events whose
+time is not known ahead of time and also for events which may occur at any time in the
+specified range.
+
+When using an `oracle_event_timestamp_range` for events which may occur at any time,
+the `earliest_expected_time_epoch` should correspond to the time at which the oracle
+announcement was created and `latest_expected_time_epoch` should correspond to the
+latest time for which the oracle will be responsible for attesting to the event's occurence.
+Note that it is possible to have functionally open-ended events through the use of very large
+`latest_expected_time_epoch` timestamps.
+
 #### Fixed `oracle_event_timestamp`
 
 1. type: 55348 (`oracle_event_timestamp_fixed`)
@@ -432,6 +444,7 @@ See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 ### The `oracle_keys` Type
 
 This type contains static oracle information and can be used to import trusted oracles into wallets.
+This information should be saved by DLC nodes.
 
 #### `oracle_keys`
 
@@ -449,6 +462,22 @@ where both proof-of-knowledge signatures are Schnorr signatures of over a sha256
 `announcement_public_key || attestation_public_key || oracle_name || oracle_description`
 using the tag `oraclekeys/v0`.
 
+#### Rationale
+
+Separate public keys are required for announcement and attestation because the attestation scheme
+used in the current DLC spec reduces the security of non-attestation Schnorr signatures issued by the
+attestation keys and hence a separate announcement key is required.
+
+Proof-of-knowledge signatures are used to force the two keys to authenticate each other as well as the
+rest of the data in the `oracle_keys` message.
+
+#### Requirements
+
+A node
+
+* SHOULD save this information in persistent storage.
+* MUST reject if `announcement_public_key == attestation_public_key`.
+
 ### The `oracle_announcement` Type
 
 This type contains an `oracle_event` and a signature certifying its origination.
@@ -465,7 +494,7 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
    * [`x_point`:`oracle_announcement_public_key`]
    * [`oracle_event`:`oracle_event`]
 
-where both the `announcement_signature` and the proof-of-knowledge `signature`s are Schnorr signatures over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`.
+where both the `announcement_signature` and the proof-of-knowledge `signature`s are Schnorr signatures over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
 
 ### The `oracle_attestation` Type
 

@@ -6,6 +6,9 @@ For the purpose of these specifications, an event is a digital representation of
 An [oracle](./Introduction.md#Oracle) is an entity that commits to publishing one or more signatures over a (number of) event outcome(s) ahead of time by releasing one or more [R-values](./Introduction.md#R-value) as well as necessary information for two parties to build a set of [CETs](./Introduction.md#Contract-Execution-Transaction-(CET)).
 This necessary information is committed to in a so-called [_event descriptor_](#Event-descriptor) that will be further detailed in this document.
 
+Before an oracle makes any announcements or attestations, it should first publish an [`oracle_keys`](Messaging.md#the-oracle_keys-type) message for
+clients to be able to import a new oracle (or new oracle attestation keys) into their trusted keychain.
+
 ## Table of Contents
 
 - [Event descriptor](#event-descriptor)
