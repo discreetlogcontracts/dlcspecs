@@ -52,8 +52,8 @@ Transaction finalization does not imply a mandatory key material access. [ FIXME
 
 # Fee bumping policy
 
-A state machine following on-chain events must take actions based on different clocks parameterized by three
-values: `congestion_bump_frequency`/`security_bump_frequency`/`funding_security_point`/`refund_security_point`.
+A state machine following on-chain events must take actions based on different clocks parameterized by five
+values: `congestion_bump_frequency`/`security_bump_frequency`/`funding_security_point`/`refund_security_point`/`nullifying_point`.
 These values' definitions and setting recommendations are laid out in this section and their usage is made
 more precise in following sections.
 
@@ -90,6 +90,14 @@ This recommendation is made because any transaction under this fee-bumping polic
 Having different fee-bumping frequencies for congestion and security avoids a client overpaying in
 fees in the case of mempool spikes, while anticipating that at some point during DLC execution, the
 confirmation of certain transactions is a security concern.
+
+The `nullifying_point` is similar to a `security_point` with one clear difference. It is not a matter of contract safety, but
+rather a matter of economic safety when choosing to optionally mutually close a contract.
+
+It is determined as a function of the latest possible mutual closing time after close message is sent, which may be static or dynamic.
+
+We don't provide recommendations for the `nullifying_point` as its settings depends on the type of financial contract and local data to
+predict the fee-rate.
 
 # Funding Phase
 
@@ -216,7 +224,6 @@ A node:
     - MUST note its outcome output for later spend
     - MUST advances its off-chain state to the terminal phase
 
-
 ## Rationale
 
 As `refund_locktime` approaches, a CET must be confirmed quickly as a matter of security.
@@ -226,6 +233,39 @@ A refund transaction confirmation is less sensitive but it should be noted that 
 waiting for refund confirmations, the oracle key material is toxic.
 In case of oracle key compromise, a CET could be signed and confirmed by a malicious counter-party.
 Refund transaction confirmation should be managed as a function of the user's trust towards the oracle.
+
+## Optional Closing Phase
+
+The closing phase transitions to a terminal phase by confirming a mutual close transaction.
+
+## Requirements
+
+A node:
+
+  - if a close message is received:
+    - MAY finalize the mutual close transaction with a local `SIGHASH_ALL` signature
+
+A node:
+
+  - if a close message has been sent or a closing transaction broadcast and there is no confirmation:
+    - if `nullifying_point` is reached:
+      - MUST spend a funding input with a higher-fee-rate transaction/absolute fee than any previously propagated package fee-rate
+
+A node:
+
+  - if a close transaction confirms:
+    - MUST note it's outcome output for later spend
+    - MUST advance it's off-chain state to the terminal phase
+
+## Rationale
+
+Depending on the type of financial contract that a DLC represents, once a close mesage is sent to a counter-party,
+the outcome may become increasingly unfavorable the longer the counter-party takes to respond.
+After the user releases the close message, a malicious party could try to wait as long as possible to take advantage
+of a free option, and finalize the close transaction when it is financially favorable for them.
+
+The `nullifying_point` is the longest a user is willing to wait for a counter-party to finalize the closing transaction
+before spending their funding-inputs and nullifying the close signature.
 
 # Reorgs
 
