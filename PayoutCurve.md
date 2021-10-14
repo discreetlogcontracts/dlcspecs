@@ -67,7 +67,7 @@ In this section we detail the TLV serialization for a general `payout_function`.
 
 1. type: 42790 (`payout_function_v0`)
 2. data:
-   * [`u16`:`num_pts`]
+   * [`bigsize`:`num_pts`]
    * [`boolean`:`is_endpoint_1`]
    * [`bigsize`:`event_outcome_1`]
    * [`bigsize`:`outcome_payout_1`]

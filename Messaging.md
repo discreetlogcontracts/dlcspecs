@@ -58,6 +58,8 @@ Implementations MUST use a single connection per peer; contract messages (which 
 
 We reuse the [Lightning Message Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#lightning-message-format) for messages sent over the wire, the [Type-Length-Value Format](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#type-length-value-format) (TLV) for message extensibility and extra features support, and a custom format for [sub-types](#sub-types).
 
+Note that contrary to the LN messages, collections of items are prefixed with a `BigSize` and not a `u16`.
+
 ### Wire Messages
 
 Any encoded binary blob that can be sent over the wire will follow the Lightning Message Format.
@@ -223,7 +225,7 @@ This type of oracle info is for single-oracle events.
 1. type: 1
 1. data:
    * [`u16`:`threshold`]
-   * [`u16`:`num_oracles`]
+   * [`bigsize`:`num_oracles`]
    * [`oracle_announcement`:`oracle_announcement_1`]
    * ...
    * [`oracle_announcement`:`oracle_announcement_num_oracles`]
@@ -291,7 +293,7 @@ This type contains information about a specific input to be used in a funding tr
 
 1. data:
    * [`u64`:`input_serial_id`]
-   * [`u16`:`prevtx_len`]
+   * [`bigsize`:`prevtx_len`]
    * [`prevtx_len*byte`:`prevtx`]
    * [`u32`:`prevtx_vout`]
    * [`u32`:`sequence`]
@@ -335,15 +337,15 @@ This type contains signatures of the funding transaction and any necessary infor
 #### `funding_signatures`
 
 1. data:
-   * [`u16`:`num_witnesses`]
-   * [`u16`:`num_witness_elems_1`]
+   * [`bigsize`:`num_witnesses`]
+   * [`bigsize`:`num_witness_elems_1`]
    * [`num_witness_elems_1*witness_element`:`witness_elements_1`]
    * ...
-   * [`u16`:`num_witness_elems_num_witnesses`]
+   * [`bigsize`:`num_witness_elems_num_witnesses`]
    * [`num_witness_elems_num_witnesses*witness_element`:`witness_elements_num_witnesses`]
 1. subtype: `witness_element`
 1. data:
-   * [`u16`:`len`]
+   * [`bigsize`:`len`]
    * [`len*byte`:`witness`]
 
 `witness` is the data for a witness element in a witness stack. An empty `witness_stack` is an error,
@@ -361,7 +363,7 @@ Two types of events are described, see [the oracle specification](./Oracle.md#ev
 1. implements: `event_descriptor`
 1. type: 0
 1. data:
-   * [`u16`:`num_outcomes`]
+   * [`bigsize`:`num_outcomes`]
    * [`string`:`outcome_1`]
    * ...
    * [`string`:`outcome_n`]
@@ -389,7 +391,7 @@ See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 #### `oracle_event`
 
 1. data:
-   * [`u16`:`nb_nonces`]
+   * [`bigsize`:`nb_nonces`]
    * [`nb_nonces*x_point`:`oracle_nonces`]
    * [`u32`:`event_maturity_epoch`]
    * [`event_descriptor`:`event_descriptor`]
@@ -423,7 +425,7 @@ See [the Oracle specifications](./Oracle.md#oracle-attestations) for more detail
 1. data:
     * [`string`:`event_id`]
     * [`x_point`:`oracle_public_key`]
-    * [`u16`: `nb_signatures`]
+    * [`bigsize`: `nb_signatures`]
     * [`signature`:`signature_1`]
     * ...
     * [`signature`:`signature_n`]
