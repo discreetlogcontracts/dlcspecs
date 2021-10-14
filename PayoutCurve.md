@@ -69,7 +69,7 @@ In this section we detail the TLV serialization for a general `payout_function`.
 
 1. type: 42790 (`payout_function_v0`)
 2. data:
-   * [`u16`:`num_pieces`]
+   * [`bigsize`:`num_pieces`]
    * [`bigsize`:`endpoint_0`]
    * [`bigsize`:`endpoint_payout_0`]
    * [`u16`:`extra_precision_0`]
@@ -160,7 +160,7 @@ where a spline is made up of polynomial pieces so that the resulting interpolati
 
 1. type: 42792 (`polynomial_payout_curve_piece`)
 2. data:
-   * [`u16`:`num_pts`]
+   * [`bigsize`:`num_pts`]
    * [`bigsize`:`event_outcome_1`]
    * [`bigsize`:`outcome_payout_1`]
    * [`u16`:`extra_precision_1`]
