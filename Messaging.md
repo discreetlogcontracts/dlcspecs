@@ -60,6 +60,8 @@ We reuse the [Lightning Message Format](https://github.com/lightningnetwork/ligh
 
 Note that contrary to the LN messages, collections of items are prefixed with a `BigSize` and not a `u16`.
 
+Test vectors for serialization are available [here](./test/serialization_test_vectors).
+
 ### Wire Messages
 
 Any encoded binary blob that can be sent over the wire will follow the Lightning Message Format.
