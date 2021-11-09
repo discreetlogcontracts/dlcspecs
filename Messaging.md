@@ -459,7 +459,7 @@ This information should be saved by DLC nodes.
    * [`signature`:`attestation_pok_signature`]
 
 where both proof-of-knowledge signatures are Schnorr signatures of over a sha256 hash of
-`announcement_public_key || attestation_public_key || oracle_name || oracle_description`
+`announcement_public_key || attestation_public_key || oracle_name || oracle_description || timestamp`
 using the tag `oraclekeys/v0`.
 
 #### Rationale
@@ -488,13 +488,11 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
 
 1. type: 55354 (`oracle_announcement`)
 2. data:
-   * [`signature`:`announcement_signature`]
-   * [`u16`:`nb_nonces`]
-   * [`nb_nonces*signature`:`nonce_pok_signatures`]
-   * [`x_point`:`oracle_announcement_public_key`]
+   * [`signature`:`annoucement_signature`]
+   * [`x_point`:`oracle_attestation_public_key`]
    * [`oracle_event`:`oracle_event`]
 
-where both the `announcement_signature` and the proof-of-knowledge `signature`s are Schnorr signatures over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+where both the `announcement_signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`.
 
 ### The `oracle_attestation` Type
 
