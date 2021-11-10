@@ -312,7 +312,7 @@ Inputs in the closing transaction will be sorted by `fund_input_serial_id` and `
 The sender MUST:
 
   - set `contract_id` from the `sign_dlc` message.
-  - set `close_signature` to a valid signature, using its `funding_pubkey` for the close transaction, as defined in the [transaction specification](Transactions.md#close-transaction).
+  - set `close_signature` to a valid signature, using the private key associated with its `funding_pubkey` for the close transaction, as defined in the [transaction specification](Transactions.md#close-transaction).
   - set `funding_signatures` to contain valid witnesses for every funding input specified by `funding_inputs` and in the same order.
 
 The recipient:

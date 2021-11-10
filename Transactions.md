@@ -101,7 +101,7 @@ The refund transaction is exactly the same as a [Contract Execution Transaction]
 
 # Close Transaction
 
-The close transaction is exactly the same as a [Contract Execution Transaction](#contract-execution-transaction) except that its locktime is `0` and it has additional funding input(s) that are used to avoid the free option problem.
+The close transaction is similar to [Contract Execution Transaction](#contract-execution-transaction). The main differences are that locktime is `0` and it has additional funding input(s) that are used to avoid the free option problem.
 
 # Fees
 
