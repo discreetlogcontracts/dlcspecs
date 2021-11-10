@@ -455,12 +455,9 @@ This information should be saved by DLC nodes.
    * [`string`:`oracle_name`]
    * [`string`:`oracle_description`]
    * [`u32`:`timestamp`]
-   * [`signature`:`announcement_pok_signature`]
-   * [`signature`:`attestation_pok_signature`]
+   * [`signature`:`oracle_metadata_signature`]
 
-where both proof-of-knowledge signatures are Schnorr signatures of over a sha256 hash of
-`announcement_public_key || attestation_public_key || oracle_name || oracle_description || timestamp`
-using the tag `oraclekeys/v0`.
+where the `oracle_metadata_signature` is a Schnorr signature by the `announcement_public_key` using the tag `oraclekeys/v0` of the sha256 hash of the serialized `oracle_keys` message omitting the `announcement_public_key` and of course the the `oracle_metadata_signature`.
 
 #### Rationale
 
@@ -468,8 +465,7 @@ Separate public keys are required for announcement and attestation because the a
 used in the current DLC spec reduces the security of non-attestation Schnorr signatures issued by the
 attestation keys and hence a separate announcement key is required.
 
-Proof-of-knowledge signatures are used to force the two keys to authenticate each other as well as the
-rest of the data in the `oracle_keys` message.
+The `oracle_metadata_signature` is used to link all data in this message to the `announcement_public_key`.
 
 #### Requirements
 
@@ -493,6 +489,10 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
    * [`oracle_event`:`oracle_event`]
 
 where both the `announcement_signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`.
+
+#### Requirements
+
+Clients SHOULD check the `oracle_attestation_public_key` has been signed by the `oracle_announcement_public_key` in a known `oracle_keys` message and SHOULD abort if the attestation key is not recognized.
 
 ### The `oracle_attestation` Type
 
