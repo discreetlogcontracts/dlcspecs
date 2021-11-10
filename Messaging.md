@@ -363,12 +363,14 @@ Witnesses should be sorted by the `input_serial_id` sent in `funding_input` defi
 This type contains information about an event on which a contract is based.
 Two types of events are described, see [the oracle specification](./Oracle.md#event-descriptor) for more details.
 
+**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
+
 #### `enum_event_descriptor`
 
 1. implements: `event_descriptor`
-1. type: 0
+1. type: 55302
 1. data:
-   * [`bigsize`:`num_outcomes`]
+   * [`u16`:`num_outcomes`]
    * [`string`:`outcome_1`]
    * ...
    * [`string`:`outcome_n`]
@@ -380,7 +382,7 @@ Note that `outcome_i` is the outcome value itself and not its hash that will be 
 #### `digit_decomposition_event_descriptor`
 
 1. implements: `event_descriptor`
-1. type: 1
+1. type: 55306
 1. data:
    * [`bigsize`:`base`]
    * [`bool`:`is_signed`]
@@ -393,10 +395,13 @@ Note that `outcome_i` is the outcome value itself and not its hash that will be 
 This type contains information provided by an oracle on an event that it will attest to.
 See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 
+**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
+
 #### `oracle_event`
 
+1. type: 55330
 1. data:
-   * [`bigsize`:`nb_nonces`]
+   * [`u16`:`nb_nonces`]
    * [`nb_nonces*x_point`:`oracle_nonces`]
    * [`u32`:`event_maturity_epoch`]
    * [`event_descriptor`:`event_descriptor`]
@@ -407,6 +412,8 @@ See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 This type contains an `oracle_event` and a signature certifying its origination.
 As oracle announcements can be broadcast directly, they are encoded as [wire messages](#wire-messages).
 See [the Oracle specifications](./Oracle.md#oracle-announcements) for more details.
+
+**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
 
 #### `oracle_announcement`
 
@@ -424,13 +431,15 @@ This type contains information about the outcome of an event and the signature(s
 As oracle attestations can be broadcast directly, they are encoded as [wire messages](#wire-messages).
 See [the Oracle specifications](./Oracle.md#oracle-attestations) for more details.
 
+**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
+
 #### `oracle_attestation`
 
 1. type: 55400
 1. data:
     * [`string`:`event_id`]
     * [`x_point`:`oracle_public_key`]
-    * [`bigsize`: `nb_signatures`]
+    * [`u16`: `nb_signatures`]
     * [`signature`:`signature_1`]
     * ...
     * [`signature`:`signature_n`]
