@@ -62,7 +62,7 @@ up in the case of a tie.
 
 #### Reference Implementations
 
-* [bitcoin-s](https://github.com/bitcoin-s/bitcoin-s/blob/adaptor-dlc/core/src/main/scala/org/bitcoins/core/protocol/dlc/RoundingIntervals.scala)
+* [bitcoin-s](https://github.com/bitcoin-s/bitcoin-s/blob/58070f41209bb97f3648deb11eff829d70c50cca/core/src/main/scala/org/bitcoins/core/protocol/dlc/models/RoundingIntervals.scala#L14)
 
 #### Rounding Interval Serialization
 
