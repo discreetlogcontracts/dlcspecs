@@ -9,6 +9,8 @@
           * [The `accept_dlc` Message](#the-accept_dlc-message)
           * [The `sign_dlc` Message](#the-sign_dlc-message)
           * [Script Pubkey Standardness Definition](#script-pubkey-standardness-definition)
+      * [Optional Features](#optional-features)
+          * [The `close_dlc` Message](#the-close_dlc-message)
 * [Authors](#authors)
 
 # Contract
