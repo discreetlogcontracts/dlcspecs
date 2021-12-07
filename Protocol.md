@@ -295,17 +295,17 @@ to broadcast a mutual closing transaction.
    * [`u64`:`offerPayoutSatoshis`]
    * [`u64`:`acceptPayoutSatoshis`]
    * [`u64`:`fund_input_serial_id`]
-   * [`u16`:`num_funding_inputs`]
-   * [`num_funding_inputs*funding_input`:`funding_inputs`]
-   * [`funding_signatures`:`funding_signatures`]
+   * [`u16`:`num_extra_inputs`]
+   * [`num_extra_inputs*extra_input`:`extra_inputs`]
+   * [`extra_signatures`:`extra_signatures`]
 
 
 `payout_spk` and `payout_serial_id` from `offer_dlc` as well as `payout_spk` and `payout_serial_id` from `accept_dlc` should be used for constructing the close transaction
 
 `fund_input_serial_id` is a randomly chosen number which uniquely identifies the funding output to be spent.
-Inputs in the closing transaction will be sorted by `fund_input_serial_id` and `input_serial_id` in `funding_inputs`.
+Inputs in the closing transaction will be sorted by `fund_input_serial_id` and `input_serial_id` in `extra_inputs`.
 
-`funding_inputs` are extra inputs to mutual close to enable the sending party to nullify the transaction by double spending the inputs.
+`extra_inputs` are extra inputs to mutual close to enable the sending party to nullify the transaction by double spending the inputs.
 
 #### Requirements
 
@@ -313,13 +313,13 @@ The sender MUST:
 
   - set `contract_id` from the `sign_dlc` message.
   - set `close_signature` to a valid signature, using the private key associated with its `funding_pubkey` for the close transaction, as defined in the [transaction specification](Transactions.md#close-transaction).
-  - set `funding_signatures` to contain valid witnesses for every funding input specified by `funding_inputs` and in the same order.
+  - set `extra_signatures` to contain valid witnesses for every funding input specified by `extra_inputs` and in the same order.
 
 The recipient:
 
-  - if any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
+  - if any input in `extra_inputs` is not a BIP141 (Segregated Witness) input.
     - MAY ignore the message.
-  - if any `signature` or `witness` in `funding_signatures` is incorrect:
+  - if any `signature` or `witness` in `extra_signatures` is incorrect:
     - MUST ignore the message.
   - if the `close_signature` is incorrect:
     - MUST ignore the message.
