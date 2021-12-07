@@ -298,6 +298,7 @@ to broadcast a mutual closing transaction.
    * [`u16`:`num_extra_inputs`]
    * [`num_extra_inputs*extra_input`:`extra_inputs`]
    * [`extra_signatures`:`extra_signatures`]
+   * [`u32`:`close_locktime`]
 
 
 `payout_spk` and `payout_serial_id` from `offer_dlc` as well as `payout_spk` and `payout_serial_id` from `accept_dlc` should be used for constructing the close transaction
@@ -307,6 +308,8 @@ Inputs in the closing transaction will be sorted by `fund_input_serial_id` and `
 
 `extra_inputs` are extra inputs to mutual close to enable the sending party to nullify the transaction by double spending the inputs.
 
+`close_locktime` is the nLockTime to be put in close messages.
+
 #### Requirements
 
 The sender MUST:
@@ -314,6 +317,8 @@ The sender MUST:
   - set `contract_id` from the `sign_dlc` message.
   - set `close_signature` to a valid signature, using the private key associated with its `funding_pubkey` for the close transaction, as defined in the [transaction specification](Transactions.md#close-transaction).
   - set `extra_signatures` to contain valid witnesses for every funding input specified by `extra_inputs` and in the same order.
+  - set `close_locktime` to be a UNIX timestamp, or a block height as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
+  - set `close_locktime` to be less than or equal to current UNIX timestamp or block.
 
 The recipient:
 
