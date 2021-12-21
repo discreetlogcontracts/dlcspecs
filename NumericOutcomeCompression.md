@@ -191,27 +191,10 @@ A corollary of this is that the number of adaptor signatures required to cover a
 corresponds to the number of unique digits between the start and end of the interval and for each unique digit a row is
 generated in both the front and back groupings of length at most `B-1 ` which corresponds to the coefficient in the order bound.
 
-This counting also shows us that base 2 is the optimal base to be using in general cases as it will, in general, outperform all larger bases
-in both large and small intervals.
-Note that the concrete example above was chosen to be easy to write down in base 10 (large digits in `start`, small digits in `end`) and so it should not
-be thought of as a general candidate for this particular consideration.
-
-To help with intuition on this matter, consider an arbitrary interval of three digit numbers in base 10.
-To capture the same interval in base 2 we need 10 digit binary numbers.
-However, a random three digit number in base 10 is expected to have a digit sum of 15, while a random ten digit binary number expects a digit sum of only 5!
-Thus we should expect base 2 to outperform base 10 by around 3x on average.
-This is because using binary results in a compression where each row in the diagram above has only a single element, which corresponds
-to binary compression's ability to efficiently reach the largest possible number of digits ignored which itself covers the largest number of cases.
-Meanwhile in a base like 10, each row can take up to 9 adaptor signatures before moving to a larger number of digits ignored (and cases covered).
-Another way to put this is that the inefficiency of base 10 which seems intuitive at small scales is actually equally present at *all scales*!
-
-One final abstract way of intuiting that base 2 is optimal is the following:
-We wish to maximize the amount of information that we may ignore when constructing adaptor signatures, because abstractly every bit of information
-ignored in an adaptor signature computation doubles the number of cases covered with a single signature.
-Thus, if we use any base other than 2, say 10, then we will almost always run into situations where redundant information is needed because we can
-only ignore a decimal digit at a time where a decimal digit has 3.3 bits of information.
-Meanwhile in binary where every digit encodes exactly a single bit of information, we are able to perfectly ignore all redundant bits of information
-resulting in some number near 3.3 times fewer adaptor signatures on average.
+The total number of digits for which intermediary adaptor point must be generated to cover an interval of length `L` made of `n` digits will be `n*L`.
+Since the number of digits is smaller for larger bases (e.g. the number 100 is three digits in base 10 but seven in base 2), larger bases might at first sight seem more optimal, even though they require a larger number of adaptor signatures.
+However, applying the [pre-computation optimization](#pre-computing), we can reduce the number of intermediary anticipation points to compute to `B*floor(log_B(n) + 1)`, which is minimal for `B = 2`.
+Base 2 thus both requires computing less adaptor signatures and less intermediary anticipation points, and is thus chosen as the preferred one.
 
 #### Optimizations
 
