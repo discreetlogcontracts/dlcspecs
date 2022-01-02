@@ -34,7 +34,7 @@ The funding inputs and change output script public keys are negotiated in the of
 
 ## Funding Transaction Input and Output Ordering
 
-The inputs are sorted by each `funding_input`'s `input_serial_id` in ascending order.
+The inputs are sorted by each funding `input`'s `input_serial_id` in ascending order.
 The outputs are sorted in ascending order based on their respective `change_serial_id` or `fund_output_serial_id`.
 
 ## Funding Inputs

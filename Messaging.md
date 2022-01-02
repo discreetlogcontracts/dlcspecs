@@ -29,12 +29,12 @@ All data fields are unsigned big-endian unless otherwise specified.
       - [Version 0 `negotiation_fields`](#version-0-negotiation_fields)
       - [Version 1 `negotiation_fields`](#version-1-negotiation_fields)
       - [Version 2 `negotiation_fields`](#version-2-negotiation_fields)
-   - [The `funding_input` Type](#the-funding_input-type)
-      - [Version 0 `funding_input`](#version-0-funding_input)
+   - [The `input` Type](#the-input-type)
+      - [Version 0 `input`](#version-0-input)
    - [The `cet_adaptor_signatures` Type](#the-cet_adaptor_signatures-type)
       - [Version 0 `cet_adaptor_signatures`](#version-0-cet_adaptor_signatures)
-   - [The `funding_signatures` Type](#the-funding_signatures-type)
-      - [Version 0 `funding_signatures`](#version-0-funding_signatures)
+   - [The `input_signatures` Type](#the-input_signatures-type)
+      - [Version 0 `input_signatures`](#version-0-input_signatures)
    - [The `event_descriptor` Type](#the-event_descriptor-type)
       - [Version 0 `enum_event_descriptor`](#version-0-enum_event_descriptor)
       - [Version 0 `digit_decomposition_event_descriptor`](#version-0-digit_decomposition_event_descriptor)
@@ -258,13 +258,13 @@ This type is used within `dlc_accept` messages that respond to `dlc_offer`s cont
 The `num_disjoint_events` here must be equal to the `num_disjoint_events` in that `contract_info_v1` and
 all of the `negotiation_fields` nested here must be version 0 or 1.
 
-### The `funding_input` Type
+### The `input` Type
 
-This type contains information about a specific input to be used in a funding transaction, as well as its corresponding on-chain UTXO.
+This type contains information about a specific input to be used in a funding or closing transaction, as well as its corresponding on-chain UTXO.
 
-#### Version 0 `funding_input`
+#### Version 0 `input`
 
-1. type: 42772 (`funding_input_v0`)
+1. type: 42772 (`input_v0`)
 2. data:
    * [`u64`:`input_serial_id`]
    * [`u16`:`prevtx_len`]
@@ -281,7 +281,7 @@ Inputs in the funding transaction will be sorted by `input_serial_id`.
 The transaction is used to validate this spent output's value and to validate that it is a SegWit output.
 
 `max_witness_len` is the total serialized length of the witness data that will be supplied
-(e.g. sizeof(varint) + sizeof(witness) for each) in `funding_signatures`.
+(e.g. sizeof(varint) + sizeof(witness) for each) in `input_signatures`.
 
 `redeemscript` the witness script public key to be revealed for P2SH spending.
 Only applicable for P2SH-wrapped inputs.
@@ -307,13 +307,13 @@ This type contains CET signatures and any necessary information linking the sign
 
 This type should be used with [`contract_info_v0`](#version-0-contract_info) where each indexed signature in the data corresponds to the outcome of the same index.
 
-### The `funding_signatures` Type
+### The `input_signatures` Type
 
-This type contains signatures of the funding transaction and any necessary information linking the signatures to their inputs.
+This type contains signatures of the funding or closing transaction and any necessary information linking the signatures to their inputs.
 
-#### Version 0 `funding_signatures`
+#### Version 0 `input_signatures`
 
-1. type: 42776 (`funding_signatures_v0`)
+1. type: 42776 (`input_signatures_v0`)
 2. data:
    * [`u16`:`num_witnesses`]
    * [`u16`:`num_witness_elems_1`]
@@ -329,7 +329,7 @@ This type contains signatures of the funding transaction and any necessary infor
 `witness` is the data for a witness element in a witness stack. An empty `witness_stack` is an error,
 as every input must be Segwit. Witness elements should *not* include their length as part of the witness data.
 
-Witnesses should be sorted by the `input_serial_id` sent in `funding_input` defining these inputs.
+Witnesses should be sorted by the `input_serial_id` sent in funding `input` defining these inputs.
 
 ### The `event_descriptor` Type
 
