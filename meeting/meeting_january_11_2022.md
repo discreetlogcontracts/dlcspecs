@@ -45,6 +45,9 @@
 * Lightning DLC Update?
   * https://mailmanlists.org/pipermail/dlc-dev/2021-November/000091.html
   * **#Query(Tibo)**
+* Non-equal num_digits
+  * https://github.com/discreetlogcontracts/dlcspecs/issues/168
+  * **#Query(Tibo)**
 * Conjunctive Contract Interest
   * https://mailmanlists.org/pipermail/dlc-dev/2022-January/000098.html
   * **#Query(Matt)**
