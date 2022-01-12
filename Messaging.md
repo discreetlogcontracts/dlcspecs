@@ -131,7 +131,12 @@ The following convenience types are also defined:
 * `spk`: A bitcoin script public key encoded as ASM prefixed with a `u16` value indicating its length.
 * `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
 * `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#appendix-a-bigsize-test-vectors).
-* `string`: a UTF-8 encoded string using [NFC for normalization](https://github.com/discreetlogcontracts/dlcspecs/issues/89), prefixed by a `bigsize` value indicating its length in bytes.
+* `string`: a UTF-8 encoded string using [NFC for normalization](https://github.com/discreetlogcontracts/dlcspecs/issues/89), prefixed by a `bigsize` value indicating its length in bytes. The `bigsize` prefix should not be greater than 1000.
+
+### Value bounds
+
+In order to restrict the values passed in messages to ones that are useable and prevent maliciously crafted messages to trigger malfunctions, bounds are set on some of the messages' fields, indicated by `(max: max_value)`.
+This means that if a value greater than `max_value` is received for a field, de-serialization of the entire message should fail.
 
 
 ## DLC Specific Types
@@ -159,7 +164,7 @@ This type contains information about a contract's outcomes, their corresponding 
 1. type: 1
 1. data:
    * [`u64`:`total_collateral`]
-   * [`bigsize`:`num_disjoint_events`]
+   * [`bigsize`:`num_disjoint_events` (max_value: 100)]
    * [`contract_descriptor`:`contract_descriptor_1`]
    * [`oracle_info`:`oracle_info_1`]
    * ...
@@ -185,7 +190,7 @@ To save space, only the offerer's payouts are included in this message as the ac
 1. implements: `contract_descriptor`
 1. type: 0
 1. data:
-   * [`bigsize`:`num_outcomes`]
+   * [`bigsize`:`num_outcomes` (max_value: 1000000)]
    * [`string`:`outcome_1`]
    * [`u64`:`payout_1`]
    * ...
@@ -227,7 +232,7 @@ This type of oracle info is for single-oracle events.
 1. type: 1
 1. data:
    * [`u16`:`threshold`]
-   * [`bigsize`:`num_oracles`]
+   * [`bigsize`:`num_oracles` (max_value: 50)]
    * [`oracle_announcement`:`oracle_announcement_1`]
    * ...
    * [`oracle_announcement`:`oracle_announcement_num_oracles`]
@@ -278,7 +283,7 @@ The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-inter
 1. implements: `negotiation_fields`
 1. type: 1
 1. data:
-   * [`bigsize`:`num_disjoint_events`]
+   * [`bigsize`:`num_disjoint_events` (max_value: 50)]
    * [`negotiation_fields`:`negotiation_fields_1`]
    * ...
    * [`negotiation_fields`:`negotiation_fields_num_disjoint_events`]
@@ -295,7 +300,7 @@ This type contains information about a specific input to be used in a funding tr
 
 1. data:
    * [`u64`:`input_serial_id`]
-   * [`bigsize`:`prevtx_len`]
+   * [`bigsize`:`prevtx_len` (max_value: 10000)]
    * [`prevtx_len*byte`:`prevtx`]
    * [`u32`:`prevtx_vout`]
    * [`u32`:`sequence`]
@@ -325,7 +330,7 @@ This type contains CET signatures and any necessary information linking the sign
 #### `cet_adaptor_signatures`
 
 1. data:
-   * [`bigsize`:`nb_signatures`]
+   * [`bigsize`:`nb_signatures` (max_value: 1000000)]
    * [`ecdsa_adaptor_signature`:`signature_1`]
    * [`dleq_proof`:`dleq_prf_1`]
    * ...
@@ -339,15 +344,15 @@ This type contains signatures of the funding transaction and any necessary infor
 #### `funding_signatures`
 
 1. data:
-   * [`bigsize`:`num_witnesses`]
-   * [`bigsize`:`num_witness_elems_1`]
+   * [`bigsize`:`num_witnesses` (max_value: 15)]
+   * [`bigsize`:`num_witness_elems_1` (max_value: 100)]
    * [`num_witness_elems_1*witness_element`:`witness_elements_1`]
    * ...
    * [`bigsize`:`num_witness_elems_num_witnesses`]
    * [`num_witness_elems_num_witnesses*witness_element`:`witness_elements_num_witnesses`]
 1. subtype: `witness_element`
 1. data:
-   * [`bigsize`:`len`]
+   * [`bigsize`:`len` (max_value: 1000)]
    * [`len*byte`:`witness`]
 
 `witness` is the data for a witness element in a witness stack. An empty `witness_stack` is an error,
@@ -381,7 +386,7 @@ Note that `outcome_i` is the outcome value itself and not its hash that will be 
 1. implements: `event_descriptor`
 1. type: 55306
 1. data:
-   * [`bigsize`:`base`]
+   * [`bigsize`:`base` (max_value: 64)]
    * [`bool`:`is_signed`]
    * [`string`:`unit`]
    * [`int32`:`precision`]
