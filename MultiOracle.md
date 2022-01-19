@@ -449,6 +449,113 @@ of `t` oracles, or else they can be set as constant parameters across all groupi
 
 TODO: Decide how this is done and communicated. 
 
+### Multi Oracles with varying number of digits
+
+The above described algorithms all assume that all oracles use the same number of digits to represent numerical event outcomes.
+However that might not always be the case and dealing with oracles with varying number of digits require further care.
+
+When a contract is created with multiple oracles with varying number of digits, the contract should only define payouts for outcomes up to the maximum value that can be attested by the oracle with the minimum number of digits (thereafter referred as `min_nb_digits`).
+Recall that if this oracle signs the value `2^min_nb_digits - 1`, by convention it represents either the outcome value `2^min_nb_digits - 1` or a greater outcome.
+
+#### Equal outcomes
+
+When no difference is allowed between the oracles, one simply needs to "pre-pad" the outcome prefixes of oracles with larger number of digits with `0`s.
+For example, for the prefix `1010`, if an oracle uses `min_nb_digits + 2` digits, the additional prefix `00` should be prepended to yield `001010`.
+Dealing with outcomes that are above the maximum value that can be represented using `min_nb_digits` is [discussed later](#out-of-bound-outcomes). 
+
+#### Bounded error
+
+If differences are allowed between oracles, the [same algorithm](#Algorithm) defined for oracles with equal number of digits should be used, but it should be ran with `min_nb_digits + 1`, and setting the primary oracle to be the first one (in order of preference) in the group with `min_nb_digits`.
+For example, if the list of oracles is `[A, B, C, D]` with respective number of digits `[12, 10, 11, 10]`, the algorithm should be run with the order `[B, A, C, D]`.
+The list of prefixes should then be transformed so that:
+- the prefixes for oracles with more than `min_nb_digits + 1` should be "pre-padded" with zeros to reach the proper length,
+- the first `0` should be dropped for the prefixes for oracles with `min_nb_digits` 
+- any group of prefix that contains a prefix representing an outcome that cannot be attested to by the corresponding oracle should be discarded (e.g. in the previous example, if an outcome consists of oracle D attesting to a value greater than `2^min_nb_digits - 1` then that outcome should be discarded).
+
+#### Out of bound outcomes
+
+In the case of oracles with equal number of digits, if the event outcome is greater than what oracles can attest to, the contract can still be closed if all oracles attest to the maximum value (which is [the convention](./Oracle.md#Digit-Decomposition)).
+To enable contracts to be closed if the event outcome is greater than what can be represented using `min_nb_digits` in the case of oracles with varying number of digits, all possible outcomes above are assigned to the maximum contract payout.
+To cover all the possible outcomes, all the possible combinations of prefixes that cover the interval `[base^min_nb_digits; base^max_nb_digits - 1]` are generated, where `max_nb_digits` if the number of digits used by the oracle(s) with greatest `nb_digits`.
+Using the previous example with the order `[A, B, C, D]` and respective number of digits `[12, 10, 11, 10]`, the list of prefixes to cover this interval would be:
+```
+1, 1111111111, 1, 1111111111
+01, 1111111111, 1, 1111111111
+```
+
+The following algorithm can be used to generate these prefixes:
+
+```rust
+fn get_max_covering_paths(nb_digits: &[usize], min_nb_digits: usize) -> Vec<Vec<Vec<usize>>> {
+    let mut paths: Vec<Vec<Vec<usize>>> = Vec::new();
+    if nb_digits.iter().all(|x| x == min_nb_digits) {
+        // No need to generate extra coverage.
+        return Vec::new();
+    }
+
+    // The extra digits that each oracle has compared to `min_nb_digits`.
+    let max = nb_digits
+        .iter()
+        .map(|x| *x - min_nb_digits)
+        .collect::<Vec<_>>();
+    // Counter for the extra length of prefixes of each oracle. 0 if the oracle
+    // has `min_nb_digits`, starts at 1 for others since at the minimum we want to generate
+    // a prefix with `min_nb_digits + 1`.
+    let mut counters = nb_digits
+        .iter()
+        .map(|x| if x == min_nb_digits { 0 } else { 1 })
+        .collect::<Vec<_>>();
+    let mut i = 0;
+    loop {
+        let path = counters
+            .iter()
+            .map(|x| {
+                // For oracles with `min_nb_digits` we just generate the max value.
+                let p = if *x == 0 {
+                    std::iter::repeat(1_usize).take(*min_nb_digits).collect()
+                } else {
+                    // For others we generate the prefix based on their current
+                    // counter value. We insert `counter - 1` zero and then a 1.
+                    let mut p = Vec::with_capacity(*x);
+                    p.resize(x - 1, 0);
+                    p.push(1);
+                    p
+                };
+                p
+            })
+            .collect::<Vec<_>>();
+        paths.push(path);
+
+        // If all counters have reached their max prefix size value, we're done.
+        if counters.iter().zip(max.iter()).all(|(x, y)| x == y) {
+            break;
+        }
+
+        // We reset the counters of oracles that had reached their max length
+        // prefixes, until we reach one that had not yet. We increment the counter
+        // for that one.
+        while counters[i] == max[i] {
+            if &nb_digits[i] != min_nb_digits {
+                counters[i] = 1;
+            }
+            i += 1;
+        }
+        counters[i] += 1;
+        i = 0;
+    }
+    paths
+}
+```
+
+Note that when using a threshold, the above algorithm should be ran for each group of `threshold` oracles.
+Assuming a 2 out of 4 threshold in the previous example, the algorithm should be ran with the following inputs:
+1. nb_digits = [12, 10], min_nb_digits = 10
+1. nb_digits = [12, 11], min_nb_digits = 10
+1. nb_digits = [12, 10], min_nb_digits = 10
+1. nb_digits = [10, 11], min_nb_digits = 10
+1. nb_digits = [10, 10], min_nb_digits = 10
+1. nb_digits = [11, 10], min_nb_digits = 10
+
 ## Reference Implementations
 
 * [bitcoin-s](https://github.com/nkohen/bitcoin-s-core/tree/multi-oracle)
