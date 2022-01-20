@@ -139,6 +139,9 @@ This type contains information about a contract's outcomes and their correspondi
 To save space, only the offerer's payouts are included in this message as the accepter's can be derived using
 `accept_payout = total_collateral - offer_payout`.
 
+**Validity requirement**
+For a contract descriptor to be valid, it is necessary that *a single* payout is defined for any possible outcome that can be attested by the oracle(s).
+
 #### Version 0 `contract_descriptor`
 
 1. type: 42768 (`contract_descriptor_v0`)
