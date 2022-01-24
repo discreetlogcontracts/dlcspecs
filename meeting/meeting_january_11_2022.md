@@ -3,21 +3,55 @@
 ## Individual Updates (Sync)
 
 * **#Query(Nadav)**
+  * Paper with Tibo & Ichiro
+  * sbt-jni
+  * bitcoin-s review
+
 * **#Query(Chris)**
+  * Implementing new serialization in bitcoin-s
+
 * **#Query(Matt)**
+  * Conjunctive contracts
+  * Refactoring stuff for mutual close
+
 * **#Query(Tibo)**
+  * Paper and deep dive into numeric decomposition
+    * Spec clarifications
+
+  * Multi-oracle with different num_digits
+
 * **#Query(Jesse)**
+  * FROST work
+    * Maybe there's a way to turn a MuSig2 key into a FROST key!
+
 * **#Query(Ben)**
-* **#Query(Philipp)**
-* **#Query(Antoine)**
+  * Learning rust
+
+* **#Query(Lloyd)**
+  * Talking with researchers
+    * Breakthroughs!
+
+* **#Query(Aki)**
+  * Working on starting a new open source repo
+
 * **#Query(all)**
 
 ## Implementation Updates (Sync)
 
 * bitcoin-s
+  * New serialization work
+  * Working towards better JNI (Java Native Interface)
+
 * rust-dlc
+  * Implemented parallelization (2x improvement!)
+  * Testing work
+    * Ran into some serialization concerns for numbers
+
+  * Began implementing multi-oracle with non-equal num_digits
+
 * atomic finance
-* maia (itchysats)
+  * Message serialization soon (next month ish)
+
 * others?
 
 ## Specification Writing
@@ -29,6 +63,10 @@
 * Using `bigsize` vs. using `uintN`
   * https://github.com/discreetlogcontracts/dlcspecs/issues/183
   * **#Discussion**
+    * Tibo will open a proposal for how things should be restricted and/or changed subject to review
+* Changing serialization breaks contract ids
+  * **#Discussion**
+  * temp contract ids should be random and validated for non-collision with current wallet
 * Mutual Close Message
   * https://github.com/discreetlogcontracts/dlcspecs/pull/170
   * Any Updates?
@@ -38,16 +76,21 @@
   * **#Discussion**
     * Need updated milestone for v0
       * Proposed mid-February, 2022 deadline
+        * Maybe more towards late-February to early March
     * Status on message serialization changes [PR](https://github.com/discreetlogcontracts/dlcspecs/pull/163) and implementations?
     * Breaking oracle changes [PR](https://github.com/discreetlogcontracts/dlcspecs/pull/167)
       * Ready for implementation work
       * Will be rebased on top of #163 for new serialization
+      * New change to add flags to announcement for attestation versions used
 * Lightning DLC Update?
   * https://mailmanlists.org/pipermail/dlc-dev/2021-November/000091.html
   * **#Query(Tibo)**
+  * HRF and Strike have a 1BTC bounty for stable channels
+    * https://suredbits.com/how-to-claim-the-1btc-stable-channel-bounty-from-hrf-and-strike/
 * Non-equal num_digits
   * https://github.com/discreetlogcontracts/dlcspecs/issues/168
   * **#Query(Tibo)**
+    * Will try to get implementation working by next month!
 * Conjunctive Contract Interest
   * https://mailmanlists.org/pipermail/dlc-dev/2022-January/000098.html
   * **#Query(Matt)**
@@ -58,3 +101,15 @@
   * **#Discussion**
 * P2P discussion? (TOR)
   * **#Discussion**
+
+## DLC Research
+
+**#Query(Lloyd)**
+
+* BLS Signatures
+  * Can encrypt Bitcoin signatures to these BLS sigs
+    * Breakthrough: Verifiable encryption is possible and efficient for DLCs!?!?!?
+      * Crude verifiable encryption has a batching algorithm that makes it efficient for huge batches
+* Cut and choose sigs do not actually require BLS
+* Idea: OP_CTV also fixes this!?
+* Idea: Use taproot without anything else with OP_CHECKSIGADD to enforce contract logic and use cooperative closes
