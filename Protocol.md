@@ -24,6 +24,8 @@ the `funding_output_index` and the `temporary_contract_id`, using big-endian
 exclusive-OR (i.e. `funding_output_index` alters the last 2 bytes of
 `funding_txid XOR temporary_contract_id`).
 
+Test vectors for testing contract id computation are [available in the test folder](./test/contract_id_test.json).
+
 ## Contract Negotiation
 
 Contract Negotiation consists of the initiator (aka offerer) sending an `offer_dlc` message,
