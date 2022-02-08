@@ -111,5 +111,5 @@
     * Breakthrough: Verifiable encryption is possible and efficient for DLCs!?!?!?
       * Crude verifiable encryption has a batching algorithm that makes it efficient for huge batches
 * Cut and choose sigs do not actually require BLS
-* Idea: OP_CTV also fixes this!?
+* Idea: OP_CTV also fixes this!? ML post: https://mailmanlists.org/pipermail/dlc-dev/2022-January/000102.html
 * Idea: Use taproot without anything else with OP_CHECKSIGADD to enforce contract logic and use cooperative closes
