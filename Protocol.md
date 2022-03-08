@@ -326,6 +326,10 @@ The recipient:
 
   - if any input in `extra_inputs` is not a BIP141 (Segregated Witness) input.
     - MAY ignore the message.
+  - if `offer_payout_satoshis` is greater than zero and below the dust limit
+    - MUST ignore the message
+  - if `accept_payout_satoshis` is greater than zero and below the dust limit
+    - MUST ignore the message
   - if any `signature` or `witness` in `extra_signatures` is incorrect:
     - MUST ignore the message.
   - if the `close_signature` is incorrect:
