@@ -9,6 +9,8 @@
           * [The `accept_dlc` Message](#the-accept_dlc-message)
           * [The `sign_dlc` Message](#the-sign_dlc-message)
           * [Script Pubkey Standardness Definition](#script-pubkey-standardness-definition)
+      * [Optional Features](#optional-features)
+          * [The `close_dlc` Message](#the-close_dlc-message)
 * [Authors](#authors)
 
 # Contract
@@ -73,8 +75,8 @@ the funding transaction and CETs.
    * [`spk`:`payout_spk`]
    * [`u64`:`payout_serial_id`]
    * [`u64`:`offer_collateral_satoshis`]
-   * [`u16`:`num_funding_inputs`]
-   * [`num_funding_inputs*funding_input`:`funding_inputs`]
+   * [`u16`:`num_inputs`]
+   * [`num_inputs*input`:`inputs`]
    * [`spk`:`change_spk`]
    * [`u64`:`change_serial_id`]
    * [`u64`:`fund_output_serial_id`]
@@ -97,8 +99,8 @@ the funding transaction output. `payout_spk` specifies the script
 pubkey that CETs and the refund transaction should use in the sender's output.
 
 `offer_collateral_satoshis` is the amount the sender is putting into the
-contract. `num_funding_inputs` is the number of funding inputs contributed by
-the sender and `funding_inputs` contains outputs, outpoints, and expected weights
+contract. `num_inputs` is the number of funding inputs contributed by
+the sender and `inputs` contains outputs, outpoints, and expected weights
 of the sender's funding inputs. `change_spk` specifies the script pubkey that funding
 change should be sent to.
 
@@ -160,10 +162,10 @@ The receiving node MUST reject the contract if:
   - `payout_spk` or `change_spk` are not a [standard script pubkey](#script-pubkey-standardness-definition).
   - it considers `feerate_per_vb` too small for timely processing or unreasonably large.
   - `funding_pubkey` is not a valid secp256k1 pubkey in compressed format.
-  - `funding_inputs` do not contribute at least `total_collateral_satoshis` plus full [fee payment](Transactions.md#fee-payment).
+  - `inputs` do not contribute at least `total_collateral_satoshis` plus full [fee payment](Transactions.md#fee-payment).
   - Any `input_serial_id` is duplicated
   - The `fund_output_serial_id` and `change_serial_id` are not set to different value
-  - Any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
+  - Any input in `inputs` is not a BIP141 (Segregated Witness) input.
 
 ### The `accept_dlc` Message
 
@@ -179,8 +181,8 @@ and closing transactions.
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
    * [`u64`:`payout_serial_id`]
-   * [`u16`:`num_funding_inputs`]
-   * [`num_funding_inputs*funding_input`:`funding_inputs`]
+   * [`u16`:`num_inputs`]
+   * [`num_inputs*input`:`inputs`]
    * [`spk`:`change_spk`]
    * [`u64`:`change_serial_id`]
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
@@ -214,11 +216,11 @@ The receiver:
     - MAY reject the contract.
   - if `payout_spk` or `change_spk` are not a [standard script pubkey](#script-pubkey-standardness-definition)
     - MUST reject the contract.
-  - if any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
+  - if any input in `inputs` is not a BIP141 (Segregated Witness) input.
     - MUST reject the contract.
   - if `cet_adaptor_signatures` or `refund_signature` fail validation:
     - MUST reject the contract.
-  - if `funding_inputs` do not contribute at least `accept_collateral_satoshis` plus [fee payment](Transactions.md#fee-payment)
+  - if `inputs` do not contribute at least `accept_collateral_satoshis` plus [fee payment](Transactions.md#fee-payment)
     - MUST reject the contract.
   - if any `input_serial_id` is duplicated
     - MUST reject the contract.
@@ -244,7 +246,7 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
    * [`contract_id`:`contract_id`]
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
-   * [`funding_signatures`:`funding_signatures`]
+   * [`input_signatures`:`input_signatures`]
 
 #### Requirements
 
@@ -254,7 +256,7 @@ The sender MUST:
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
   - set `refund_signature` to the valid signature, using its `funding_pubkey` for the refund transaction, as defined in the [transaction specification](Transactions.md#refund-transaction).
-  - set `funding_signatures` to contain valid witnesses for every funding input specified in the `offer_dlc` message and in the same order.
+  - set `input_signatures` to contain valid witnesses for every funding input specified in the `offer_dlc` message and in the same order.
 
 The recipient:
 
@@ -278,6 +280,62 @@ The recipient:
        (witness program versions 1 through 16)
 
   These script pub key forms include only standard forms accepted by the wider set of deployed Bitcoin clients in the network, which increase the chances of successful propagation to miners.
+
+## Optional features
+
+Optional features consist of "features" which parties can opt-in to using. These messages are not needed to facilitate construction of a DLCs.
+
+### The `close_dlc` Message
+
+This message contains information about mutual close, which allows the counterparty
+to broadcast a mutual closing transaction.
+
+1. type: ? (`close_dlc_v0`)
+2. data:
+   * [`32*byte`:`contract_id`]
+   * [`signature`:`close_signature`]
+   * [`u64`:`offer_payout_satoshis`]
+   * [`u64`:`accept_payout_satoshis`]
+   * [`u64`:`fund_input_serial_id`]
+   * [`u16`:`num_extra_inputs`]
+   * [`num_extra_inputs*input`:`extra_inputs`]
+   * [`input_signatures`:`input_signatures`]
+   * [`u32`:`close_locktime`]
+
+
+`payout_spk` and `payout_serial_id` from `offer_dlc` as well as `payout_spk` and `payout_serial_id` from `accept_dlc` should be used for constructing the close transaction
+
+`fund_input_serial_id` is a randomly chosen number which uniquely identifies the funding output to be spent.
+Inputs in the closing transaction will be sorted by `fund_input_serial_id` and `input_serial_id` in `extra_inputs`.
+
+`extra_inputs` are extra inputs to mutual close to enable the sending party to nullify the transaction by double spending the inputs.
+
+`close_locktime` is the nLockTime to be put in close messages.
+
+#### Requirements
+
+The sender MUST:
+
+  - set `contract_id` from the `sign_dlc` message.
+  - set `close_signature` to a valid signature, using the private key associated with its `funding_pubkey` for the close transaction, as defined in the [transaction specification](Transactions.md#close-transaction).
+  - set `extra_signatures` to contain valid witnesses for every funding input specified by `extra_inputs` and in the same order.
+  - set `close_locktime` to be a UNIX timestamp, or a block height as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
+  - set `close_locktime` to be less than or equal to current UNIX timestamp or block.
+
+The recipient:
+
+  - if any input in `extra_inputs` is not a BIP141 (Segregated Witness) input.
+    - MAY ignore the message.
+  - if `offer_payout_satoshis` is greater than zero and below the dust limit
+    - MUST ignore the message
+  - if `accept_payout_satoshis` is greater than zero and below the dust limit
+    - MUST ignore the message
+  - if any `signature` or `witness` in `extra_signatures` is incorrect:
+    - MUST ignore the message.
+  - if the `close_signature` is incorrect:
+    - MUST ignore the message.
+  - on receipt of a valid `close_dlc`:
+    - SHOULD broadcast the closing transaction.
 
 # Authors
 

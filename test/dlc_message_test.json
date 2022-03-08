@@ -25,7 +25,7 @@
     "rValue" : "9e7eaeb2624a93bba2f132da687862f73038c2e5769c812c7b0ba4b654a3e856"
   }
 }, {
-  "tpeName" : "funding_input_v0",
+  "tpeName" : "input_v0",
   "input" : "fda71437002902000000000100c2eb0b00000000160014781c327deed64538720dc4c857a0712111020c740000000000000000ffffffff006b0000",
   "fields" : {
     "tpe" : "fda714",
