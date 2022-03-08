@@ -54,6 +54,9 @@
 * Recurring Payments
   * https://mailmanlists.org/pipermail/dlc-dev/2022-March/000126.html
   * **#Query(Chris)**
+* Bitcoin 2022
+  * Who's coming?
+  * Let's meet up!
 
 ## DLC Research
 
