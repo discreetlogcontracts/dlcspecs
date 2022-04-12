@@ -130,6 +130,7 @@ The sending node MUST:
   - set `cet_locktime` to be less than `refund_locktime`.
   - use a unique `input_serial_id` for each input
   - set `change_serial_id` and `fund_output_serial_id` to different values
+  - use valid [contract descriptor(s)](./Messaging.md#The-contract_descriptor-Type) within `contract_info`.
 
 The sending node SHOULD:
 
@@ -164,6 +165,7 @@ The receiving node MUST reject the contract if:
   - Any `input_serial_id` is duplicated
   - The `fund_output_serial_id` and `change_serial_id` are not set to different value
   - Any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
+  - invalid [contract descriptor(s)](./Messaging.md#The-contract_descriptor-Type) are used within `contract_info`.
 
 ### The `accept_dlc` Message
 
