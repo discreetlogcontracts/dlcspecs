@@ -69,6 +69,7 @@ the funding transaction and CETs.
    * [`u32`: `protocol_version`]
    * [`byte`:`contract_flags`]
    * [`chain_hash`:`chain_hash`]
+   * [`32*byte`:`temporary_contract_id`]
    * [`contract_info`:`contract_info`]
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
@@ -96,6 +97,8 @@ reside within. This is usually the genesis hash of the respective blockchain.
 The existence of the `chain_hash` allows nodes to open contracts
 across many distinct blockchains as well as have contracts within multiple
 blockchains opened to the same peer (if it supports the target chains).
+
+The `temporary_contract_id` is used to identify the contract on a per-peer basis until the funding transaction is established, at which point it is replaced by the contract_id, which is derived from the funding transaction.
 
 `contract_info` specifies the contract to be constructed and the oracles to be used.
 
@@ -130,7 +133,8 @@ The sending node MUST:
 
   - set undefined bits in `contract_flags` to 0.
   - ensure the `chain_hash` value identifies the chain it wishes to open the contract within.
-  - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition)
+  - set `temporary_contract_id` to a random value.
+  - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition).
   - set `funding_pubkey` to a valid secp256k1 pubkey in compressed format.
   - set `offer_collateral_satoshis` to a value greater than or equal to 1000.
   - set `cet_locktime` and `refund_locktime` to either both be UNIX timestamps, or both be block heights as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
@@ -149,6 +153,7 @@ The sending node SHOULD:
 
 The receiving node MUST:
 
+  - ensure that the `temporary_contract_id` is unique from any other contract ID with the same peer.
   - ignore undefined bits in `contract_flags`.
 
 The receiving node MAY reject the contract if:
@@ -163,6 +168,7 @@ The receiving node MAY reject the contract if:
 The receiving node MUST reject the contract if:
 
   - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
+  - the `temporary_contract_id` is not unique from any other contract ID with the same peer.
   - the `contract_info` refers to events unknown to the receiver.
   - the `contract_info` refers to an oracle unknown or inaccessible to the receiver.
   - `payout_spk` or `change_spk` are not a [standard script pubkey](#script-pubkey-standardness-definition).
@@ -199,7 +205,7 @@ and closing transactions.
 
 #### Requirements
 
-The `temporary_contract_id` MUST be the SHA256 hash of the `offer_dlc` message.
+The `temporary_contract_id` MUST be the same as the `temporary_contract_id` in the `offer_contract` message.
 
 The sender MUST:
 
