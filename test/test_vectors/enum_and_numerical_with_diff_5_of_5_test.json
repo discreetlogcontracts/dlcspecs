@@ -151,7 +151,7 @@
                   "payoutFunction": {
                     "payoutFunctionPieces": [
                       {
-                        "leftEndPoint": {
+                        "endPoint": {
                           "eventOutcome": 0,
                           "outcomePayout": 0,
                           "extraPrecision": 0
@@ -163,7 +163,7 @@
                         }
                       },
                       {
-                        "leftEndPoint": {
+                        "endPoint": {
                           "eventOutcome": 5,
                           "outcomePayout": 200000000,
                           "extraPrecision": 0
