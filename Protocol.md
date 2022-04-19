@@ -300,6 +300,76 @@ The recipient:
 
   These script pub key forms include only standard forms accepted by the wider set of deployed Bitcoin clients in the network, which increase the chances of successful propagation to miners.
 
+# Message segmentation
+
+The communication protocol specified in [BOLT #8](https://github.com/lightningnetwork/lightning-rfc/blob/master/08-transport.md) is based on the noise protocol that has a fixed limit of 65535 bytes for message lengths.
+This can be insufficient for contract with large number of outcomes (and thus adaptor signatures).
+To circumvent this issue, a simple message segmentation protocol is defined, that splits large messages into a `segment_start` message followed by 
+
+## The `segment_start` message
+
+The segment start message indicates the start of a message that is split in several segments.
+
+1. type: 42900 (`segment_start`)
+1. data:
+  * [`u16`:`nb_segments`]
+  * [`bigsize`:`data_len`]
+  * [`data_len*u8`:`data`]
+
+### Requirements
+
+The sender MUST:
+  - set `nb_segments` to the number of segments into which the message will be split into
+  - set `nb_segments` to a number greater than 1 and smaller than 1000
+  - set `data_len` to 65526
+
+The receiver:
+  - if `nb_segments` is less than 2 or greater than 1000:
+    - MUST reject the contract
+  - if `data_len` is not set to 65526
+    - MUST reject the contract
+
+#### Rationale
+
+A peer should not use the segmentation protocol if the message can fit withing a single segment.
+
+Given the size constraint of 65535 bytes per segment, a single segment can fit at maximum 404 ecdsa adaptor signatures (a bit less considering the serialization overhead).
+Allowing at maximum 1000 segments for a single message limits the maximum number of ECDSA adaptor signatures that can be exchanged to roughly 404000, which is already a very large number considering the significant cost of signing and verifying them. 
+
+The first segment can fit 65526 (65535 - 2 for wire message type - 2 for `nb_segments` - 5 for `data_len`) bytes for the data field, and all of these should be used.
+While it might be possible to get read of the `data_len` field in this case the increased code complexity is not worth the 0.007% saving. 
+
+## The `segment_chunk` message
+
+The segment chunk message provides the following block of data.
+
+1. type: 42902 (`segment_chunk`)
+1. data:
+  * [`bigsize`:`data_len`]
+  * [`data_len*u8`:`data`]
+
+### Requirements
+
+The sender MUST:
+  - set `data_len` to 65528 if the segment is not the last one.
+
+The receiver:
+  - if the segment is not the last expected one and `data_len` is not set to 65528:
+    - MUST reject the contract
+  - if a `segment_start` was not received prior to receiving the `segment_chunk` message:
+    - MUST reject the contract
+  - if receiving a message different than `segment_chunk` while expecting one:
+    - MAY reject the contract 
+
+#### Rationale
+
+A segment chunk can fit 65528 (65535 - 2 for wire message type - 5 for `data_len`) bytes for the data field, and all of these should be used.
+
+As we assume an underlying reliable communication protocol, if a peer sends a `segment_chunk` without having first sent a `segment_start`, the peer must be intentionally misbehaving.
+
+Not receiving a `segment_chunk` while expecting one constitutes an error, but it can be difficult to determine whether it is due to intentional misbehavior or network issue.
+For example, if the peer crashes in the middle of sending a segmented message, it might decide to re-start sending it from scratch rather than from the state it was previously.
+
 # Authors
 
 Nadav Kohen <nadavk25@gmail.com>
