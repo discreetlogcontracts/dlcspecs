@@ -65,10 +65,9 @@ interpolation points.
 
 In this section we detail the TLV serialization for a general `payout_function`.
 
-#### Version 0 payout_function
+#### payout_function
 
-1. type: 42790 (`payout_function_v0`)
-2. data:
+1. data:
    * [`bigsize`:`num_pieces`]
    * [`bigsize`:`endpoint_0`]
    * [`bigsize`:`endpoint_payout_0`]
@@ -158,8 +157,9 @@ where a spline is made up of polynomial pieces so that the resulting interpolati
 
 #### Polynomial Serialization
 
-1. type: 42792 (`polynomial_payout_curve_piece`)
-2. data:
+1. implements: `payout_curve_piece`
+1. type: 0
+1. data:
    * [`bigsize`:`num_pts`]
    * [`bigsize`:`event_outcome_1`]
    * [`bigsize`:`outcome_payout_1`]
@@ -206,8 +206,10 @@ set `f_1 = b = c = 0, a = 1, d = constant, f_2 = constant'`.
 
 #### Hyperbola Serialization
 
-1. type: 42794 (`hyperbola_payout_curve_piece`)
-2. data:
+
+1. implements: `payout_curve_piece`
+1. type: 1
+1. data:
    * [`bool`:`use_positive_piece`]
    * [`bool`:`translate_outcome_sign`]
    * [`bigsize`:`translate_outcome`]
