@@ -68,15 +68,15 @@ up in the case of a tie.
 
 1. data:
    * [`u16`:`num_rounding_intervals`]
-   * [`bigsize`:`begin_interval_1`]
-   * [`bigsize`:`rounding_mod_1`]
+   * [`u64`:`begin_interval_1`]
+   * [`u64`:`rounding_mod_1`]
    * ...
-   * [`bigsize`:`begin_interval_num_rounding_intervals`]
-   * [`bigsize`:`rounding_mod_num_rounding_intervals`]
+   * [`u64`:`begin_interval_num_rounding_intervals`]
+   * [`u64`:`rounding_mod_num_rounding_intervals`]
 
 `num_rounding_intervals` is the number of rounding intervals specified in this function and can be
 zero in which case a rounding modulus of `1` is used everywhere.
-Each serialized rounding interval consists of two `bigsize` integers.
+Each serialized rounding interval consists of two `u64` integers.
 
 The first integer is called `begin_interval` and refers to the x-coordinate (`event_outcome`) at which this range begins.
 The second integer is called `rounding_mod` and contains the rounding modulus to be used in this range.
