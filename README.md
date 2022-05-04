@@ -43,6 +43,11 @@ This wrapper is currently used as inside the [p2pderivatives application](https:
 
 @Tibo-lg and others are working on a new Rust DLC implementation
 
+### [node-dlc](https://github.com/AtomicFinance/node-dlc) and [chainify-finance](https://github.com/AtomicFinance/chainify-finance)
+
+The team at Atomic Finance is working on two typescript implementation libraries which build on top of [cfd-dlc](https://github.com/p2pderivatives/cfd-dlc).
+These libraries are used in the Atomic Finance [app](https://atomic.finance/) which also uses [react-native-cfddlc](https://github.com/AtomicFinance/react-native-cfddlc) swift module for C++ bindings.
+
 ### [NDLC](https://github.com/dgarage/NDLC)
 
 @NicolasDorier has created a wip DLC implementation in C# which can be used with BTCPayServer
