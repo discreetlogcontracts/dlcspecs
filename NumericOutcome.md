@@ -67,7 +67,7 @@ up in the case of a tie.
 #### Rounding Interval Serialization
 
 1. data:
-   * [`u16`:`num_rounding_intervals`]
+   * [`bigsize`:`num_rounding_intervals`]
    * [`u64`:`begin_interval_1`]
    * [`u64`:`rounding_mod_1`]
    * ...
