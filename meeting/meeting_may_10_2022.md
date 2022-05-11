@@ -35,6 +35,8 @@
   * https://github.com/discreetlogcontracts/dlcspecs/pull/192/
 * Validation of offers and announcements
   * https://github.com/discreetlogcontracts/dlcspecs/pull/193
+* Multi-oracle with varying num_digits
+  * https://github.com/discreetlogcontracts/dlcspecs/pull/186
 * Messaging and Serialization Breaking Changes
   * https://github.com/discreetlogcontracts/dlcspecs/pull/163
   * Just needs a second impl
