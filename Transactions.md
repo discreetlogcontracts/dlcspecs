@@ -312,9 +312,59 @@ accept_cet_vbytes = Ceil(accept_cet_weight / 4.0) vbytes
 
 TODO
 
-# References
+# Channel
 
-* [Bitcoin-S implementation](https://github.com/bitcoin-s/bitcoin-s/blob/adaptor-dlc/dlc/src/main/scala/org/bitcoins/dlc/builder)
+## Channel Contract Execution Transaction
+
+The CETs are as described [above](#contract-execution-transaction) with the difference of using their nSequence field to set a relative lock enabling timely use of the punishment path in case of misbehavior.
+The refund transaction is similar to the [one for on-chain DLC](#refund-transaction).
+A notable difference for both CETs and refund transactions in the off-chain case is that they must use the output of the [buffer transaction](#buffer-transaction) instead of the funding output.
+
+## Buffer Transaction
+
+In the case of DLC channels, a buffer transaction is inserted between the fund transaction output and the CETs.
+This enables safe revocation of an established contract even before its maturity.
+
+### Input
+
+* version: 2
+* locktime: 0
+* txin count: 1
+  * `txin[0]` outpoint: `txid` of funding transaction and `output_index` 0
+  * `txin[0]` sequence: 0xFFFFFFFE
+  * `txin[0]` script bytes: 0
+  * `txin[0]` witness: `0 <signature_for_pubkey1> <signature_for_pubkey2>`
+
+### Output
+
+* The buffer transaction output script is a P2WSH defined by the following miniscript policy:
+
+```
+or(and(pk(offer_own_pk),pk(accept_own_pk)),or(and(pk(offer_own_pk),and(pk(accept_publish_pk), pk(accept_rev_pk))),and(pk(offer_own_pk),and(pk(offer_publish_pk),pk(offer_rev_pk)))))
+```
+
+## Settle transaction
+
+A settle transaction enables both parties of a channel to settle an ongoing contract while keeping the channel open.
+
+### Input
+
+* version: 2
+* locktime: 0
+* txin count: 1
+  * `txin[0]` outpoint: `txid` of funding transaction and `output_index` 0
+  * `txin[0]` sequence: 0xFFFFFFFE
+  * `txin[0]` script bytes: 0
+  * `txin[0]` witness: `0 <signature_for_pubkey1> <signature_for_pubkey2>`
+
+### Outputs
+
+* The settle transaction contains two outputs, paying each party their respective payout agreed during the setup of the settle state (see [here](./Protocol.md#the-settleoffer-message)).
+Note that if the payout of a party is lower than dust threshold, the corresponding output is dropped.
+
+```
+or(and(pk(payee_own_pk), older(csv_timelock)), and(pk(counter_own_pk), and(pk(payee_publish_pk), pk(payee_revoke_pk))))
+```
 
 # Authors
 
