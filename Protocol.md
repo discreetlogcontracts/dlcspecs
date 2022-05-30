@@ -259,6 +259,7 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
 
 1. type: 42782 (`sign_dlc_v0`)
 2. data:
+   * [`u32`: `protocol_version`]
    * [`contract_id`:`contract_id`]
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
@@ -269,6 +270,7 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
 
 The sender MUST:
 
+  - set `protocol_version` to the same value as the one in the sent `offer_dlc` message.
   - set `contract_id` by exclusive-OR of the `funding_txid`, the `funding_output_index` and the `temporary_contract_id` from the `offer_dlc` and `accept_dlc` messages.
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.
