@@ -189,6 +189,7 @@ and closing transactions.
 
 1. type: 42780 (`accept_dlc_v0`)
 2. data:
+   * [`u32`: `protocol_version`]
    * [`32*byte`:`temporary_contract_id`]
    * [`u64`:`accept_collateral_satoshis`]
    * [`point`:`funding_pubkey`]
@@ -209,6 +210,7 @@ The `temporary_contract_id` MUST be the same as the `temporary_contract_id` in t
 
 The sender MUST:
 
+  - set `protocol_version` to the same value as the one in the received `offer_dlc` message.
   - set `accept_collateral_satoshis` to equal the `offer_dlc`'s `contract_info` `total_collateral` minus the `offer_collateral_satoshis`.
   - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition)
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
