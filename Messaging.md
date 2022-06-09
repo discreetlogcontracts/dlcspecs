@@ -210,7 +210,7 @@ This type represents an enumerated outcome contract.
 1. implements: `contract_descriptor`
 1. type: 1
 1. data:
-   * [`u16`:`num_digits`]
+   * [`bigsize`:`num_digits`]
    * [`payout_function`:`payout_function`]
    * [`rounding_intervals`:`rounding_intervals`]
 
@@ -371,14 +371,12 @@ Witnesses should be sorted by the `input_serial_id` sent in `funding_input` defi
 This type contains information about an event on which a contract is based.
 Two types of events are described, see [the oracle specification](./Oracle.md#event-descriptor) for more details.
 
-**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
-
 #### `enum_event_descriptor`
 
 1. implements: `event_descriptor`
-1. type: 55302
+1. type: 0
 1. data:
-   * [`u16`:`num_outcomes`]
+   * [`bigsize`:`num_outcomes`]
    * [`num_outcomes*string`:`outcomes`]
 
 This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
@@ -388,7 +386,7 @@ Note that `outcomes[i]` is the outcome value itself and not its hash that will b
 #### `digit_decomposition_event_descriptor`
 
 1. implements: `event_descriptor`
-1. type: 55306
+1. type: 1
 1. data:
    * [`bigsize`:`base`]
    * [`bool`:`is_signed`]
@@ -412,16 +410,18 @@ latest time for which the oracle will be responsible for attesting to the event'
 Note that it is possible to have functionally open-ended events through the use of very large
 `latest_expected_time_epoch` timestamps.
 
-#### Fixed `oracle_event_timestamp`
+#### `fixed_oracle_event_timestamp`
 
-1. type: 55348 (`oracle_event_timestamp_fixed`)
-2. data:
+1. implements: `oracle_event_timestamp`
+1. type: 0
+1. data:
    * [`u32`:`expected_time_epoch`]
 
-#### Range `oracle_event_timestamp`
+#### `range_oracle_event_timestamp`
 
-1. type: 55350 (`oracle_event_timestamp_range`)
-2. data:
+1. implements: `oracle_event_timestamp`
+1. type: 1
+1. data:
    * [`u32`:`earliest_expected_time_epoch`]
    * [`u32`:`latest_expected_time_epoch`]
 
@@ -430,16 +430,9 @@ Note that it is possible to have functionally open-ended events through the use 
 This type contains information provided by an oracle on an event that it will attest to.
 See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 
-
 #### `oracle_event`
 
-1. type: 55352 (`oracle_event`)
-
-2. data:
-
-   * [`u16`:`nb_nonces`]
-   * [`nb_nonces*x_point`:`oracle_nonces`]
-
+1. data:
    * [`oracle_event_timestamp`:`timestamp`]
    * [`event_descriptor`:`event_descriptor`]
    * [`string`:`event_id`]
@@ -451,13 +444,12 @@ This information should be saved by DLC nodes.
 
 #### `oracle_keys`
 
-1. type: 55356 (`oracle_keys`)
-2. data:
+1. data:
    * [`x_point`:`announcement_public_key`]
-   * [`x_point`:`attestation_public_key`]
    * [`string`:`oracle_name`]
    * [`string`:`oracle_description`]
    * [`u32`:`timestamp`]
+   * [`oracle_schemes`:`oracle_schemes`]
    * [`signature`:`oracle_metadata_signature`]
 
 where the `oracle_metadata_signature` is a Schnorr signature by the `announcement_public_key` using the tag `oraclekeys/v0` of the sha256 hash of the serialized `oracle_keys` message omitting the `announcement_public_key` and of course the the `oracle_metadata_signature`.
@@ -477,6 +469,26 @@ A node
 * SHOULD save this information in persistent storage.
 * MUST reject if `announcement_public_key == attestation_public_key`.
 
+### The `oracle_schemes` Type
+
+In order to enable oracles to support multiple attestation schemes, and clients to chose their preferred one, the `oracle_schemes` type can contain multiple attestations schemes.
+Each scheme is defined as a TLV so that clients can easily ignore schemes that they don't know about.
+Note that at the moment the only defined scheme is the `schnorr_scheme` that uses Schnorr signatures.
+
+#### `oracle_schemes`
+
+1. data:
+   * [`bigsize`:`nb_schemes`]
+   * [`nb_schemes*scheme`:`attestation_schemes`]
+
+#### `schnorr_scheme`
+
+1. type: 0
+1. data:
+   * [`x_point`:`attestation_public_key`]
+   * [`bigsize`:`nb_nonces`]
+   * [`nb_nonces*x_point`:`oracle_nonces`]
+
 ### The `oracle_announcement` Type
 
 This type contains an `oracle_event` and a signature certifying its origination.
@@ -487,8 +499,8 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
 
 1. type: 55354 (`oracle_announcement`)
 2. data:
-   * [`signature`:`annoucement_signature`]
-   * [`x_point`:`oracle_attestation_public_key`]
+   * [`signature`:`announcement_signature`]
+   * [`oracle_keys`:`oracle_keys`]
    * [`oracle_event`:`oracle_event`]
 
 where both the `announcement_signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`.
@@ -496,6 +508,32 @@ where both the `announcement_signature` is a Schnorr signature over a sha256 has
 #### Requirements
 
 Clients SHOULD check the `oracle_attestation_public_key` has been signed by the `oracle_announcement_public_key` in a known `oracle_keys` message and SHOULD abort if the attestation key is not recognized.
+
+### The `oracle_attestations` Type
+
+As [an oracle can support multiple attestation schemes](#the-oracleschemes-type), multiple attestations corresponding to each supported schemes can be embedded into a single attestation message.
+Each attestation is serialized as a TLV to enable clients to easily ignore those they don't support.
+Note that at the moment only the `schnorr_attestation` scheme is defined.
+
+#### `oracle_attestations`
+
+1. data:
+   * [`bigsize`:`nb_attestations`]
+   * [`nb_attestations*attestation`:attestations]
+
+#### `schnorr_attestation`
+
+1. type: 0
+1. data:
+   * [`x_point`:`oracle_attestation_public_key`]
+   * [`bigsize`: `nb_outcomes`]
+   * [`nb_signatures*attested_outcome`:`attested_outcomes`]
+1. subtype: `attested_outcome`
+   * [`signature`:signature]
+   * [`outcome`:outcome]
+Where the signatures are ordered the same as the nonces in their original `oracle_event`.
+The outcomes should be the message signed, ordered the same as the signatures.
+
 
 ### The `oracle_attestation` Type
 
@@ -508,13 +546,7 @@ See [the Oracle specifications](./Oracle.md#oracle-attestations) for more detail
 1. type: 55400
 1. data:
     * [`string`:`event_id`]
-    * [`x_point`:`oracle_attestation_public_key`]
-    * [`u16`: `nb_signatures`]
-    * [`nb_signatures*signature`:`signatures`]
-    * [`nb_signatures*string`:`outcomes`]
-
-Where the signatures are ordered the same as the nonces in their original `oracle_event`.
-The outcomes should be the message signed, ordered the same as the signatures.
+    * [`oracle_attestations`:oracle_attestations]
 
 ## Authors
 
