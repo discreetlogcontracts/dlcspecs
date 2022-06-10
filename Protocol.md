@@ -313,7 +313,7 @@ The segment start message indicates the start of a message that is split in seve
 1. type: 42900 (`segment_start`)
 1. data:
   * [`u16`:`nb_segments`]
-  * [`bigsize`:`data_len`]
+  * [`u16`:`data_len`]
   * [`data_len*u8`:`data`]
 
 ### Requirements
@@ -345,7 +345,7 @@ The segment chunk message provides the following block of data.
 
 1. type: 42902 (`segment_chunk`)
 1. data:
-  * [`bigsize`:`data_len`]
+  * [`u16`:`data_len`]
   * [`data_len*u8`:`data`]
 
 ### Requirements
