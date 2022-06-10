@@ -337,7 +337,7 @@ Given the size constraint of 65535 bytes per segment, a single segment can fit a
 Allowing at maximum 1000 segments for a single message limits the maximum number of ECDSA adaptor signatures that can be exchanged to roughly 404000, which is already a very large number considering the significant cost of signing and verifying them. 
 
 The first segment can fit 65526 (65535 - 2 for wire message type - 2 for `nb_segments` - 5 for `data_len`) bytes for the data field, and all of these should be used.
-While it might be possible to get read of the `data_len` field in this case the increased code complexity is not worth the 0.007% saving. 
+While it might be possible to get rid of the `data_len` field in this case the increased code complexity is not worth the 0.007% saving. 
 
 ## The `segment_chunk` message
 
