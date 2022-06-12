@@ -66,14 +66,16 @@ the funding transaction and CETs.
 
 1. type: 42778 (`offer_dlc_v0`)
 2. data:
+   * [`u32`: `protocol_version`]
    * [`byte`:`contract_flags`]
    * [`chain_hash`:`chain_hash`]
+   * [`32*byte`:`temporary_contract_id`]
    * [`contract_info`:`contract_info`]
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
    * [`u64`:`payout_serial_id`]
    * [`u64`:`offer_collateral_satoshis`]
-   * [`u16`:`num_funding_inputs`]
+   * [`bigsize`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
    * [`spk`:`change_spk`]
    * [`u64`:`change_serial_id`]
@@ -81,6 +83,12 @@ the funding transaction and CETs.
    * [`u64`:`feerate_per_vb`]
    * [`u32`:`cet_locktime`]
    * [`u32`:`refund_locktime`]
+   * [`offer_tlvs`: `tlvs`]
+
+[//]: # (TODO: `protocol_version` should be advertised by DLC nodes in the future)
+The `protocol_version` value denotes the version of the protocol that the offering node is proposing.
+If the receiving node does not support the requested version, it should ignore the message.
+The current protocol version is `1`.
 
 No bits of `contract_flags` are currently defined, this field should be ignored.
 
@@ -89,6 +97,8 @@ reside within. This is usually the genesis hash of the respective blockchain.
 The existence of the `chain_hash` allows nodes to open contracts
 across many distinct blockchains as well as have contracts within multiple
 blockchains opened to the same peer (if it supports the target chains).
+
+The `temporary_contract_id` is used to identify the contract on a per-peer basis until the funding transaction is established, at which point it is replaced by the contract_id, which is derived from the funding transaction.
 
 `contract_info` specifies the contract to be constructed and the oracles to be used.
 
@@ -123,7 +133,8 @@ The sending node MUST:
 
   - set undefined bits in `contract_flags` to 0.
   - ensure the `chain_hash` value identifies the chain it wishes to open the contract within.
-  - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition)
+  - set `temporary_contract_id` to a random value.
+  - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition).
   - set `funding_pubkey` to a valid secp256k1 pubkey in compressed format.
   - set `offer_collateral_satoshis` to a value greater than or equal to 1000.
   - set `cet_locktime` and `refund_locktime` to either both be UNIX timestamps, or both be block heights as distinguished [here](https://en.bitcoin.it/wiki/NLockTime).
@@ -142,6 +153,7 @@ The sending node SHOULD:
 
 The receiving node MUST:
 
+  - ensure that the `temporary_contract_id` is unique from any other contract ID with the same peer.
   - ignore undefined bits in `contract_flags`.
 
 The receiving node MAY reject the contract if:
@@ -156,6 +168,7 @@ The receiving node MAY reject the contract if:
 The receiving node MUST reject the contract if:
 
   - the `chain_hash` value is set to a hash of a chain that is unknown to the receiver.
+  - the `temporary_contract_id` is not unique from any other contract ID with the same peer.
   - the `contract_info` refers to events unknown to the receiver.
   - the `contract_info` refers to an oracle unknown or inaccessible to the receiver.
   - `payout_spk` or `change_spk` are not a [standard script pubkey](#script-pubkey-standardness-definition).
@@ -176,25 +189,28 @@ and closing transactions.
 
 1. type: 42780 (`accept_dlc_v0`)
 2. data:
+   * [`u32`: `protocol_version`]
    * [`32*byte`:`temporary_contract_id`]
    * [`u64`:`accept_collateral_satoshis`]
    * [`point`:`funding_pubkey`]
    * [`spk`:`payout_spk`]
    * [`u64`:`payout_serial_id`]
-   * [`u16`:`num_funding_inputs`]
+   * [`bigsize`:`num_funding_inputs`]
    * [`num_funding_inputs*funding_input`:`funding_inputs`]
    * [`spk`:`change_spk`]
    * [`u64`:`change_serial_id`]
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
-   * [`negotiation_fields`:`negotiation_fields`]
+   * [`negotiation_fields`:`negotiation_fields`] (Optional: 1)
+   * [`accept_tlvs`: `tlvs`]
 
 #### Requirements
 
-The `temporary_contract_id` MUST be the SHA256 hash of the `offer_dlc` message.
+The `temporary_contract_id` MUST be the same as the `temporary_contract_id` in the `offer_contract` message.
 
 The sender MUST:
 
+  - set `protocol_version` to the same value as the one in the received `offer_dlc` message.
   - set `accept_collateral_satoshis` to equal the `offer_dlc`'s `contract_info` `total_collateral` minus the `offer_collateral_satoshis`.
   - set `payout_spk` and `change_spk` to a [standard script pubkey](#script-pubkey-standardness-definition)
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
@@ -243,15 +259,18 @@ This message introduces the [`contract_id`](#definition-of-contract_id) to ident
 
 1. type: 42782 (`sign_dlc_v0`)
 2. data:
+   * [`u32`: `protocol_version`]
    * [`contract_id`:`contract_id`]
    * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
    * [`signature`:`refund_signature`]
    * [`funding_signatures`:`funding_signatures`]
+   * [`sign_tlvs`: `tlvs`]
 
 #### Requirements
 
 The sender MUST:
 
+  - set `protocol_version` to the same value as the one in the sent `offer_dlc` message.
   - set `contract_id` by exclusive-OR of the `funding_txid`, the `funding_output_index` and the `temporary_contract_id` from the `offer_dlc` and `accept_dlc` messages.
   - set `cet_adaptor_signatures` to valid adaptor signatures, using its `funding_pubkey` for each CET, as defined in the [transaction specification](Transactions.md#contract-execution-transaction) and using signature public keys computed using the `offer_dlc`'s `contract_info` and `oracle_info` as adaptor points.
   - include an adaptor signature in `cet_adaptor_signatures` for every event specified in the `offer_dlc`'s `contract_info`.

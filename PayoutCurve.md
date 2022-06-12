@@ -65,24 +65,23 @@ interpolation points.
 
 In this section we detail the TLV serialization for a general `payout_function`.
 
-#### Version 0 payout_function
+#### payout_function
 
-1. type: 42790 (`payout_function_v0`)
-2. data:
-   * [`u16`:`num_pieces`]
-   * [`bigsize`:`endpoint_0`]
-   * [`bigsize`:`endpoint_payout_0`]
+1. data:
+   * [`bigsize`:`num_pieces`]
+   * [`u64`:`endpoint_0`]
+   * [`u64`:`endpoint_payout_0`]
    * [`u16`:`extra_precision_0`]
    * [`payout_curve_piece`:`piece_1`]
-   * [`bigsize`:`endpoint_1`]
+   * [`u64`:`endpoint_1`]
    * ...
    * [`payout_curve_piece`:`piece_num_pieces`]
-   * [`bigsize`:`endpoint_num_pieces`]
-   * [`bigsize`:`endpoint_payout_num_pieces`]
+   * [`u64`:`endpoint_num_pieces`]
+   * [`u64`:`endpoint_payout_num_pieces`]
    * [`u16`:`extra_precision_num_pieces`]
 
 `num_pieces` is the number of `payout_curve_pieces` which make up the payout curve along with their endpoints.
-Each endpoint consists of a two `bigsize` integers and a `u16`.
+Each endpoint consists of a two `u64` and a `u16`.
 
 The first integer is called `endpoint` and contains the actual `event_outcome` which corresponds to an x-coordinate
 on the payout curve which is a boundary between curve pieces.
@@ -158,15 +157,16 @@ where a spline is made up of polynomial pieces so that the resulting interpolati
 
 #### Polynomial Serialization
 
-1. type: 42792 (`polynomial_payout_curve_piece`)
-2. data:
-   * [`u16`:`num_pts`]
-   * [`bigsize`:`event_outcome_1`]
-   * [`bigsize`:`outcome_payout_1`]
+1. implements: `payout_curve_piece`
+1. type: 0
+1. data:
+   * [`bigsize`:`num_pts`]
+   * [`u64`:`event_outcome_1`]
+   * [`u64`:`outcome_payout_1`]
    * [`u16`:`extra_precision_1`]
    * ...
-   * [`bigsize`:`event_outcome_num_pts`]
-   * [`bigsize`:`outcome_payout_num_pts`]
+   * [`u64`:`event_outcome_num_pts`]
+   * [`u64`:`outcome_payout_num_pts`]
    * [`u16`:`extra_precision_num_pts`]
 
 `num_pts` is the number of midpoints specified in this curve piece which will be used along with the surrounding `endpoint`s to perform interpolation.
@@ -206,31 +206,33 @@ set `f_1 = b = c = 0, a = 1, d = constant, f_2 = constant'`.
 
 #### Hyperbola Serialization
 
-1. type: 42794 (`hyperbola_payout_curve_piece`)
-2. data:
+
+1. implements: `payout_curve_piece`
+1. type: 1
+1. data:
    * [`bool`:`use_positive_piece`]
    * [`bool`:`translate_outcome_sign`]
-   * [`bigsize`:`translate_outcome`]
+   * [`u64`:`translate_outcome`]
    * [`u16`:`translate_outcome_extra_precision`]
    * [`bool`:`translate_payout_sign`]
-   * [`bigsize`:`translate_payout`]
+   * [`u64`:`translate_payout`]
    * [`u16`:`translate_payout_extra_precision`]
    * [`bool`:`a_sign`]
-   * [`bigsize`:`a`]
+   * [`u64`:`a`]
    * [`u16`:`a_extra_precision`]
    * [`bool`:`b_sign`]
-   * [`bigsize`:`b`]
+   * [`u64`:`b`]
    * [`u16`:`b_extra_precision`]
    * [`bool`:`c_sign`]
-   * [`bigsize`:`c`]
+   * [`u64`:`c`]
    * [`u16`:`c_extra_precision`]
    * [`bool`:`d_sign`]
-   * [`bigsize`:`d`]
+   * [`u64`:`d`]
    * [`u16`:`d_extra_precision`]
 
 If `use_positive_piece` is set to true, then `y_1` is used, otherwise `y_2` is used.
 
-Then there are six numeric values represented as a `bool` sign set to true for positive numbers and false for negative ones, a `bigsize` integer, and a `u16` extra precision.
+Then there are six numeric values represented as a `bool` sign set to true for positive numbers and false for negative ones, a `u64` integer, and a `u16` extra precision.
 To be precise, the numbers used should be: (`num_sign`)( `num + double(num_extra_precision) >> 16`).
 
 The fields `translate_outcome` and `translate_payout` correspond to the values `f_1` and `f_2` respectively.
