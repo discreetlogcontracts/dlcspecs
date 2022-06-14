@@ -47,8 +47,8 @@ All data fields are unsigned big-endian unless otherwise specified.
       - [Range `oracle_event_timestamp`](#range-oracle_event_timestamp)
    - [The `oracle_event` Type](#the-oracle_event-type)
       - [`oracle_event`](#oracle_event)
-   - [The `oracle_keys` Type](#the-oracle_keys-type)
-      - [`oracle_keys`](#oracle_keys)
+   - [The `oracle_metadata` Type](#the-oracle_metadata-type)
+      - [`oracle_metadata`](#oracle_metadata)
       - [Rationale](#rationale)
       - [Requirements](#requirements)
    - [The `oracle_announcement` Type](#the-oracle_announcement-type)
@@ -437,12 +437,12 @@ See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
    * [`event_descriptor`:`event_descriptor`]
    * [`string`:`event_id`]
 
-### The `oracle_keys` Type
+### The `oracle_metadata` Type
 
 This type contains static oracle information and can be used to import trusted oracles into wallets.
 This information should be saved by DLC nodes.
 
-#### `oracle_keys`
+#### `oracle_metadata`
 
 1. data:
    * [`x_point`:`announcement_public_key`]
@@ -452,7 +452,7 @@ This information should be saved by DLC nodes.
    * [`oracle_schemes`:`oracle_schemes`]
    * [`signature`:`oracle_metadata_signature`]
 
-where the `oracle_metadata_signature` is a Schnorr signature by the `announcement_public_key` using the tag `oraclekeys/v0` of the sha256 hash of the serialized `oracle_keys` message omitting the `announcement_public_key` and of course the the `oracle_metadata_signature`.
+where the `oracle_metadata_signature` is a Schnorr signature by the `announcement_public_key` using the tag `oraclemetadata/v0` of the sha256 hash of the serialized `oracle_metadata` message omitting the `announcement_public_key` and of course the the `oracle_metadata_signature`.
 
 #### Rationale
 
@@ -500,14 +500,14 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
 1. type: 55354 (`oracle_announcement`)
 2. data:
    * [`signature`:`announcement_signature`]
-   * [`oracle_keys`:`oracle_keys`]
+   * [`oracle_metadata`:`oracle_metadata`]
    * [`oracle_event`:`oracle_event`]
 
 where both the `announcement_signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`.
 
 #### Requirements
 
-Clients SHOULD check the `oracle_attestation_public_key` has been signed by the `oracle_announcement_public_key` in a known `oracle_keys` message and SHOULD abort if the attestation key is not recognized.
+Clients SHOULD check the `oracle_attestation_public_key` has been signed by the `oracle_announcement_public_key` in a known `oracle_metadata` message and SHOULD abort if the attestation key is not recognized.
 
 ### The `oracle_attestations` Type
 
