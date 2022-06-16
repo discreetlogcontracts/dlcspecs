@@ -388,7 +388,7 @@ Note that `outcomes[i]` is the outcome value itself and not its hash that will b
 1. implements: `event_descriptor`
 1. type: 1
 1. data:
-   * [`bigsize`:`base`]
+   * [`u8`:`base`]
    * [`bool`:`is_signed`]
    * [`string`:`unit`]
    * [`int32`:`precision`]
