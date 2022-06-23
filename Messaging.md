@@ -469,6 +469,22 @@ A node
 * SHOULD save this information in persistent storage.
 * MUST reject if `announcement_public_key == attestation_public_key`.
 
+
+### The `proof_of_knowledge` Type
+
+A proof of knowledge is used to prove that oracles know the pre-images of the nonces they are using to prevent cancellation attacks in multi-oracle settings.
+
+#### `schnorr_proof_of_knowledge`
+
+1. implements: `proof_of_knowledge`
+1. type: 0
+1. data:
+   * [`signature`:`attestation_public_key_proof`]
+   * [`nb_signatures`:`bigsize`]
+   * [`nb_signatures*signature`:`nonce_proofs`]
+
+where each signature is generated over the message `dlcoraclepok`.
+
 ### The `oracle_schemes` Type
 
 In order to enable oracles to support multiple attestation schemes, and clients to chose their preferred one, the `oracle_schemes` type can contain multiple attestations schemes.
@@ -488,6 +504,18 @@ Note that at the moment the only defined scheme is the `schnorr_scheme` that use
    * [`x_point`:`attestation_public_key`]
    * [`bigsize`:`nb_nonces`]
    * [`nb_nonces*x_point`:`oracle_nonces`]
+   * [`proof_of_knowledge`:`proof_of_knowledge`]
+
+where `proof_of_knowledge` ensures that the oracle knows the pre-image of the `attestation_public_key` and all `oracle_nonce`.
+
+#### Requirements
+
+A node *MUST* validate the proof of knowledge in the case of multi oracle contracts.
+A node *MUST* discard any announcement failing this verification.
+
+#### Rationale
+
+While using an aggregate signature increases the complexity of oracle implementation and management, providing a signature per nonce would lead to a large number of signatures in particular for oracle attesting to numerical event.
 
 ### The `oracle_announcement` Type
 
