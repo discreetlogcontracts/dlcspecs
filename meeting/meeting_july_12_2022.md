@@ -5,20 +5,35 @@
 ## Individual Updates (Sync)
 
 * **#Query(Nadav)**
+  * MuSig2 impl in bitcoin-s
+
 * **#Query(Chris)**
-* **#Query(Ben)**
-* **#Query(Lloyd)**
+  * Taproot work
+
 * **#Query(Matt)**
+  * messaging serialization
+
 * **#Query(Tibo)**
-* **#Query(Jesse)**
-* **Query(James & Jonathan)**
+  * discussion about segmentation
+
+* **Query(Philipp)**
+  * Reviewed Tibo's PR
+
 * **#Query(all)**
 
 ## Implementation Updates (Sync)
 
 * bitcoin-s
+  * Has MuSig2
+
 * rust-dlc
+  * New contributors!
+  * Working on channels
+
 * atomic finance
+  * Messaging serialization test vectors passing
+  * Need to do some refactoring
+
 * [lava](https://github.com/lava-xyz/sybils)
 * gun.fun
 * others?
@@ -31,6 +46,9 @@
   * https://github.com/discreetlogcontracts/dlcspecs/pull/192/
   * Still needs review
   * Some LN devs have been reached out to by Chris, how'd it go?
+  * Some mailing list chatter and responses from LN devs, generally positive
+  * Maybe LN will do something like this someday but not anytime soon
+  * Sounds like we're just goint to do the dumb thing and send more data to peers as we need it
 * Validation of offers and announcements
   * https://github.com/discreetlogcontracts/dlcspecs/pull/193
   * Still needs implementations
@@ -41,6 +59,7 @@
   * https://github.com/discreetlogcontracts/dlcspecs/pull/167
   * **#Discussion**
   * Updates?
+    * We should move to having a pok per key and adding a type for musig version of this once musig has a bip number
 * DLC channels
   * https://mailmanlists.org/pipermail/dlc-dev/2022-June/000148.html
   * **#Query(Tibo)**
@@ -48,13 +67,11 @@
 * Cutting v0, Imagining v1, let's go!
   * Need breaking oracle changes
     * Anything else?
+      * Nope!
 
-  * What should we start thinking about wrt the next spec version? Taproot? BLS oracle tricks? Other stuff?
+  * What should we start thinking about wrt the next spec version? Taproot? BLS oracle tricks? Channels? Other stuff?
     * **#Discussion**
+      * GitHub Issue to be opened for discussion (with corresponding post to mailing list).
 * Anything else?
+  * Tibo claims he might have a channel demo for us by next month ... maybe
 
-## DLC Research
-
-**#Query(Lloyd)**
-
-* https://eprint.iacr.org/2022/499
