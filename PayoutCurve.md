@@ -119,7 +119,7 @@ Given a potential `event_outcome` compute the `outcome_payout` as follows:
 
 * Binary search the `endpoint`s by `event_outcome`
   * If found, return `endpoint_payout`.
-  * Else evaluate `event_outcome` on the `paytou_curve_piece` between (inclusive) the previous and next `endpoint`.
+  * Else evaluate `event_outcome` on the `payout_curve_piece` between (inclusive) the previous and next `endpoint`.
 
 #### Reference Implementations
 
