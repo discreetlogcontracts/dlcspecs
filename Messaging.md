@@ -43,17 +43,28 @@ All data fields are unsigned big-endian unless otherwise specified.
       - [`enum_event_descriptor`](#enum_event_descriptor)
       - [`digit_decomposition_event_descriptor`](#digit_decomposition_event_descriptor)
    - [The `oracle_event_timestamp` Type](#the-oracle_event_timestamp-type)
-      - [Fixed `oracle_event_timestamp`](#fixed-oracle_event_timestamp)
-      - [Range `oracle_event_timestamp`](#range-oracle_event_timestamp)
+      - [`fixed_oracle_event_timestamp`](#fixed_oracle_event_timestamp)
+      - [`range_oracle_event_timestamp`](#range_oracle_event_timestamp)
    - [The `oracle_event` Type](#the-oracle_event-type)
       - [`oracle_event`](#oracle_event)
    - [The `oracle_metadata` Type](#the-oracle_metadata-type)
       - [`oracle_metadata`](#oracle_metadata)
       - [Rationale](#rationale)
       - [Requirements](#requirements)
+   - [The `proof_of_knowledge` Type](#the-proof_of_knowledge-type)
+      - [`schnorr_proof_of_knowledge`](#schnorr_proof_of_knowledge)
+   - [The `oracle_schemes` Type](#the-oracle_schemes-type)
+      - [`oracle_schemes`](#oracle_schemes)
+   - [`attestation_scheme`](#attestation_scheme)
+      - [`schnorr_scheme`](#schnorr_scheme)
+      - [Requirements](#requirements-1)
+      - [Rationale](#rationale-1)
    - [The `oracle_announcement` Type](#the-oracle_announcement-type)
       - [`oracle_announcement`](#oracle_announcement)
-      - [Requirements](#requirements-1)
+      - [Requirements](#requirements-2)
+   - [The `oracle_attestations` Type](#the-oracle_attestations-type)
+      - [`oracle_attestations`](#oracle_attestations)
+      - [`schnorr_attestation`](#schnorr_attestation)
    - [The `oracle_attestation` Type](#the-oracle_attestation-type)
       - [`oracle_attestation`](#oracle_attestation)
 - [Authors](#authors)
@@ -495,10 +506,15 @@ Note that at the moment the only defined scheme is the `schnorr_scheme` that use
 
 1. data:
    * [`bigsize`:`nb_schemes`]
-   * [`nb_schemes*scheme`:`attestation_schemes`]
+   * [`nb_schemes*attestation_scheme`:`attestation_schemes`]
+
+### `attestation_scheme`
+
+An attestation scheme contains the required information to interpret and verify an attestation from an oracle.
 
 #### `schnorr_scheme`
 
+1. implements: `attestation_scheme`
 1. type: 0
 1. data:
    * [`x_point`:`attestation_public_key`]
