@@ -547,7 +547,7 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
    * [`oracle_metadata`:`oracle_metadata`]
    * [`oracle_event`:`oracle_event`]
 
-where both the `announcement_signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`.
+where both the `announcement_signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`, that should be verified using the `oracle_announcement_public_key`.
 
 #### Requirements
 
