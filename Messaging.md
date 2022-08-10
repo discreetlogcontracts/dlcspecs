@@ -51,12 +51,8 @@ All data fields are unsigned big-endian unless otherwise specified.
       - [`oracle_metadata`](#oracle_metadata)
       - [Rationale](#rationale)
       - [Requirements](#requirements)
-   - [The `proof_of_knowledge` Type](#the-proof_of_knowledge-type)
-      - [`schnorr_proof_of_knowledge`](#schnorr_proof_of_knowledge)
-   - [The `oracle_schemes` Type](#the-oracle_schemes-type)
-      - [`oracle_schemes`](#oracle_schemes)
-   - [`attestation_scheme`](#attestation_scheme)
-      - [`schnorr_scheme`](#schnorr_scheme)
+   - [The `schnorr_proof_of_knowledge` type](#the-schnorr_proof_of_knowledge-type)
+   - [The `schnorr_attestation_scheme` Type](#the-schnorr_attestation_scheme-type)
       - [Requirements](#requirements-1)
       - [Rationale](#rationale-1)
    - [The `oracle_announcement` Type](#the-oracle_announcement-type)
@@ -460,7 +456,7 @@ This information should be saved by DLC nodes.
    * [`string`:`oracle_name`]
    * [`string`:`oracle_description`]
    * [`u32`:`timestamp`]
-   * [`oracle_schemes`:`oracle_schemes`]
+   * [`schnorr_attestation_scheme`:`attestation_scheme`]
    * [`signature`:`oracle_metadata_signature`]
 
 where the `oracle_metadata_signature` is a Schnorr signature by the `announcement_public_key` using the tag `oraclemetadata/v0` of the sha256 hash of the serialized `oracle_metadata` message omitting the `announcement_public_key` and of course the the `oracle_metadata_signature`.
@@ -480,15 +476,11 @@ A node
 * SHOULD save this information in persistent storage.
 * MUST reject if `announcement_public_key == attestation_public_key`.
 
-
-### The `proof_of_knowledge` Type
+### The `schnorr_proof_of_knowledge` type
 
 A proof of knowledge is used to prove that oracles know the pre-images of the nonces they are using to prevent cancellation attacks in multi-oracle settings.
+The `schnorr_proof_of_knowledge` uses Schnorr signatures to achieve this.
 
-#### `schnorr_proof_of_knowledge`
-
-1. implements: `proof_of_knowledge`
-1. type: 0
 1. data:
    * [`signature`:`attestation_public_key_proof`]
    * [`nb_signatures`:`bigsize`]
@@ -496,31 +488,15 @@ A proof of knowledge is used to prove that oracles know the pre-images of the no
 
 where each signature is generated over the message `dlcoraclepok`.
 
-### The `oracle_schemes` Type
+### The `schnorr_attestation_scheme` Type
 
-In order to enable oracles to support multiple attestation schemes, and clients to chose their preferred one, the `oracle_schemes` type can contain multiple attestations schemes.
-Each scheme is defined as a TLV so that clients can easily ignore schemes that they don't know about.
-Note that at the moment the only defined scheme is the `schnorr_scheme` that uses Schnorr signatures.
+The `schnorr_attestation_scheme` provides the information required to anticipate the attestation signatures of an oracle, as well as guaranteeing that the oracle knows the pre-images of the nonce point that it provides.
 
-#### `oracle_schemes`
-
-1. data:
-   * [`bigsize`:`nb_schemes`]
-   * [`nb_schemes*attestation_scheme`:`attestation_schemes`]
-
-### `attestation_scheme`
-
-An attestation scheme contains the required information to interpret and verify an attestation from an oracle.
-
-#### `schnorr_scheme`
-
-1. implements: `attestation_scheme`
-1. type: 0
 1. data:
    * [`x_point`:`attestation_public_key`]
    * [`bigsize`:`nb_nonces`]
    * [`nb_nonces*x_point`:`oracle_nonces`]
-   * [`proof_of_knowledge`:`proof_of_knowledge`]
+   * [`schnorr_proof_of_knowledge`:`proof_of_knowledge`]
 
 where `proof_of_knowledge` ensures that the oracle knows the pre-image of the `attestation_public_key` and all `oracle_nonce`.
 
