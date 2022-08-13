@@ -112,7 +112,7 @@ Oracle events contain such information, which includes:
 * the event descriptor,
 * the event ID which can be a name or categorization associated with the event by the oracle.
 
-The TLV serialization for oracle events is given in [the Messaging specifications](./Messaging.md#the-oracle_event-type).
+The serialization for oracle events is given in [the Messaging specifications](./Messaging.md#the-oracle_event-type).
 
 ## Oracle announcements
 
@@ -121,14 +121,14 @@ This proof is given in a so-called oracle announcement, which contains an oracle
 
 This also makes it possible for users to obtain oracle event information from an un-trusted peer while being guaranteed that it originates from a given oracle.
 
-The TLV serialization of oracle announcements is given in [the Messaging specifications](./Messaging.md#the-oracle_announcement-type).
+The serialization of oracle announcements is given in [the Messaging specifications](./Messaging.md#the-oracle_announcement-type).
 
 ## Oracle Attestations
 
 After an event occurs, and the oracle creates signatures to attest the outcome, it needs to give them to users.
 An oracle can use an attestation tlv to give users this information.
 
-The TLV serialization of oracle attestations is given in [the Messaging specifications](./Messaging.md#the-oracle_attestation-type).
+The TLV serialization of oracle attestations is given in [the Messaging specifications](./Messaging.md#the-schnorr_attestation-type).
 
 ## Signing Algorithm
 

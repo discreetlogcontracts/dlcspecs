@@ -9,7 +9,6 @@ All data fields are unsigned big-endian unless otherwise specified.
 
 ## Table of Contents
 
-- [Connection Handling and Multiplexing](#connection-handling-and-multiplexing)
 - [Message Format](#message-format)
    - [Wire Messages](#wire-messages)
    - [Type-Length-Value](#type-length-value)
@@ -58,11 +57,7 @@ All data fields are unsigned big-endian unless otherwise specified.
    - [The `oracle_announcement` Type](#the-oracle_announcement-type)
       - [`oracle_announcement`](#oracle_announcement)
       - [Requirements](#requirements-2)
-   - [The `oracle_attestations` Type](#the-oracle_attestations-type)
-      - [`oracle_attestations`](#oracle_attestations)
-      - [`schnorr_attestation`](#schnorr_attestation)
-   - [The `oracle_attestation` Type](#the-oracle_attestation-type)
-      - [`oracle_attestation`](#oracle_attestation)
+   - [The `schnorr_attestation` Type](#the-schnorr_attestation-type)
 - [Authors](#authors)
 
 ## Connection Handling and Multiplexing
@@ -229,6 +224,7 @@ The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-inter
 ### The `oracle_info` Type
 
 This type contains information about the oracles to be used in executing a DLC.
+Note that all `oracle_announcements` are serialized with their `u16` type prefixes to match their wire serialization.
 
 #### `single_oracle_info`
 
@@ -529,22 +525,13 @@ where both the `announcement_signature` is a Schnorr signature over a sha256 has
 
 Clients SHOULD check the `oracle_attestation_public_key` has been signed by the `oracle_announcement_public_key` in a known `oracle_metadata` message and SHOULD abort if the attestation key is not recognized.
 
-### The `oracle_attestations` Type
+### The `schnorr_attestation` Type
 
-As [an oracle can support multiple attestation schemes](#the-oracleschemes-type), multiple attestations corresponding to each supported schemes can be embedded into a single attestation message.
-Each attestation is serialized as a TLV to enable clients to easily ignore those they don't support.
-Note that at the moment only the `schnorr_attestation` scheme is defined.
+The `schnorr_attestation` type provides signatures over an event outcome result values.
 
-#### `oracle_attestations`
-
+1. type: 55356
 1. data:
-   * [`bigsize`:`nb_attestations`]
-   * [`nb_attestations*attestation`:attestations]
-
-#### `schnorr_attestation`
-
-1. type: 0
-1. data:
+   * [`string`:`event_id`]
    * [`x_point`:`oracle_attestation_public_key`]
    * [`bigsize`: `nb_outcomes`]
    * [`nb_signatures*attested_outcome`:`attested_outcomes`]
@@ -553,20 +540,6 @@ Note that at the moment only the `schnorr_attestation` scheme is defined.
    * [`outcome`:outcome]
 Where the signatures are ordered the same as the nonces in their original `oracle_event`.
 The outcomes should be the message signed, ordered the same as the signatures.
-
-
-### The `oracle_attestation` Type
-
-This type contains information about the outcome of an event and the signature(s) over its outcome value(s).
-As oracle attestations can be broadcast directly, they are encoded as [wire messages](#wire-messages).
-See [the Oracle specifications](./Oracle.md#oracle-attestations) for more details.
-
-#### `oracle_attestation`
-
-1. type: 55400
-1. data:
-    * [`string`:`event_id`]
-    * [`oracle_attestations`:oracle_attestations]
 
 ## Authors
 
