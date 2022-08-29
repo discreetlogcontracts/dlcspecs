@@ -533,11 +533,10 @@ The `schnorr_attestation` type provides signatures over an event outcome result 
 1. data:
    * [`string`:`event_id`]
    * [`x_point`:`oracle_attestation_public_key`]
+   * [`bigsize`: `nb_signatures`]
+   * [`nb_signatures`:`signatures`]
    * [`bigsize`: `nb_outcomes`]
-   * [`nb_signatures*attested_outcome`:`attested_outcomes`]
-1. subtype: `attested_outcome`
-   * [`signature`:signature]
-   * [`outcome`:outcome]
+   * [`nb_outcomes`:`signatures`]
 Where the signatures are ordered the same as the nonces in their original `oracle_event`.
 The outcomes should be the message signed, ordered the same as the signatures.
 
