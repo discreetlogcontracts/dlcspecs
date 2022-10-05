@@ -495,6 +495,7 @@ The `schnorr_attestation_scheme` provides the information required to anticipate
    * [`schnorr_proof_of_knowledge`:`proof_of_knowledge`]
 
 where `proof_of_knowledge` ensures that the oracle knows the pre-image of the `attestation_public_key` and all `oracle_nonce`.
+To be valid, an oracle MUST order the serialized nonces lexicographically.
 
 #### Requirements
 
@@ -537,7 +538,7 @@ The `schnorr_attestation` type provides signatures over an event outcome result 
    * [`nb_signatures`:`signatures`]
    * [`bigsize`: `nb_outcomes`]
    * [`nb_outcomes`:`signatures`]
-Where the signatures are ordered the same as the nonces in their original `oracle_event`.
+Where the signatures are ordered the same as the nonces in their original `schnorr_attestation_scheme`.
 The outcomes should be the message signed, ordered the same as the signatures.
 
 ## Authors
