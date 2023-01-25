@@ -27,3 +27,6 @@ This document provides a list of resources to learn about DLC.
 * [Tadj Dryja at Dev++ 2017](https://www.youtube.com/watch?v=FU-rA5dkTHI)
 * [Tadj Dryja on MIT OpenCourseWare](https://www.youtube.com/watch?v=P6AX8KdXAts)
 * [Tadj Dryja at the MIT Bitcoin Expo 2020](https://livestream.com/accounts/2261474/events/9019383/videos/202643580) (starts at 49:26)
+
+## Other 
+* [dlc.wiki](https://www.dlc.wiki)
