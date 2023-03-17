@@ -101,261 +101,265 @@ these integers (interpreted in base `B`) where all digits not used may be any va
 Before generalizing or specifying the algorithm, let us run through a concrete example.
 
 We will consider the interval `[135677, 138621]`, in base `10`.
-Note that the `start` and `end` both begin with the prefix `13` which must be included in every digit prefix, for this purpose we will omit these digits for
-the remainder of this example as we can simply examine the interval `[5677, 8621]` and prepend a `13` to all results to get a result for our original interval.
-
-To cover all cases while looking at as few digits as possible in this interval we need only consider
-`5677`, `8621` individually in addition to the following cases:
+The expected output of the algorithm is:
 
 ```
-5678, 5679,
-568_, 569_,
-57__, 58__, 59__,
-
-6_, 7_,
-
-80__, 81__, 82__, 83__, 84__, 85__,
-860_, 861_,
-8620
+135677, 135678, 135679,
+13568_, 13569_,
+1357__, 1358__, 1359__,
+136_, 137_,
+1380__, 1381__, 1382__, 1383__, 1384__, 1385__,
+13860_, 13861_,
+138620, 138621
 ```
 
 where `_` refers to an ignored digit (an omission from the array of integers representing the digit prefix).
-(Recall that all of these are prefixed by `13`).
 Each of these digit prefixes can be used to construct a single adaptor signature.
-Thus, we are able to cover the entire interval of `2944` outcomes using only `20` adaptor signatures!
+Thus, we are able to cover the entire interval of `2944` outcomes using only `20` adaptor signatures and `92` intermediary anticipation points.
 
-Let us reconsider this example in binary (specifically the interval `[5677, 8621]`, not the original interval with the `13` prefix in base 10):
-The individual outliers are `5677 = 01011000101101` and `8621 = 10000110101101` with cases:
-
-```
-0101100010111_,
-0101100011____,
-01011001______,
-0101101_______,
-010111________,
-011___________,
-
-100000________,
-1000010_______,
-100001100_____,
-10000110100___,
-100001101010__,
-10000110101100
-```
-
-And so again we are able to cover the entire interval (of `2944` outcomes) using only `14` adaptor signatures this time.
-
-### Abstract Example
-
-Before specifying the algorithm, let us run through a general example and do some analysis.
-
-Consider the range `[(prefix)wxyz, (prefix)WXYZ]` where `prefix` is some string of digits in base `B` which
-`start` and `end` share and `w, x, y, and z` are the unique digits of `start` in base `B` while `W, X, Y, and Z`
-are the unique digits of `end` in base `B`.
-
-To cover all cases while looking at as few digits as possible in this (general) range we need only consider
-`(prefix)wxyz`, `(prefix)WXYZ` independently along with the following cases:
+Let us reconsider this example in binary:
 
 ```
-wxy(z+1), wxy(z+2), ..., wxy(B-1),
-wx(y+1)_, wx(y+2)_, ..., wx(B-1)_,
-w(x+1)__, w(x+2)__, ..., w(B-1)__,
-
-(w+1)___, (w+2)___, ..., (W-1)___,
-
-W0__, W1__, ..., W(X-1)__,
-WX0_, WX1_, ..., WX(Y-1)_,
-WXY0, WXY1, ..., WXY(Z-1)
+100001000111111101,
+10000100011111111_,
+100001001_________,
+10000101__________,
+10000110__________,
+1000011100________,
+100001110100______,
+1000011101010_____,
+10000111010110____,
+100001110101110___,
+1000011101011110__,
+10000111010111110_
 ```
 
-where `_` refers to an ignored digit (an omission from the array of integers) and all of these cases have the `prefix`.
+And so again we are able to cover the entire interval (of `2944` outcomes) using `12` adaptor signatures and `157` intermediary anticipation points.
 
 ### Analysis of Numeric Outcome Compression
 
-This specification refers to the first three rows of the abstract example above as the **front groupings** the fourth row
-in the example as the **middle grouping** and the last three rows in the example as the **back groupings**.
-
-Notice that the patterns for the front and back groupings are nearly identical.
-
-#### Counting Adaptor Signatures
-
-Also note that in total the number of elements in each row of the front groupings is equal to `B-1` minus the corresponding digit.
-That is to say, `B-1` minus the last digit is the number of elements in the first row and then the second to last digit and so on.
-Likewise the number of elements in each row of the back groupings is equal to the corresponding digit.
-That is to say, the last digit corresponds to the last row, second to last digit is the second to last row and so on.
-This covers all but the first digit of both `start` and `end` (as well as the two outliers `wxyz` and `WXYZ`).
-Thus the total number of adaptor signatures required to cover the interval will be equal to the sum of the unique digits of `end` except the
-first, plus the sum of the unique digits of `start` except for the first subtracted from `B-1` plus the difference of the first digits plus one.
-
-A corollary of this is that the number of adaptor signatures required to cover an interval of length `L` will be `O(B*log_B(L))` because `log_B(L)`
-corresponds to the number of unique digits between the start and end of the interval and for each unique digit a row is
-generated in both the front and back groupings of length at most `B-1 ` which corresponds to the coefficient in the order bound.
+The worst case interval yielding the highest number of adaptor signatures to be computed in a base `B` with `n` digits is the interval `[1, n - 2]` for which one need to compute `(B * (n - 1) * 2) + (n - 2)`.
+In the worst case, base 2 is thus optimal.
+This also appears to be the case in general.
 
 The total number of digits for which intermediary adaptor point must be generated to cover an interval of length `L` made of `n` digits will be `n*L`.
 Since the number of digits is smaller for larger bases (e.g. the number 100 is three digits in base 10 but seven in base 2), larger bases might at first sight seem more optimal, even though they require a larger number of adaptor signatures.
 However, applying the [pre-computation optimization](#pre-computing), we can reduce the number of intermediary anticipation points to compute to `B*floor(log_B(n) + 1)`, which is minimal for `B = 2`.
 Base 2 thus both requires computing less adaptor signatures and less intermediary anticipation points, and is thus chosen as the preferred one.
 
-#### Optimizations
-
-Because `start` and `end` are outliers to the general grouping pattern, there are optimizations that could potentially be made when they are added.
-
-Consider the example in base 10 of the interval `[2200, 4999]` which has the endpoints `2200` and `4999` along with the groupings
-
-```
-2201, 2202, 2203, 2204, 2205, 2206, 2207, 2208, 2209,
-221_, 222_, 223_, 224_, 225_, 226_, 227_, 228_, 229_,
-23__, 24__, 25__, 26__, 27__, 28__, 29__,
-
-3___,
-
-40__, 41__, 42__, 43__, 44__, 45__, 46__, 47__, 48__,
-490_, 491_, 492_, 493_, 494_, 495_, 496_, 497_, 498_,
-4990, 4991, 4992, 4993, 4994, 4995, 4996, 4997, 4998
-```
-
-This grouping pattern captures the exclusive interval `(2200, 4999)` and then adds the endpoints in ad-hoc to get the inclusive range `[2200, 4999]`.
-But this method misses out on a good amount of compression as re-introducing the endpoints allows us to replace the first two rows with
-a single `22__` and the last 3 rows with just `4___`.
-
-This optimization is called the **endpoint optimization**.
-
-More generally, let the unique digits of `start` be `start = (x1)(x2)...(xn)` then if `x(n-i+1) = x(n-i+2) = ... = xn = 0`, then the
-first `i` rows of the front groupings can be replaced by `(x1)(x2)...(x(n-i))_..._`.
-In the example above, `start` ends with two zeros so that the first two rows are replaced by `22__`.
-
-Likewise, let the unique digits of `end` be `end = (y1)(y2)...(yn)` then if `y(n-j+1) = y(n-j+2) = ... = yn = B-1`, then the last `j` rows
-of the back groupings can be replaced by `(y1)(y2)...(y(n-j))_..._`.
-In the example above, `end` ends with three nines so that the last three rows can are replaced by `4___`.
-
-There is one more optimization that can potentially be made.
-If the unique digits of `start` are all `0` and the unique digits of `end` are all `B-1` then we will have no need for a middle grouping as we can cover
-this whole interval with just a single adaptor signature of `(prefix)_..._`.
-This optimization is called the **total optimization**.
-
 ### Algorithms
 
-We will first need a function to decompose any number into its digits in a given base.
+Computing the prefixes required to cover the intervals with constant payouts can be done in many ways.
+Here we provide two examples, a recursive version that might facilitate the understanding, and an iterative one that can be used in practice if recursion is undesirable.
 
-```scala
-def decompose(num: Long, base: Int, numDigits: Int): Vector[Int] = {
-  var currentNum: Long = num
+We first define a function to decompose any number into its digits in a given base.
 
-  // Note that (0 until numDigits) includes 0 and excludes numDigits
-  val backwardsDigits = (0 until numDigits).toVector.map { _ =>
-    val digit = currentNum % base
-    currentNum = currentNum / base // Note that this is integer division
+```rust
+fn decompose_value(mut value: usize, base: usize, nb_digits: usize) -> Vec<usize> {
+    let mut res = Vec::new();
 
-    digit.toInt
-  }
-  
-  backwardsDigits.reverse
+    while value > 0 {
+        res.push(value % base);
+        value = ((value as f64) / (base as f64)).floor() as usize;
+    }
+
+    while res.len() < nb_digits {
+        res.push(0);
+    }
+
+    assert_eq!(nb_digits, res.len());
+
+    res.into_iter().rev().collect()
 }
 ```
 
-We will use this function for the purposes of this specification but note that when iterating through a range of sequential numbers,
-there are faster algorithms for computing sequential decompositions.
+We define another function that takes and returns the common prefix of two vectors:
 
-We will then need a function to compute the shared prefix and the unique digits of `start` and `end`.
+```rust
+    fn take_prefix(start: &mut Vec<usize>, end: &mut Vec<usize>) -> Vec<usize> {
+        if start == end {
+            end.clear();
+            return start.drain(0..).collect();
+        }
+        let mut i = 0;
+        while start[i] == end[i] {
+            i += 1;
+        }
 
-```scala
-def separatePrefix(start: Long, end: Long, base: Int, numDigits: Int): (Vector[Int], Vector[Int], Vector[Int]) = {
-    val startDigits = decompose(start, base, numDigits)
-    val endDigits = decompose(end, base, numDigits)
+        start.drain(0..i);
+        end.drain(0..i).collect()
+    }
+```
 
-    val prefixDigits = startDigits
-      .zip(endDigits)
-      .takeWhile { case (startDigit, endDigit) => startDigit == endDigit }
-      .map(_._1)
-    
-    (prefixDigits, startDigits.drop(prefixDigits.length), endDigits.drop(prefixDigits.length))
+We then define a recursive function `compress_recursive` that returns the set of prefixes that cover a given interval `[start, end]`.
+This function essentially separate the interval into `[start, start[0]..base - 1]`, `[start + 1, end - 1]` and `[end[0]..0, end]` and recurse on the first and last part (the middle interval can be covered with only single digit prefixes).
+
+```rust
+fn compress_recursive(start: &mut Vec<usize>, end: &mut Vec<usize>, base: usize) -> Vec<Vec<usize>> {
+    // Base case
+    if start == end {
+        return vec![start.clone()];
+    }
+
+    // Extract the common prefix of start and end
+    let prefix = take_prefix(start, end);
+
+    // If start and end are empty or start is all zeros and end is all (base - 1), then the prefix can cover the original interval
+    if start.iter().all(|x| *x == 0    if (ds.is_empty() && de.is_empty())
+        || (ds.iter().all(|x| *x == 0) && de.iter().all(|x| *x == base - 1))
+    {
+        return vec![prefix];
+    }
+
+    // We recurse on the interval that shares the first common digit with start.
+    // E.g. if start is 1234, we recurse on [1234, 1999].
+    let mut res = recur(
+        &start,
+        &start
+            .iter()
+            .enumerate()
+            .map(|(i, x)| if i == 0 { *x } else { base - 1 })
+            .collect(),
+        base,
+    );
+
+    // We take all the single digit prefixes between start and end. E.g. if start
+    // is 1234 and end is 5678, we know that we can take the prefixes 2___, 3___ and 4___ out.
+    let mut mid_fix = start[0] + 1;
+
+    while mid_fix != end[0] {
+        res.push(vec![mid_fix]);
+        mid_fix += 1;
+    }
+
+    // We recurse on the interval that shares the first common digit with end.
+    // E.g. if end is 5678, we recurse with [5000, 5678]
+    res.append(&mut recur(
+        &end.iter()
+            .enumerate()
+            .map(|(i, x)| if i == 0 { *x } else { 0 })
+            .collect(),
+        &end,
+        base,
+    ));
+
+    res.iter()
+        .map(|x| prefix.iter().cloned().chain(x.clone()).collect())
+        .collect()
 }
 ```
 
-Now we need the algorithms for computing the groupings.
+We can finally use the above recursive function to define our compression function:
 
-```scala
-def frontGroupings(
-    digits: Vector[Int], // The unique digits of the range's start
-    base: Int): Vector[Vector[Int]] = {
-  val nonZeroDigits = digits.reverse.zipWithIndex.dropWhile(_._1 == 0) // Endpoint Optimization
-  
-  if (nonZeroDigits.isEmpty) { // All digits are 0
-      Vector(Vector(0))
-  } else {
-    val fromFront = nonZeroDigits.init.flatMap { // Note the flatMap collapses the rows of the grouping 
-      case (lastImportantDigit, unimportantDigits) =>
-        val fixedDigits = digits.dropRight(unimportantDigits + 1)
-        (lastImportantDigit + 1).until(base).map { lastDigit => // Note that this loop excludes lastImportantDigit and base
-          fixedDigits :+ lastDigit
+```rust
+    fn compress_interval(start: usize, end: usize, base: usize, nb_digits: usize) -> Vec<Vec<usize>> {
+        compress_recursive(
+            &mut decompose_value(start, base, nb_digits),
+            &mut decompose_value(end, base, nb_digits),
+            base,
+        )
+    }
+```
+
+The following slightly more complex iterative algorithm can be also be used:
+
+```rust
+    fn remove_tail(v: &mut Vec<usize>, to_remove: usize) {
+        while v.len() > 1 && v[v.len() - 1] == to_remove {
+            v.pop();
         }
     }
 
-    nonZeroDigits.map(_._1).reverse +: fromFront // Add Endpoint
-  }
-}
+    pub fn compress_interval(start: usize, end: usize, base: usize, nb_digits: usize) -> Vec<Vec<usize>> {
+        let mut ds = decompose_value(start as usize, base as usize, nb_digits as usize);
+        let mut de = decompose_value(end as usize, base as usize, nb_digits as usize);
 
-def backGroupings(
-    digits: Vector[Int], // The unique digits of the interval's end
-    base: Int): Vector[Vector[Int]] = {
-  val nonMaxDigits = digits.reverse.zipWithIndex.dropWhile(_._1 == base - 1) // Endpoint Optimization
+        // We take the common prefix of start and end and save it, so we are guaranteed that ds[0] != de[0].
+        let prefix = take_prefix(&mut ds, &mut de);
 
-  if (nonMaxDigits.isEmpty) { // All digits are max
-    Vector(Vector(base - 1))
-  } else {
-    // Here we compute the back groupings in reverse so as to use the same iteration as in front groupings
-    val fromBack = nonMaxDigits.init.flatMap { // Note the flatMap collapses the rows of the grouping 
-      case (lastImportantDigit, unimportantDigits) =>
-        val fixedDigits = digits.dropRight(unimportantDigits + 1)
-        0.until(lastImportantDigit).reverse.toVector.map { // Note that this loop excludes lastImportantDigit
-          lastDigit =>
-            fixedDigits :+ lastDigit
+        // If start and end are empty or start is all zeros and end is all (base - 1), then the prefix can cover the original interval
+        if start.iter().all(|x| *x == 0    if (ds.is_empty() && de.is_empty())
+           || (ds.iter().all(|x| *x == 0) && de.iter().all(|x| *x == base - 1))
+        {
+            return vec![prefix];
         }
-    }
 
-    fromBack.reverse :+ nonMaxDigits.map(_._1).reverse // Add Endpoint
-  }
-}
+        // We can remove the trailing 0s from the start and trailing base - 1 from the end
+        // as they will be covered the interval represented by the digits in front of them.
+        remove_tail(&mut ds, 0);
+        remove_tail(&mut de, base - 1);
 
-def middleGrouping(
-    firstDigitStart: Int, // The first unique digit of the interval's start
-    firstDigitEnd: Int): Vector[Vector[Int]] = { // The first unique digit of the interval's end
-  (firstDigitStart + 1).until(firstDigitEnd).toVector.map { firstDigit => // Note that this loop excludes firstDigitEnd
-    Vector(firstDigit)
-  }
-}
-```
+        // We initialize the stack with the start digits.
+        let mut stack = ds.clone();
+        let mut list = Vec::new();
 
-Finally we are able to use all of these pieces to compress an interval to an approximately minimal number of outcomes (by ignoring digits).
+        // This will generate all the prefixes for the interval [start, start[0]..base - 1]. E.g.
+        // if start is 1234 in base 10, this will generate for [1234, 1999].
+        while stack.len() != 1 {
+            let i = stack.len() - 1;
+            // Once the last digit of the stack is base - 1, we can save the prefix and pop a digit.
+            // E.g. if we have our stack as [1, 2, 3, 9], next is [1, 2, 4, 0], but we don't need the last 0
+            // as we can cover with [1, 2, 4].
+            if stack[i] == base - 1 {
+                list.push(stack.clone());
+                stack.pop();
+                // We can remove any base - 1 digits at this point. E.g. if we had [1, 2, 9, 9] above,
+                // now we have [1, 2, 9], next is [1, 3, 0], but similarly as above we can get rid of
+                // the trailing zero.
+                remove_tail(&mut stack, base - 1);
+                // We increment the last digit (e.g. move from [1, 2] to [1, 3] in the example above).
+                let j = stack.len() - 1;
+                stack[j] += 1;
+            } else if stack[i] == 0 {
+                // We can always get rid of trailing zeros (up to the first digit). E.g. if we have
+                // out stack as [1, 3, 0, 0], [1, 3] is enough to cover the interval
+                remove_tail(&mut stack, 0);
+            } else {
+                // We save the stack an increment the last digit. E.g. if we had [1, 2, 3, 4], we save it
+                // and move to [1, 2, 3, 5].
+                list.push(stack.clone());
+                stack[i] += 1;
+            }
+            assert!(stack.iter().all(|x| x < &base));
+        }
 
-```scala
-def groupByIgnoringDigits(start: Long, end: Long, base: Int, numDigits: Int): Vector[Vector[Int]] = {
-    val (prefixDigits, startDigits, endDigits) = separatePrefix(start, end, base, numDigits)
-    
-    if (start == end) { // Special Case: Interval Length 1
-        Vector(prefixDigits)
-    } else if (startDigits.forall(_ == 0) && endDigits.forall(_ == base - 1)) {
-        if (prefixDigits.nonEmpty) {
-            Vector(prefixDigits) // Total Optimization
+        // All the single digits in ]start[0]; end[0][ are sufficient to cover their respective intervals.
+        // E.g. with start = 1234 and end = 4567, 2___ and 3___ are enough to cover between 2000 and 3999.
+        while stack[0] != de[0] {
+            list.push(stack.clone());
+            stack[0] += 1;
+        }
+
+        // We take care of the interval [end[0]..0; end]. E.g. if end is 4567 that's [4000; 4567].
+        while stack != de {
+            let i = stack.len() - 1;
+            // If stack has common prefix with end, we need to push a zero. E.g. if stack is [4], we
+            // want then have stack as [4, 0], so we will cover [4000; 4499] with (40, 41, 42, 43).
+            if stack[i] == de[i] {
+                stack.push(0);
+            } else {
+                // We save the stack and increment the last digit. E.g. if we have [4, 0], we move to [4, 1].
+                list.push(stack.clone());
+                stack[i] += 1;
+            }
+        }
+
+        // We need to include end (previous condition exit when stack is equal to end).
+        list.push(de);
+
+        // We add the common prefix of start and end if there was one and return our list of prefixes.
+        if !prefix.is_empty() {
+            list.into_iter()
+                .map(|mut x| {
+                    let mut p = prefix.clone();
+                    p.append(&mut x);
+                    p
+                })
+                .collect()
         } else {
-            throw new IllegalArgumentException("DLCs with only one outcome are not supported.")
+            list
         }
-    } else if (prefixDigits.length == numDigits - 1) { // Special Case: Front Grouping = Back Grouping
-        startDigits.last.to(endDigits.last).toVector.map { lastDigit =>
-            prefixDigits :+ lastDigit
-        }
-    } else {
-      val front = frontGroupings(startDigits, base)
-      val middle = middleGrouping(startDigits.head, endDigits.head)
-      val back = backGroupings(endDigits, base)
-
-      val groupings = front ++ middle ++ back
-
-      groupings.map { digits =>
-        prefixDigits ++ digits
-      }
     }
-}
 ```
 
 ## Adaptor Point Computation Optimizations
@@ -433,6 +437,7 @@ computeSigPoints(0, undefined, noncesSigPoints, result)
 ## Reference Implementations
 
 * [bitcoin-s](https://github.com/bitcoin-s/bitcoin-s/blob/adaptor-dlc/core/src/main/scala/org/bitcoins/core/protocol/dlc/CETCalculator.scala)
+* [rust-dlc](https://github.com/p2pderivatives/rust-dlc/blob/master/dlc-trie/src/digit_decomposition.rs)
 
 ## Authors
 
