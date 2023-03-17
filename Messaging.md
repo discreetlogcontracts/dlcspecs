@@ -9,7 +9,6 @@ All data fields are unsigned big-endian unless otherwise specified.
 
 ## Table of Contents
 
-- [Connection Handling and Multiplexing](#connection-handling-and-multiplexing)
 - [Message Format](#message-format)
    - [Wire Messages](#wire-messages)
    - [Type-Length-Value](#type-length-value)
@@ -42,12 +41,23 @@ All data fields are unsigned big-endian unless otherwise specified.
    - [The `event_descriptor` Type](#the-event_descriptor-type)
       - [`enum_event_descriptor`](#enum_event_descriptor)
       - [`digit_decomposition_event_descriptor`](#digit_decomposition_event_descriptor)
+   - [The `oracle_event_timestamp` Type](#the-oracle_event_timestamp-type)
+      - [`fixed_oracle_event_timestamp`](#fixed_oracle_event_timestamp)
+      - [`range_oracle_event_timestamp`](#range_oracle_event_timestamp)
    - [The `oracle_event` Type](#the-oracle_event-type)
       - [`oracle_event`](#oracle_event)
+   - [The `oracle_metadata` Type](#the-oracle_metadata-type)
+      - [`oracle_metadata`](#oracle_metadata)
+      - [Rationale](#rationale)
+      - [Requirements](#requirements)
+   - [The `schnorr_proof_of_knowledge` type](#the-schnorr_proof_of_knowledge-type)
+   - [The `schnorr_attestation_scheme` Type](#the-schnorr_attestation_scheme-type)
+      - [Requirements](#requirements-1)
+      - [Rationale](#rationale-1)
    - [The `oracle_announcement` Type](#the-oracle_announcement-type)
       - [`oracle_announcement`](#oracle_announcement)
-   - [The `oracle_attestation` Type](#the-oracle_attestation-type)
-      - [`oracle_attestation`](#oracle_attestation)
+      - [Requirements](#requirements-2)
+   - [The `schnorr_attestation` Type](#the-schnorr_attestation-type)
 - [Authors](#authors)
 
 ## Connection Handling and Multiplexing
@@ -202,7 +212,7 @@ This type represents an enumerated outcome contract.
 1. implements: `contract_descriptor`
 1. type: 1
 1. data:
-   * [`u16`:`num_digits`]
+   * [`bigsize`:`num_digits`]
    * [`payout_function`:`payout_function`]
    * [`rounding_intervals`:`rounding_intervals`]
 
@@ -214,6 +224,7 @@ The type `rounding_intervals` is defined [here](NumericOutcome.md#rounding-inter
 ### The `oracle_info` Type
 
 This type contains information about the oracles to be used in executing a DLC.
+Note that all `oracle_announcements` are serialized with their `u16` type prefixes to match their wire serialization.
 
 #### `single_oracle_info`
 
@@ -363,49 +374,137 @@ Witnesses should be sorted by the `input_serial_id` sent in `funding_input` defi
 This type contains information about an event on which a contract is based.
 Two types of events are described, see [the oracle specification](./Oracle.md#event-descriptor) for more details.
 
-**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
-
 #### `enum_event_descriptor`
 
 1. implements: `event_descriptor`
-1. type: 55302
+1. type: 0
 1. data:
-   * [`u16`:`num_outcomes`]
-   * [`string`:`outcome_1`]
-   * ...
-   * [`string`:`outcome_n`]
+   * [`bigsize`:`num_outcomes`]
+   * [`num_outcomes*string`:`outcomes`]
 
 This type of event descriptor is a simple enumeration where the value `n` is the number of outcomes in the event.
 
-Note that `outcome_i` is the outcome value itself and not its hash that will be signed by the oracle.
+Note that `outcomes[i]` is the outcome value itself and not its hash that will be signed by the oracle.
 
 #### `digit_decomposition_event_descriptor`
 
 1. implements: `event_descriptor`
-1. type: 55306
+1. type: 1
 1. data:
-   * [`bigsize`:`base`]
+   * [`u8`:`base`]
    * [`bool`:`is_signed`]
    * [`string`:`unit`]
    * [`int32`:`precision`]
    * [`u16`:`nb_digits`]
+
+### The `oracle_event_timestamp` Type
+
+This type contains timestamp information about when an `oracle_event` is to happen.
+
+There are two kinds of `oracle_event_timestamps`: fixed timestamps for events with a
+known (expected) epoch time at which the event will occur, and range for events whose
+time is not known ahead of time and also for events which may occur at any time in the
+specified range.
+
+When using an `oracle_event_timestamp_range` for events which may occur at any time,
+the `earliest_expected_time_epoch` should correspond to the time at which the oracle
+announcement was created and `latest_expected_time_epoch` should correspond to the
+latest time for which the oracle will be responsible for attesting to the event's occurence.
+Note that it is possible to have functionally open-ended events through the use of very large
+`latest_expected_time_epoch` timestamps.
+
+#### `fixed_oracle_event_timestamp`
+
+1. implements: `oracle_event_timestamp`
+1. type: 0
+1. data:
+   * [`u32`:`expected_time_epoch`]
+
+#### `range_oracle_event_timestamp`
+
+1. implements: `oracle_event_timestamp`
+1. type: 1
+1. data:
+   * [`u32`:`earliest_expected_time_epoch`]
+   * [`u32`:`latest_expected_time_epoch`]
 
 ### The `oracle_event` Type
 
 This type contains information provided by an oracle on an event that it will attest to.
 See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
 
-**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
-
 #### `oracle_event`
 
-1. type: 55330
 1. data:
-   * [`u16`:`nb_nonces`]
-   * [`nb_nonces*x_point`:`oracle_nonces`]
-   * [`u32`:`event_maturity_epoch`]
+   * [`oracle_event_timestamp`:`timestamp`]
    * [`event_descriptor`:`event_descriptor`]
    * [`string`:`event_id`]
+
+### The `oracle_metadata` Type
+
+This type contains static oracle information and can be used to import trusted oracles into wallets.
+This information should be saved by DLC nodes.
+
+#### `oracle_metadata`
+
+1. data:
+   * [`x_point`:`announcement_public_key`]
+   * [`string`:`oracle_name`]
+   * [`string`:`oracle_description`]
+   * [`u32`:`timestamp`]
+   * [`schnorr_attestation_scheme`:`attestation_scheme`]
+   * [`signature`:`oracle_metadata_signature`]
+
+where the `oracle_metadata_signature` is a Schnorr signature by the `announcement_public_key` using the tag `oraclemetadata/v0` of the sha256 hash of the serialized `oracle_metadata` message omitting the `announcement_public_key` and of course the the `oracle_metadata_signature`.
+
+#### Rationale
+
+Separate public keys are required for announcement and attestation because the attestation scheme
+used in the current DLC spec reduces the security of non-attestation Schnorr signatures issued by the
+attestation keys and hence a separate announcement key is required.
+
+The `oracle_metadata_signature` is used to link all data in this message to the `announcement_public_key`.
+
+#### Requirements
+
+A node
+
+* SHOULD save this information in persistent storage.
+* MUST reject if `announcement_public_key == attestation_public_key`.
+
+### The `schnorr_proof_of_knowledge` type
+
+A proof of knowledge is used to prove that oracles know the pre-images of the nonces they are using to prevent cancellation attacks in multi-oracle settings.
+The `schnorr_proof_of_knowledge` uses Schnorr signatures to achieve this.
+
+1. data:
+   * [`signature`:`attestation_public_key_proof`]
+   * [`nb_signatures`:`bigsize`]
+   * [`nb_signatures*signature`:`nonce_proofs`]
+
+where each signature is generated over the message `dlcoraclepok`.
+
+### The `schnorr_attestation_scheme` Type
+
+The `schnorr_attestation_scheme` provides the information required to anticipate the attestation signatures of an oracle, as well as guaranteeing that the oracle knows the pre-images of the nonce point that it provides.
+
+1. data:
+   * [`x_point`:`attestation_public_key`]
+   * [`bigsize`:`nb_nonces`]
+   * [`nb_nonces*x_point`:`oracle_nonces`]
+   * [`schnorr_proof_of_knowledge`:`proof_of_knowledge`]
+
+where `proof_of_knowledge` ensures that the oracle knows the pre-image of the `attestation_public_key` and all `oracle_nonce`.
+To be valid, an oracle MUST order the serialized nonces lexicographically.
+
+#### Requirements
+
+A node *MUST* validate the proof of knowledge in the case of multi oracle contracts.
+A node *MUST* discard any announcement failing this verification.
+
+#### Rationale
+
+While using an aggregate signature increases the complexity of oracle implementation and management, providing a signature per nonce would lead to a large number of signatures in particular for oracle attesting to numerical event.
 
 ### The `oracle_announcement` Type
 
@@ -413,41 +512,33 @@ This type contains an `oracle_event` and a signature certifying its origination.
 As oracle announcements can be broadcast directly, they are encoded as [wire messages](#wire-messages).
 See [the Oracle specifications](./Oracle.md#oracle-announcements) for more details.
 
-**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
-
 #### `oracle_announcement`
 
-1. type: 55332
-1. data:
-   * [`signature`:`annoucement_signature`]
-   * [`x_point`:`oracle_public_key`]
+1. type: 55354 (`oracle_announcement`)
+2. data:
+   * [`signature`:`announcement_signature`]
+   * [`oracle_metadata`:`oracle_metadata`]
    * [`oracle_event`:`oracle_event`]
 
-where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+where both the `announcement_signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v1`, that should be verified using the `oracle_announcement_public_key`.
 
-### The `oracle_attestation` Type
+#### Requirements
 
-This type contains information about the outcome of an event and the signature(s) over its outcome value(s).
-As oracle attestations can be broadcast directly, they are encoded as [wire messages](#wire-messages).
-See [the Oracle specifications](./Oracle.md#oracle-attestations) for more details.
+Clients SHOULD check the `oracle_attestation_public_key` has been signed by the `oracle_announcement_public_key` in a known `oracle_metadata` message and SHOULD abort if the attestation key is not recognized.
 
-**For backward compatibility reasons, this type is currently serialized as a TLV and uses u16 for collection prefix. It is expected to be changed to the new serialization format in a near future.**
+### The `schnorr_attestation` Type
 
-#### `oracle_attestation`
+The `schnorr_attestation` type provides signatures over an event outcome result values.
 
-1. type: 55400
+1. type: 55356
 1. data:
-    * [`string`:`event_id`]
-    * [`x_point`:`oracle_public_key`]
-    * [`u16`: `nb_signatures`]
-    * [`signature`:`signature_1`]
-    * ...
-    * [`signature`:`signature_n`]
-    * [`string`:`outcome_1`]
-    * ...
-    * [`string`:`outcome_n`]
-
-Where the signatures are ordered the same as the nonces in their original `oracle_event`.
+   * [`string`:`event_id`]
+   * [`x_point`:`oracle_attestation_public_key`]
+   * [`bigsize`: `nb_signatures`]
+   * [`nb_signatures`:`signatures`]
+   * [`bigsize`: `nb_outcomes`]
+   * [`nb_outcomes`:`signatures`]
+Where the signatures are ordered the same as the nonces in their original `schnorr_attestation_scheme`.
 The outcomes should be the message signed, ordered the same as the signatures.
 
 ## Authors

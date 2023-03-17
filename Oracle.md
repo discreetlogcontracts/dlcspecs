@@ -6,6 +6,9 @@ For the purpose of these specifications, an event is a digital representation of
 An [oracle](./Introduction.md#Oracle) is an entity that commits to publishing one or more signatures over a (number of) event outcome(s) ahead of time by releasing one or more [R-values](./Introduction.md#R-value) as well as necessary information for two parties to build a set of [CETs](./Introduction.md#Contract-Execution-Transaction-(CET)).
 This necessary information is committed to in a so-called [_event descriptor_](#Event-descriptor) that will be further detailed in this document.
 
+Before an oracle makes any announcements or attestations, it should first publish an [`oracle_keys`](Messaging.md#the-oracle_keys-type) message for
+clients to be able to import a new oracle (or new oracle attestation keys) into their trusted keychain.
+
 ## Table of Contents
 
 - [Event descriptor](#event-descriptor)
@@ -109,7 +112,7 @@ Oracle events contain such information, which includes:
 * the event descriptor,
 * the event ID which can be a name or categorization associated with the event by the oracle.
 
-The TLV serialization for oracle events is given in [the Messaging specifications](./Messaging.md#the-oracle_event-type).
+The serialization for oracle events is given in [the Messaging specifications](./Messaging.md#the-oracle_event-type).
 
 ## Oracle announcements
 
@@ -118,14 +121,14 @@ This proof is given in a so-called oracle announcement, which contains an oracle
 
 This also makes it possible for users to obtain oracle event information from an un-trusted peer while being guaranteed that it originates from a given oracle.
 
-The TLV serialization of oracle announcements is given in [the Messaging specifications](./Messaging.md#the-oracle_announcement-type).
+The serialization of oracle announcements is given in [the Messaging specifications](./Messaging.md#the-oracle_announcement-type).
 
 ## Oracle Attestations
 
 After an event occurs, and the oracle creates signatures to attest the outcome, it needs to give them to users.
 An oracle can use an attestation tlv to give users this information.
 
-The TLV serialization of oracle attestations is given in [the Messaging specifications](./Messaging.md#the-oracle_attestation-type).
+The TLV serialization of oracle attestations is given in [the Messaging specifications](./Messaging.md#the-schnorr_attestation-type).
 
 ## Signing Algorithm
 
