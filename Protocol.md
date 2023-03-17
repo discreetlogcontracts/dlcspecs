@@ -127,7 +127,9 @@ Outputs in the funding transaction will be sorted by `change_serial_id` and `fun
 sides will use to compute fees in the funding transaction, as described in the
 [transaction specification](Transactions.md).
 
-`cet_locktime` is the nLockTime to be put on CETs. `refund_locktime` is the nLockTime to be put on the refund transaction.
+`cet_locktime` is the nLockTime to be put on CETs.
+
+`refund_locktime` is the nLockTime to be put on the refund transaction.
 
 #### Requirements
 
@@ -143,7 +145,9 @@ The sending node MUST:
   - set `cet_locktime` to be less than `refund_locktime`.
   - use a unique `input_serial_id` for each input
   - set `change_serial_id` and `fund_output_serial_id` to different values
-  - use valid [contract descriptor(s)](./Messaging.md#The-contract_descriptor-Type) within `contract_info`.
+  - use valid [contract descriptor(s)](./Messaging.md#The-contract_descriptor-Type) within `contract_info`
+  - set `cet_locktime` to a value less than or equal to the earliest `event_maturity_epoch` amongst all `oracle_event` used included in the `contract_info`
+  - set `refund_locktime` to a value greater than `cet_locktime` (recommended value of latest event maturity + 86400 * 7 meaning roughly 7 days after latest event maturity).
 
 The sending node SHOULD:
 
@@ -152,6 +156,7 @@ The sending node SHOULD:
   - set `refund_locktime` sufficiently long after the latest possible release of oracle signatures added to all other delays to closing the contract.
   - set `payout_spk` to a previously unused script public key.
   - set `change_spk` to a previously unused script public key.
+  - set `refund_locktime` to a value not too big that both party can be expected to be refunded in a reasonable time-frame (recommended not more than latest contract maturity + 86400 * 14 meaning 2 weeks after latest contract maturity).
 
 The receiving node MUST:
 
@@ -166,6 +171,7 @@ The receiving node MAY reject the contract if:
   - `offer_collateral_satoshis` is too small.
   - `feerate_per_vb` is too small.
   - `feerate_per_vb` is too large.
+  - `refund_locktime` is too small or too large.
 
 The receiving node MUST reject the contract if:
 
@@ -181,6 +187,9 @@ The receiving node MUST reject the contract if:
   - The `fund_output_serial_id` and `change_serial_id` are not set to different value
   - Any input in `funding_inputs` is not a BIP141 (Segregated Witness) input.
   - invalid [contract descriptor(s)](./Messaging.md#The-contract_descriptor-Type) are used within `contract_info`.
+  - `cet_locktime` is not set to a value less than or equal to the earliest maturity time of all included oracle events.
+  - `refund_locktime` is less than or too close to `cet_locktime`.
+  - any of the included `oracle_announcement` is [invalid](Messaging#version-0-oracleannouncement).
 
 ### The `accept_dlc` Message
 

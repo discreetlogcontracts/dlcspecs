@@ -407,6 +407,9 @@ See [the Oracle specifications](./Oracle.md#oracle-event) for more details.
    * [`event_descriptor`:`event_descriptor`]
    * [`string`:`event_id`]
 
+**Validity requirement**
+- `nb_nonces` MUST be equal to 1 for enumerated outcomes and to `nb_digits` for digit decomposition events.
+
 ### The `oracle_announcement` Type
 
 This type contains an `oracle_event` and a signature certifying its origination.
@@ -424,6 +427,10 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
    * [`oracle_event`:`oracle_event`]
 
 where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+
+**Validity requirement**
+- The `signature` MUST be valid for the `oracle_public_key`
+- `oracle_event` MUST be [valid](#the-oracleevent-type).
 
 ### The `oracle_attestation` Type
 
