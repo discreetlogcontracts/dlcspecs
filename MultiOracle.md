@@ -409,6 +409,17 @@ To summarize, for n-of-n oracle support, the 2-of-2 algorithm is run where the p
   * `2^(n-1) - 1` aggregate non-middle points for each side
     * Totaling `2^n - 2` non-middle aggregate points.
 
+Note that for n-of-n oracle support, the order in which outcomes are assigned to each oracle for each possible combination need to be consistent between implementation.
+In order to guarantee this, it is required that secondary oracle outcomes be ordered in lexicographical order.
+For example, assuming 3 oracles attesting three digits values with a `maxErrorExp` of 2 and a `minSupportExp` of 1, the combinations for when the primary oracle signs the value `2` should be:
+
+| Primary oracle value | Second oracle value | Third oracle value |
+|---|---|---|
+| 0 1 0 | 0 | 0 |
+| 0 1 0 | 0 | 1 0 |
+| 0 1 0 | 1 0 | 0 |
+| 0 1 0 | 1 0 | 1 0 |
+
 #### Analysis
 
 Luckily, there are very few large primary intervals in any given DLC.
