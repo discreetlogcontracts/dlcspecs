@@ -2,13 +2,30 @@
 
 # Table of Contents
 
-  * [Contract](#contract)
-      * [Definition of `contract_id`](#definition-of-contract_id)
-      * [Contract Negotiation](#contract-negotiation)
-          * [The `offer_dlc` Message](#the-offer_dlc-message)
-          * [The `accept_dlc` Message](#the-accept_dlc-message)
-          * [The `sign_dlc` Message](#the-sign_dlc-message)
-          * [Script Pubkey Standardness Definition](#script-pubkey-standardness-definition)
+* [Contract](#contract)
+    * [Definition of `contract_id`](#definition-of-contract_id)
+    * [Contract Negotiation](#contract-negotiation)
+        * [The `offer_dlc` Message](#the-offer_dlc-message)
+            * [Requirements](#requirements)
+        * [The `accept_dlc` Message](#the-accept_dlc-message)
+            * [Requirements](#requirements-1)
+        * [The `sign_dlc` Message](#the-sign_dlc-message)
+            * [Requirements](#requirements-2)
+        * [Script Pubkey Standardness Definition](#script-pubkey-standardness-definition)
+* [Channel](#channel)
+    * [Overview](#overview)
+        * [State machine representation](#state-machine-representation)
+    * [The `offer_channel` message](#the-offer_channel-message)
+    * [The `accept_channel` message](#the-accept_channel-message)
+    * [The `sign_channel` message](#the-sign_channel-message)
+    * [The `settle_offer` message](#the-settle_offer-message)
+    * [The `settle_accept` message](#the-settle_accept-message)
+    * [The `settle_confirm` message](#the-settle_confirm-message)
+    * [The `settle_finalize` message](#the-settle_finalize-message)
+    * [The `renew_offer` message](#the-renew_offer-message)
+    * [The `renew_accept` message](#the-renew_accept-message)
+    * [The `renew_confirm` message](#the-renew_confirm-message)
+    * [The `renew_finalize` message](#the-renew_finalize-message)
 * [Authors](#authors)
 
 # Contract
@@ -302,6 +319,181 @@ The recipient:
 
   These script pub key forms include only standard forms accepted by the wider set of deployed Bitcoin clients in the network, which increase the chances of successful propagation to miners.
 
+# Channel
+
+## Overview
+
+The lifetime of a channel is composed of its establishment, and the possibility for each party to offer the settlement or renewal of the contract within the channel, as well as to close the channel.
+
+The establishment protocol is depicted in the following [state machine](#state-machine-representation).
+
+<img src="./images/dlc_channel_establish_ta.svg">
+
+The protocol for renewal, settlement and closing of the channel is shown in the following [state machine](#state-machine-representation).
+
+<img src="./images/dlc_channel_settle_renew.svg">
+
+### Revocation
+
+Revocation is done following the mechanism introduced in [this paper](https://eprint.iacr.org/2020/476).
+
+### State machine representation
+ The state machine is represented as a timed automaton augmented with:
+* channel synchronization representing message passing between the processes (`?` indicating the receiving of a message while `!` indicates its sending),
+* edge guards only enabling state transition to be taken when the condition is satisfied (e.g. `Invalid` being true),
+* location invariants requiring the associated condition to hold for the automaton to stay in the location,
+* updates, setting the value of free variables and clocks. 
+
+Note that transitions setting the variable `Invalid` to true are omitted for clarity.
+
+## The `offer_channel` message
+
+1. type: 43000 (`offer_channel_v0`)
+2. data:
+   * [`u32`: `protocol_version`]
+   * [`byte`:`contract_flags`]
+   * [`chain_hash`:`chain_hash`]
+   * [`32*byte`:`temporary_contract_id`]
+   * [`32*byte`:`temporary_channel_id`]
+   * [`contract_info`:`contract_info`]
+   * [`point`:`funding_pubkey`]
+   * [`point`:`revocation_base_point`]
+   * [`point`:`publish_base_point`]
+   * [`point`:`own_base_point`]
+   * [`point`:`first_per_update_point`]
+   * [`spk`:`payout_spk`]
+   * [`u64`:`payout_serial_id`]
+   * [`u64`:`offer_collateral_satoshis`]
+   * [`bigsize`:`num_funding_inputs`]
+   * [`num_funding_inputs*funding_input`:`funding_inputs`]
+   * [`spk`:`change_spk`]
+   * [`u64`:`change_serial_id`]
+   * [`u64`:`fund_output_serial_id`]
+   * [`u64`:`feerate_per_vb`]
+   * [`u32`:`cet_locktime`]
+   * [`u32`:`refund_locktime`]
+   * [`u32`:`cet_nsequence`]
+   * [`offer_channel_tlvs`: `tlvs`]
+
+## The `accept_channel` message
+
+1. type: 43002 (`accept_channel_v0`)
+2. data:
+   * [`32*byte`:`temporary_channel_id`]
+   * [`u64`:`accept_collateral_satoshis`]
+   * [`point`:`funding_pubkey`]
+   * [`point`:`revocation_base_point`]
+   * [`point`:`publish_base_point`]
+   * [`point`:`own_base_point`]
+   * [`point`:`first_per_update_point`]
+   * [`spk`:`payout_spk`]
+   * [`u64`:`payout_serial_id`]
+   * [`bigsize`:`num_funding_inputs`]
+   * [`num_funding_inputs*funding_input`:`funding_inputs`]
+   * [`spk`:`change_spk`]
+   * [`u64`:`change_serial_id`]
+   * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
+   * [`adaptor_signature`:`buffer_adaptor_signature`]
+   * [`signature`:`refund_signature`]
+   * [`negotiation_fields`:`negotiation_fields`] (Optional: 1)
+   * [`accept_channel_tlvs`: `tlvs`]
+
+## The `sign_channel` message
+
+1. type: 43004 (`sign_dlc_v0`)
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
+   * [`signature`:`refund_signature`]
+   * [`funding_signatures`:`funding_signatures`]
+   * [`sign_channel_tlvs`: `tlvs`]
+
+## The `settle_offer` message
+
+1. type: 43006
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`u64`:`counter_payout`]
+   * [`point`: `next_per_update_point`]
+
+## The `settle_accept` message
+
+1. type: 43008
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`point`:`next_per_update_point`]
+   * [`adaptor_signature`:`settle_adaptor_signature`]
+
+## The `settle_confirm` message
+
+1. type: 43010
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`32*byte`:`prev_per_update_secret`]
+   * [`adaptor_signature`:`settle_adaptor_signature`]
+
+## The `settle_finalize` message
+
+1. type: 43012
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`32*byte`:`prev_per_update_secret`]
+
+
+## The `renew_offer` message
+
+1. type: 43014
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`contract_id`:`temporary_contract_id`]
+   * [`u64`:`counter_payout`]
+   * [`point`:`next_per_update_point`]
+   * [`contract_info`:`contract_info`]
+   * [`u32`:`cet_locktime`]
+   * [`u32`:`refund_locktime`]
+   * [`u32`:`cet_nsequence`]
+
+## The `renew_accept` message
+
+1. type: 43016
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`point`:`next_per_update_point`]
+   * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
+   * [`adaptor_signature`:`buffer_adaptor_signature`]
+   * [`signature`:`refund_signature`]
+
+## The `renew_confirm` message
+
+1. type: 43018
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`32*byte`:`prev_per_update_secret`]
+   * [`cet_adaptor_signatures`:`cet_adaptor_signatures`]
+   * [`adaptor_signature`:`buffer_adaptor_signature`]
+   * [`signature`:`refund_signature`]
+
+## The `renew_finalize` message
+
+1. type: 43020
+2. data:
+   * [`channel_id`:`channel_id`]
+   * [`32*byte`:`prev_per_update_secret`]
+
+## The `close_offer` message
+
+1. type: 43022
+2. data:
+  * [`channel_id`:`channel_id`]
+  * [`counter_payout`:`u64`]
+  * [`u64`: `fee_rate_per_vb`]
+  * [`signature`: `close_signature`]
+
+## The `reject` message
+
+1. type: 43024
+2. data:
+  * [`channel_id`:`channel_id`]
 # Authors
 
 Nadav Kohen <nadavk25@gmail.com>
