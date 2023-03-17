@@ -260,6 +260,8 @@ y_2 = c * (x - f_1 - sqrt((x - f_1)^2 - 4*a*b))/(2*a) + 2*a*d/(x - f_1 - sqrt((x
 We will refer to `y_1` as the positive piece and `y_2` as the negative piece, only because they use positive
 and negative square roots respectively.
 
+Since some of the outcomes starting from 0 can produce undefined payouts, a hyperbolic curve piece should be combined with a non-hyperbolic piece that defines the undefined payouts.
+
 ## Authors
 
 Nadav Kohen <nadavk25@gmail.com>
