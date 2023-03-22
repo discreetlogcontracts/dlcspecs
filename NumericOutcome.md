@@ -58,7 +58,7 @@ of both party's rounding moduli.
 
 If `R` is the rounding modulus to be used for a given `event_outcome` and the result of function evaluation for that `event_outcome` is `value`,
 then the amount to be used in the CET output for this party will be the closer of `value - (value % R)` or `value - (value % R) + R`, rounding
-up in the case of a tie.
+up in the case of a tie, making sure not to round over the total collateral of the contract.
 
 #### Reference Implementations
 
