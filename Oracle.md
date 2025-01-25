@@ -94,7 +94,7 @@ UTF-8 is chosen as being a widely supported and easy to implement encoding forma
 For numerical outcomes represented in bases greater than 10, each digit should be converted to base 10 before being encoded (note that base 10 numbers in UTF-8 take values in the 0x0030-0x0039 range).
 This helps preventing any confusion about the capitalization of letters or the introduction of non-standard characters.
 
-Signing should be done using the [signing algorithm](#Signing-Algorithm) using the tag `attestation/v0`.
+Signing should be done using the [signing algorithm](#Signing-Algorithm) using the tag `DLC/oracle/attestation/v0`.
 
 ### Serialization of event descriptors
 
