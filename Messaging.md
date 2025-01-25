@@ -423,7 +423,7 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
    * [`x_point`:`oracle_public_key`]
    * [`oracle_event`:`oracle_event`]
 
-where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `DLC/oracle/announcement/v0`.
 
 ### The `oracle_attestation` Type
 
