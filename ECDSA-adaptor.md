@@ -136,6 +136,7 @@ and is defined as:
 - Parse `a` as `(R, R_a, s_a, proof)`
 - Check `DLEQ_verify((R_a, Y, R), proof)` or fail
 - Set `m` to `scalar(message_hash)`
+- Set `r` to the x-coordinate of `R` modulo `n`
 - Set `u_1` to `s_a⁻¹ * m`
 - Set `u_2` to `s_a⁻¹ * r`
 - Check `u_1 * G + u2 * X == R_a`
