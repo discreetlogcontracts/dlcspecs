@@ -46,7 +46,7 @@ All funding inputs must be Segwit or nested P2SH(Segwit) in order to protect aga
 * The funding output script is a P2WSH to:
 
 ```
-2 <pubkey1> <pubkey2> 2 OP_CHECKMULTISIG
+OP_2 <pubkey1> <pubkey2> OP_2 OP_CHECKMULTISIG
 ```
 
 * Where `pubkey1` is the lexicographically lesser of `offer_funding_pubkey` and `accept_funding_pubkey`, and where `pubkey2` is the lexicographically greater of the two.

@@ -293,14 +293,27 @@ The recipient:
 
  For a script pub key to be valid it must be in one of the following forms:
 
-    1. `OP_DUP` `OP_HASH160` `20` 20-bytes `OP_EQUALVERIFY` `OP_CHECKSIG` (pay to pubkey hash), OR
-    2. `OP_HASH160` `20` 20-bytes `OP_EQUAL` (pay to script hash), OR
-    3. `OP_0` `20` 20-bytes (version 0 pay to witness pubkey hash), OR
-    4. `OP_0` `32` 32-bytes (version 0 pay to witness script hash), OR
-    5. `OP_1` through `OP_16` inclusive, followed by a single push of 2 to 40 bytes
-       (witness program versions 1 through 16)
+```bash
+# Pay-to-pubkey-hash (P2PKH)
+OP_DUP OP_HASH160 <20-bytes> OP_EQUALVERIFY OP_CHECKSIG
 
+# Pay-to-script-hash (P2SH)
+OP_HASH160 <20-bytes> OP_EQUAL
+
+# Pay-to-witness-pubkey-hash (P2WPKH), version 0
+OP_0 <20-bytes>
+
+# Pay-to-witness-script-hash (P2WSH), version 0
+OP_0 <32-bytes>
+
+# Witness program versions 1 through 16, followed by a single push of 2 to 40 bytes
+OP_1 <2-to-40-bytes>
+OP_2 <2-to-40-bytes>
+...
+OP_16 <2-to-40-bytes>
+```
   These script pub key forms include only standard forms accepted by the wider set of deployed Bitcoin clients in the network, which increase the chances of successful propagation to miners.
+  More information about the Script language can be found here: https://en.bitcoin.it/wiki/Script .
 
 # Authors
 
