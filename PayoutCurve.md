@@ -170,7 +170,7 @@ where a spline is made up of polynomial pieces so that the resulting interpolati
    * [`u16`:`extra_precision_num_pts`]
 
 `num_pts` is the number of midpoints specified in this curve piece which will be used along with the surrounding `endpoint`s to perform interpolation.
-Each point consists of a two `bigsize` integers and a `u16` which are interpreted as `x` and `y` coordinates in exactly the same manner as is done
+Each point consists of two `u64` integers and a `u16` which are interpreted as `x` and `y` coordinates (and extra precision) in exactly the same manner as is done
 for `endpoint`s in [general payout curves](#version-0-payout_function).
 
 In the special case that `num_pts` is `0`, only the endpoints are used meaning that a line is interpolated between the endpoints.
