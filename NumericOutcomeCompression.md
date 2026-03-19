@@ -44,7 +44,7 @@ where attestations are ignored.
 ## Adaptor Points with Multiple Attestations
 
 Given public key `P` and nonces `R1, ..., Rn` we can compute `n` individual adaptor points for
-a given event `(d1, ..., dn)` in the usual way: `si * G = Ri + H(P, Ri, di)*P`.
+a given event `(d1, ..., dn)` in the usual way: `si * G = Ri + H(Ri, P, di)*P`.
 To compute an aggregate adaptor point for all events which agree on the first `m` digits, where
 `m` is any positive number less than or equal to `n`, the sum of the corresponding adaptor points
 points is used: `s(1..m) * G = (s1 + s2 + ... + sm) * G = s1 * G + s2 * G + ... + sm * G`.
