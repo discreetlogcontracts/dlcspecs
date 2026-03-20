@@ -120,14 +120,15 @@ integers can be omitted:
 
 The following convenience types are also defined:
 
-* `chain_hash`: a 32-byte chain identifier (see [BOLT #0](https://github.com/lightningnetwork/lightning-rfc/blob/master/00-introduction.md#chain_hash))
-* `contract_id`: a 32-byte contract_id (see [Protocol Specification](Protocol.md))
-* `sha256`: a 32-byte SHA2-256 hash
-* `signature`: a 64-byte bitcoin Elliptic Curve signature
-* `ecdsa_adaptor_signature`: a 65-byte ECDSA adaptor signature (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done)
-* `dleq_proof`: a 97-byte zero-knowledge proof of discrete log equality (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done)
-* `x_point`: a 32-byte x-only public key with implicit y-coordinate being even as in [BIP 340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#design)
-* `point`: a 33-byte Elliptic Curve point (compressed encoding as per [SEC 1 standard](http://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3))
+* `chain_hash`: a 32-byte chain identifier (see [BOLT #0](https://github.com/lightningnetwork/lightning-rfc/blob/master/00-introduction.md#chain_hash)).
+* `contract_id`: a 32-byte contract_id (see [Protocol Specification](Protocol.md)).
+* `sha256`: a 32-byte SHA2-256 hash.
+* `signature`: a 64-byte bitcoin Elliptic Curve signature.
+* `ecdsa_adaptor_signature`: a 65-byte ECDSA adaptor signature (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done).
+* `dleq_proof`: a 97-byte zero-knowledge proof of discrete log equality (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done).
+* `x_point`: a 32-byte x-only public key with implicit y-coordinate being even as in [BIP 340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#design).
+* `point`: a 33-byte Elliptic Curve point (compressed encoding as per [SEC 1 standard](http://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3)).
+* `scalar`: a 32-byte big-endian encoded integer as per [this description](https://github.com/discreetlogcontracts/dlcspecs/blob/master/ECDSA-adaptor.md#notation-and-conventions).
 * `spk`: A bitcoin script public key encoded as ASM prefixed with a `u16` value indicating its length.
 * `short_contract_id`: an 8 byte value identifying a contract funding transaction on-chain (see [BOLT #7](https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#definition-of-short-channel-id))
 * `bigsize`: a variable-length, unsigned integer similar to Bitcoin's CompactSize encoding, but big-endian.  Described in [BigSize](https://github.com/lightningnetwork/lightning-rfc/blob/master/01-messaging.md#appendix-a-bigsize-test-vectors).
@@ -335,6 +336,50 @@ This type contains CET signatures and any necessary information linking the sign
    * [`ecdsa_adaptor_signature`:`signature_n`]
    * [`dleq_proof`:`dleq_prf_n`]
 
+### The `ecdsa_adaptor_signature` Type
+This type contains an ECDSA adaptor signature, represented as a 65-byte stream as follows:  
+
+`R`: a 33-byte compressed elliptic-curve point as described in [Fundamental Types](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Messaging.md#fundamental-types).
+- The point `R` is calculated by multiplying a random value `k` by the adaptor point `Y`, as described [here](https://github.com/discreetlogcontracts/dlcspecs/blob/master/ECDSA-adaptor.md#encrypted-signing).
+- `Y` is an adaptor point calculated as defined [here](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Introduction.md#signature-point).
+
+`s_a`: a 32-byte encrypted signature scalar. This is calculated as `s_a = k⁻¹ (m + r * x)` as explained [here](https://github.com/discreetlogcontracts/dlcspecs/blob/master/ECDSA-adaptor.md#encrypted-signing).  
+- `k` is the same random value used to obtain `R`.
+- `m` is the 32-byte transaction digest.
+- `r`  is the x-coordinate of `R` (mod `n`)
+- `x` is the signer's private key.
+
+
+#### `ecdsa_adaptor_signature`
+1. data: 
+  * [`point`:`R`]
+  * [`scalar`:`s_a`]
+
+### The `dleq_proof` Type
+This type contains a 97-byte zero-knowledge proof of discrete log equality.
+
+`R_a`: a 33-byte compressed elliptic-curve adaptor point as described in [Fundamental Types](https://github.com/discreetlogcontracts/dlcspecs/blob/master/Messaging.md#fundamental-types).  
+- The point `R_a` is derived as `R_a = k * G`, where `G` is the generator point in the curve, and `k` is the same random value used to calculate `R` in the `ecdsa_adaptor_signature` type.
+
+`b`: a 32-byte sha256 outcome representing a challenge calculated as `b = H(R_a || Y || R || A_G || A_Y)` (see [here](https://github.com/discreetlogcontracts/dlcspecs/blob/master/ECDSA-adaptor.md#proving)). Note that the hash function needs to use a tag as specified [here](https://github.com/discreetlogcontracts/dlcspecs/blob/master/ECDSA-adaptor.md#proof-of-discrete-logarithm-equality). The points `A_G` and `A_Y` are defined as follows: 
+  
+  - `A_G = a * G`
+  - `A_Y = a * Y`
+  - `a` is a random value (see [here](https://github.com/discreetlogcontracts/dlcspecs/blob/master/ECDSA-adaptor.md#proving)).
+  - `R`, `Y` are the same values used in the `ecdsa_adaptor_signature` related to this proof.
+
+`c`: a 32-byte signature verification scalar calculated as `c = a + b * k` (see [here](https://github.com/discreetlogcontracts/dlcspecs/blob/master/ECDSA-adaptor.md#proving)), where:  
+
+  - `a` is the random value described above.
+  - `b` is the challenge as described above.
+  - `k` is the secret random number used for calculating points `R` and `R_a`
+
+#### `dleq_proof`
+1. data: 
+  * [`point`:`R_a`]
+  * [`sha256`:`b`]
+  * [`scalar`:`c`]
+
 ### The `funding_signatures` Type
 
 This type contains signatures of the funding transaction and any necessary information linking the signatures to their inputs.
@@ -455,6 +500,8 @@ The outcomes should be the message signed, ordered the same as the signatures.
 Nadav Kohen <nadavk25@gmail.com>
 
 Ben Carman <benthecarman@live.com>
+
+Raúl Cano <raul.cano.argamasilla@gmail.com>
 
 ![Creative Commons License](https://i.creativecommons.org/l/by/4.0/88x31.png "License CC-BY")
 <br>

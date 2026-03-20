@@ -67,9 +67,9 @@ The challenge hash `H` below is defined as `H(x) = scalar(SHA256(tag || x))`.
 
 ### Proving
 
-The `DLEQ_prove(x, (X, Y, Z))` algorithm takes the following inputs:
+The `DLEQ_prove(k, (X, Y, Z))` algorithm takes the following inputs:
 
-- `x`: A **non-zero** scalar representing the witness for the proof.
+- `k`: A **non-zero** scalar representing the witness for the proof.
 - `(X, Y, Z)`: Three **non-zero** secp256k1 points which define the statement to be verified.
 
 and is defined as:
@@ -78,7 +78,7 @@ and is defined as:
 - Set `A_G` to `a * G`
 - Set `A_Y` to `a * Y`
 - Set `b` to  `H(X || Y || Z || A_G || A_Y)`
-- Set `c` to `a + b * x`
+- Set `c` to `a + b * k`
 - Set `proof` to `b || c`
 - Return `proof`
 
