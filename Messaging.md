@@ -124,6 +124,7 @@ The following convenience types are also defined:
 * `contract_id`: a 32-byte contract_id (see [Protocol Specification](Protocol.md))
 * `sha256`: a 32-byte SHA2-256 hash
 * `signature`: a 64-byte bitcoin Elliptic Curve signature
+* `schnorr_signature`: a 64-byte Schnorr signature
 * `ecdsa_adaptor_signature`: a 65-byte ECDSA adaptor signature (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done)
 * `dleq_proof`: a 97-byte zero-knowledge proof of discrete log equality (TODO: link to doc once [#50](https://github.com/discreetlogcontracts/dlcspecs/issues/50) is done)
 * `x_point`: a 32-byte x-only public key with implicit y-coordinate being even as in [BIP 340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#design)
@@ -419,11 +420,11 @@ See [the Oracle specifications](./Oracle.md#oracle-announcements) for more detai
 
 1. type: 55332
 1. data:
-   * [`signature`:`annoucement_signature`]
+   * [`schnorr_signature`:`annoucement_signature`]
    * [`x_point`:`oracle_public_key`]
    * [`oracle_event`:`oracle_event`]
 
-where `signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
+where `schnorr_signature` is a Schnorr signature over a sha256 hash of the serialized `oracle_event`, using the tag `announcement/v0`.
 
 ### The `oracle_attestation` Type
 
@@ -440,9 +441,9 @@ See [the Oracle specifications](./Oracle.md#oracle-attestations) for more detail
     * [`string`:`event_id`]
     * [`x_point`:`oracle_public_key`]
     * [`u16`: `nb_signatures`]
-    * [`signature`:`signature_1`]
+    * [`schnorr_signature`:`signature_1`]
     * ...
-    * [`signature`:`signature_n`]
+    * [`schnorr_signature`:`signature_n`]
     * [`string`:`outcome_1`]
     * ...
     * [`string`:`outcome_n`]
