@@ -16,7 +16,7 @@ warrant their own types to be created.
 
 This document also specifies serialization and deserialization of hyperbola-shaped payout curve pieces
 which are useful for many inverse contracts such as contracts for difference (CFDs) where the payout
-curve has the form `constant/outcome` (where `outcome` is the input value).
+curve has the form `constant/outcome` (where `outcome` is the input value). Likewise, some [examples of payout functions](PayoutFunctionSamples.md) are provided to illustrate the principles described here.
 
 ## Table of Contents
 
@@ -33,6 +33,7 @@ curve has the form `constant/outcome` (where `outcome` is the input value).
   * [Hyperbola Curve Piece](#hyperbola-curve-piece)
     * [Hyperbola Serialization](#hyperbola-serialization)
     * [Hyperbola Evaluation](#hyperbola-evaluation)
+* [Examples](#examples)
 * [Authors](#authors)
 
 ## General Payout Curves
@@ -259,6 +260,15 @@ y_2 = c * (x - f_1 - sqrt((x - f_1)^2 - 4*a*b))/(2*a) + 2*a*d/(x - f_1 - sqrt((x
 
 We will refer to `y_1` as the positive piece and `y_2` as the negative piece, only because they use positive
 and negative square roots respectively.
+
+## Examples
+
+The following examples describe some common payout functions implemented following the principles in this document:
+- Payout function description for a [LONG CALL option contract](PayoutFunctionSamples.md#example-1-long-call-payout-buyer-side).
+- Payout function description for a [SHORT CALL option contract](PayoutFunctionSamples.md#example-2-short-call-payout-seller-side).
+- Payout function description for a [LONG PUT option contract](PayoutFunctionSamples.md#example-3-long-put-payout-buyer-side).
+- Payout function description for a [SHORT PUT option contract](PayoutFunctionSamples.md#example-4-short-put-payout-seller-side).
+
 
 ## Authors
 
