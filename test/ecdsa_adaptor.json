@@ -79,5 +79,182 @@
         "kind" : "serialization",
         "adaptor_sig" : "03e6d51da7bc2bf24cf9dfd9acc6c4f0a3e74d8a6273ee5a573ed6818e3095b60903f33bc98f9d2ea3511f2e24f3358557c815abd7713c9318af9f4dfab4441898ecfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd036414185b58980b8e6c54bd20616bdb9461dccd8eebb7d7e7c83a91452cc20edf53be5b0fe0db44dddaaafbe737678c684b6e89b9b4b679b1855aa6ed644498b89c918",
         "error" : "s_a too high"
+    },
+    {
+        "kind" : "recovery",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "signature" : "7ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb312c16043383a3b32dac2168edd95611fe57969e4acac6119d8d46a1bf499d26",
+        "encryption_key" : "0397855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : "012345f6789abcde012345f6789abcdcbbd222dd27e35d19c0f5a48348d0fe20",
+        "comment" : "recovery with -Y returns -y"
+    },
+    {
+        "kind" : "verification",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "message_hash" : "0000000000000000000000000000000000000000000000000000000000000000",
+        "public_signing_key" : "02bb50e2d89a4ed70663d080659fe0ad4b9bc3e06c17a227433966cb59ceee020d",
+        "encryption_key" : "0297855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+        "signature" : "7ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb312c16043383a3b32dac2168edd95611fe57969e4acac6119d8d46a1bf499d26",
+        "error" : "verification equation fails",
+        "comment" : "verified against another message"
+    },
+    {
+        "kind" : "verification",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "message_hash" : "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "public_signing_key" : "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+        "encryption_key" : "0297855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+        "signature" : "7ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb312c16043383a3b32dac2168edd95611fe57969e4acac6119d8d46a1bf499d26",
+        "error" : "verification equation fails",
+        "comment" : "verified against another signing key"
+    },
+    {
+        "kind" : "verification",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "message_hash" : "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "public_signing_key" : "02bb50e2d89a4ed70663d080659fe0ad4b9bc3e06c17a227433966cb59ceee020d",
+        "encryption_key" : "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+        "decryption_key" : "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+        "signature" : "7ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb312c16043383a3b32dac2168edd95611fe57969e4acac6119d8d46a1bf499d26",
+        "error" : "proof is wrong",
+        "comment" : "verified against another encryption key"
+    },
+    {
+        "kind" : "verification",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef4c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "message_hash" : "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "public_signing_key" : "02bb50e2d89a4ed70663d080659fe0ad4b9bc3e06c17a227433966cb59ceee020d",
+        "encryption_key" : "0297855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+        "signature" : "7ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb333d5b54b694c79afae5f7b40ed7303edf5619c9f47ac4f46cc1cb7088d429ac",
+        "error" : "verification equation fails",
+        "comment" : "s_a increased by one"
+    },
+    {
+        "kind" : "verification",
+        "adaptor_sig" : "0386a9de50806b51cf5d088258d73c34db72ce230a83bb14b0c878485103df64d4034646ae5047316b4230d0086c8acec687f00b1cd9d1dc634f6cb358ac0a9a8fff7574d7d91aca79d74239743d591831496ce9eb65c74f6d2442cc184200dbd29700000000000000000000000000000000000000000000000000000000000000010123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "message_hash" : "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "public_signing_key" : "02bb50e2d89a4ed70663d080659fe0ad4b9bc3e06c17a227433966cb59ceee020d",
+        "encryption_key" : "0297855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+        "signature" : "86a9de50806b51cf5d088258d73c34db72ce230a83bb14b0c878485103df64d44a22492955867a9c810d8d1965b29ac0dd48e09f4f557607f6716769cf8996d5",
+        "error" : "A_G is the point at infinity",
+        "comment" : "proof (b, c) = (1, k), so A_G = k * G - R_a and A_Y = k * Y - R are both the point at infinity"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "057ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "error" : "R is not a valid point",
+        "comment" : "R with an invalid prefix"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "02fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd03641410320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "error" : "r cannot be zero",
+        "comment" : "R with x-coordinate equal to the curve order, so r is zero"
+    },
+    {
+        "kind" : "recovery",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "signature" : "7ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb312c16043383a3b32dac2168edd95611fe57969e4acac6119d8d46a1bf499d26",
+        "encryption_key" : "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+        "decryption_key" : null,
+        "error" : "the decryption key does not match the encryption key",
+        "comment" : "recovery with another encryption key"
+    },
+    {
+        "kind" : "recovery",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "signature" : "7ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb312c16043383a3b32dac2168edd95611fe57969e4acac6119d8d46a1bf499d27",
+        "encryption_key" : "0297855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : null,
+        "error" : "the decryption key does not match the encryption key",
+        "comment" : "signature s increased by one"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab8702fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
+        "error" : "proof c too high",
+        "comment" : "proof c equal to the curve order"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab8702ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "error" : "proof c too high",
+        "comment" : "proof c at 2^256 - 1"
+    },
+    {
+        "kind" : "verification",
+        "adaptor_sig" : "028c112046f68d0ef620e71fb54dee7263c3441239cded5d2a909ad6ca5fc59b4403afe7764c68029e1448dd77495a47e975bf5e523ab4f00d13e08b337ebd830acb893ea9a1cc3e2a057937ed3f9fca50d6fde2f987da74743fe4b3a5cbd9e50e878814d15eb324e3102c838a91207aa9543474dca5900d4d9d949d9c69a06be59455db161a653b469f349392852968d6d4a4f3c610a36632aeb8ea2ee78214826f",
+        "message_hash" : "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "public_signing_key" : "02bb50e2d89a4ed70663d080659fe0ad4b9bc3e06c17a227433966cb59ceee020d",
+        "encryption_key" : "0297855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+        "signature" : "8c112046f68d0ef620e71fb54dee7263c3441239cded5d2a909ad6ca5fc59b442bcb8cf6dd63cb9e0eb9d0c5375dc7f3a716d4554f9fde8a607af1f102b68b1f",
+        "comment" : "message hash above the curve order, so m is the hash modulo n"
+    },
+    {
+        "kind" : "verification",
+        "adaptor_sig" : "0386a9de50806b51cf5d088258d73c34db72ce230a83bb14b0c878485103df64d403c5151ad14672596ac6c9c7daf307dd0c0f022db8e865e5755667e1f13c4dad127574d7d91aca79d74239743d591831496ce9eb65c74f6d2442cc184200dbd29700000000000000000000000000000000000000000000000000000000000000010123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "message_hash" : "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "public_signing_key" : "02bb50e2d89a4ed70663d080659fe0ad4b9bc3e06c17a227433966cb59ceee020d",
+        "encryption_key" : "0297855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+        "signature" : "86a9de50806b51cf5d088258d73c34db72ce230a83bb14b0c878485103df64d44a22492955867a9c810d8d1965b29ac0dd48e09f4f557607f6716769cf8996d5",
+        "error" : "A_Y is the point at infinity",
+        "comment" : "R_a = (k + 1) * G and proof (b, c) = (1, k), so A_Y = k * Y - R is the point at infinity and A_G = -G is not"
+    },
+    {
+        "kind" : "recovery",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "signature" : "7ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0000000000000000000000000000000000000000000000000000000000000000",
+        "encryption_key" : "0297855f402631f09e602e5ccadc219503f07cdd4c73b2215b5418f52a7fdbfcd9",
+        "decryption_key" : null,
+        "error" : "signature s cannot be zero",
+        "comment" : "signature s is zero, which has no inverse"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "02fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc300320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "error" : "R is not a valid point",
+        "comment" : "R with x-coordinate p + 1, which a parser reducing modulo p reads as x = 1, on the curve"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb02fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc30b83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "error" : "R_a is not a valid point",
+        "comment" : "R_a with x-coordinate p + 1, which a parser reducing modulo p reads as x = 1, on the curve"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "0200000000000000000000000000000000000000000000000000000000000000050320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "error" : "R is not a valid point",
+        "comment" : "R with x-coordinate 5, which is not on the curve"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb020000000000000000000000000000000000000000000000000000000000000005b83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "error" : "R_a is not a valid point",
+        "comment" : "R_a with x-coordinate 5, which is not on the curve"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0520c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87022e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "error" : "R_a is not a valid point",
+        "comment" : "R_a with an invalid prefix"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef300000000000000000000000000000000000000000000000000000000000000002e4f915114e9fe3ab989db88e1b2dce3b4d6b55f625e05cf31efb00657b7d9e8",
+        "error" : null,
+        "comment" : "proof b can be zero"
+    },
+    {
+        "kind" : "serialization",
+        "adaptor_sig" : "027ea6931e6a3362ba0fa14d23d7869b8358a85d211f763d8ec0a4b46978c029cb0320c20271fc3ba96c6a37a61d93c1ee0c89e132ff203d349a5c86e9b2f68c8f9ab83e59b7f7b407edd39cebb7848485428b9003e5dba1f56a0d33df3b59ba1ef3c997786985602c6a1f8bbbdb0d976bce42b11eadff7988d97a0d2e1331ab87020000000000000000000000000000000000000000000000000000000000000000",
+        "error" : null,
+        "comment" : "proof c can be zero"
     }
 ]
